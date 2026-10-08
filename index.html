@@ -277,6 +277,7 @@ select.input:disabled{background-color:#E9EBEC;border-color:#E9EBEC;color:var(--
 .alerta.nueva{animation:alertaEntra .45s var(--ease)}
 @keyframes alertaEntra{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 .resumen{padding:24px}
+.resumen.decidida{border:1px solid #00A499}
 .meta{display:flex;flex-wrap:wrap;gap:16px 0}
 .meta>div{padding:0 24px;border-left:1px solid var(--g6)}
 .meta>div:first-child{padding-left:0;border-left:0}
@@ -755,7 +756,7 @@ function vDetalle() {
   return `
   <header class="cab-pag"><h1>Detalle OP ${o.id}</h1>${migas(['Inicio', 'Aprobaciones de Pago', `Detalle OP ${o.id}`])}</header>
   <div id="zona-alerta">${alerta(o)}</div>
-  <section class="card resumen" aria-label="Resumen de la OP">
+  <section class="card resumen${o.est!=='Pendiente'?' decidida':''}" aria-label="Resumen de la OP">
     <dl class="meta" style="margin:0">
       <div><dt>Estado aprobación</dt><dd id="d-estado">${chip(o.est, o.anim)}</dd></div>
       <div><dt>Item de operación</dt><dd>Pago Reembolso</dd></div>
