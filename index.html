@@ -1,0 +1,1597 @@
+<meta charset="utf-8">
+<title>Aprobaciones de Pago CCP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Tema claro fijo: replica CCP (no tiene modo oscuro). Colores = estilos locales del Figma "CCP-Solicitud pagos". */
+:root{
+  color-scheme: light;
+  --verde:#00A499; --verde2:#00837A; --verde4:#00736B; --verde6:#E6F6F5; --verde-hover:#006A63;
+  --cab:#01736C; --menu-txt:#55798F; --lat-activo:#E8F5F4;
+  --t1:#203442; --t2:#364855; --t3:#4D5D68; --t4:#65717A; --t-dis:#A6AEB4;
+  --fondo:#F2F5F9; --fondo-tabla:#F8F9F9; --g5:#D2D6D9; --g6:#E9EBEC; --blanco:#FFFFFF;
+  --ok:#7CB342; --ok-bg:#F1F8E9; --ok-dk:#33691E;
+  --al:#FFB300; --al-bg:#FFF8E1; --al-dk:#7A4A00;
+  --er-bg:#FFE7E7; --er-bd:#E8A0A4; --er-dk:#991B1B; --salmon:#CF464E;
+  --lila:#4B4DD6; --lila-bg:#EEECFB; --lila-bd:#857BE2; --lila-dk:#392F95;
+  --scrim:rgba(26,27,41,.55);
+  --sombra-tarjeta:0 1px 2px rgba(32,52,66,.06),0 1px 4px rgba(32,52,66,.06);
+  --sombra-elevada:0 4px 16px rgba(32,52,66,.14);
+  --sombra-modal:0 16px 48px rgba(26,27,41,.28);
+  --sombra-lateral:-6px 0 10px -4px rgba(32,52,66,.16);
+  --foco:0 0 0 3px rgba(0,164,153,.35);
+  --r:8px;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+*{box-sizing:border-box}
+[hidden]:not(.punto){display:none !important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--fondo);color:var(--t1);font:400 16px/24px 'Overpass',system-ui,-apple-system,'Segoe UI',sans-serif;letter-spacing:.012em;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;letter-spacing:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0;padding:0}
+:focus{outline:none}
+:focus-visible{box-shadow:var(--foco);border-radius:4px}
+h1[tabindex="-1"]:focus,h1[tabindex="-1"]:focus-visible{outline:none;box-shadow:none}
+.sep{display:inline-block;width:3px;height:3px;border-radius:50%;background:currentColor;font-size:0;vertical-align:middle;margin:0 .3em}
+.ic{width:24px;height:24px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic.s{width:20px;height:20px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+b,strong{font-weight:700}
+
+/* ── Barra de prototipo ── */
+.proto{display:flex;align-items:center;gap:12px;min-height:32px;padding:4px 16px;background:#1A1B29;color:#C9CDD8;font-size:12px;line-height:16px}
+.proto b{color:#fff;font-weight:700}
+.proto .sep{opacity:.4}
+.proto button{margin-left:auto;color:#fff;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.3)}
+.proto button:hover{background:rgba(255,255,255,.1)}
+.proto .opc{display:inline}
+
+/* ── Cabecera ── */
+.cabecera{position:sticky;top:0;z-index:40;height:72px;display:flex;align-items:center;gap:16px;padding:0 24px 0 28px;background:var(--cab);color:#fff}
+.hamb{display:none;width:40px;height:40px;align-items:center;justify-content:center;border-radius:8px;color:#fff}
+.hamb:hover{background:rgba(255,255,255,.1)}
+.logo{display:flex;align-items:center;gap:6px;color:#fff;text-decoration:none}
+.logo svg{width:44px;height:44px}
+.logo-t{display:flex;flex-direction:column;line-height:1}
+.logo-t b{font-size:36px;font-weight:800;letter-spacing:.01em;line-height:34px}
+.logo-t small{font-size:10px;letter-spacing:.14em;align-self:flex-end;margin-top:-2px;opacity:.9}
+.cab-der{margin-left:auto;display:flex;align-items:center;height:100%}
+.usuario{display:flex;align-items:center;gap:16px;padding-right:24px}
+.avatar{width:48px;height:48px;border-radius:50%;background:#E3F1F0;color:var(--cab);display:grid;place-items:center;font-weight:800;font-size:16px;border:2px solid rgba(255,255,255,.7)}
+.usuario-t{display:flex;flex-direction:column;line-height:20px}
+.usuario-t b{font-size:14px}
+.usuario-t small{font-size:12px;opacity:.9;line-height:16px}
+.cab-sep{width:1px;height:56px;background:rgba(255,255,255,.25)}
+.campana{position:relative;width:84px;height:100%;display:grid;place-items:center;color:#fff}
+.campana:hover{background:rgba(255,255,255,.06)}
+.campana .punto{position:absolute;top:22px;right:30px;width:9px;height:9px;border-radius:50%;background:#E53935;border:2px solid var(--cab);transition:transform .2s var(--ease)}
+.campana .punto[hidden]{display:block;transform:scale(0)}
+.salir{display:flex;align-items:center;gap:16px;padding:0 0 0 24px;height:100%;color:#fff;font-size:16px}
+.salir:hover span{text-decoration:underline}
+
+/* ── Shell ── */
+.shell{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:calc(100vh - 104px);transition:grid-template-columns .25s var(--ease)}
+.shell.colapsado{grid-template-columns:72px minmax(0,1fr)}
+.lateral{position:sticky;top:72px;height:calc(100vh - 72px);align-self:start;background:#fff;overflow:hidden;z-index:30}
+.lat-top{display:flex;flex-direction:column;padding:20px 16px 12px}
+.lat-volver{align-self:flex-end;width:40px;height:40px;display:grid;place-items:center;color:var(--menu-txt);border-radius:8px;margin-right:16px;transition:transform .25s var(--ease)}
+.lat-volver:hover{background:var(--verde6)}
+.lat-titulo{color:var(--menu-txt);font-size:16px;margin-top:4px;white-space:nowrap}
+.lat-item{display:flex;align-items:center;gap:16px;width:100%;height:56px;padding:0 16px 0 18px;background:var(--lat-activo);color:var(--menu-txt);text-align:left;white-space:nowrap;text-decoration:none}
+.lat-item:hover{background:#DCEFEE}
+.lat-item .ic{transition:transform .2s var(--ease)}
+.lat-item[aria-expanded="false"] .ic{transform:rotate(-90deg)}
+.lat-sub{display:grid;grid-template-rows:1fr;transition:grid-template-rows .25s var(--ease)}
+.lat-sub.cerrado{grid-template-rows:0fr}
+.lat-sub>div{overflow:hidden}
+.lat-item.activo{color:var(--verde4);font-weight:700}
+.lat-item.sec{background:#fff}
+.lat-item.sec:hover{background:var(--verde6)}
+.lat-item.sec span{white-space:normal;line-height:20px}
+.shell.colapsado .lat-titulo,.shell.colapsado .lat-item span{opacity:0}
+.shell.colapsado .lat-volver{transform:rotate(180deg);margin-right:0;align-self:center}
+.lat-scrim{display:none}
+
+main{min-width:0;padding:24px 32px 56px}
+.vista.entra{animation:entra .32s var(--ease)}
+@keyframes entra{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ── Cabecera de página ── */
+.cab-pag h1{margin:0;font-size:28px;line-height:34px;font-weight:700}
+.migas{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-top:12px;font-size:14px;line-height:20px;color:var(--t1)}
+.migas a,.migas button{color:var(--t1);text-decoration:none}
+.migas a:hover,.migas button:hover{text-decoration:underline;color:var(--verde2)}
+.migas .ic{width:16px;height:16px;stroke-width:2.2}
+.migas [aria-current]{font-weight:700}
+
+/* ── Cards ── */
+.card{background:#fff;border-radius:var(--r);box-shadow:var(--sombra-tarjeta);margin-top:24px}
+.card-item{padding:24px}
+.card-item label{display:block;font-size:16px;color:var(--t2);margin-bottom:8px}
+.select-dis{display:flex;align-items:center;justify-content:space-between;width:360px;max-width:100%;height:50px;padding:0 16px;border-radius:6px;background:#E9EBEC;color:var(--t4);cursor:not-allowed}
+
+/* ── Botones ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:50px;padding:0 20px;border-radius:6px;font-weight:700;font-size:16px;white-space:nowrap;transition:background .15s,border-color .15s,color .15s,box-shadow .15s,transform .1s}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.btn-sec{border:1px solid var(--verde4);color:var(--verde4);background:#fff}
+.btn-sec:hover:not(:disabled){background:var(--verde6)}
+.btn-pri{background:var(--verde4);color:#fff;border:1px solid var(--verde4)}
+.btn-pri:hover:not(:disabled){background:var(--verde-hover);border-color:var(--verde-hover)}
+.btn:disabled{background:var(--fondo);border-color:var(--fondo);color:#79858E;cursor:not-allowed}
+.btn-140{width:140px}
+.spin{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;animation:gira .7s linear infinite}
+.btn-sec .spin{border-color:var(--g5);border-top-color:currentColor}
+.cargador{width:24px;height:24px;animation:gira .8s linear infinite}
+.cargador circle{fill:none;stroke:#fff;stroke-width:2.4;stroke-dasharray:46 60}
+.btn-pri[aria-busy="true"]{cursor:progress}
+.modal-pie .btn[aria-disabled="true"]{pointer-events:none}
+/* Exportar en curso: solo el arco verde centrado, el botón conserva su ancho y borde */
+.arco{width:26px;height:26px;animation:gira .8s linear infinite}
+.arco circle{fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-dasharray:42 57}
+.btn-sec[aria-busy="true"]{background:#fff;cursor:progress}
+@keyframes gira{to{transform:rotate(360deg)}}
+
+/* ── Tabla card ── */
+.tabla-cab{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:24px}
+.tabla-cab h2{margin:0;font-size:18px;line-height:22px;font-weight:700}
+.tabla-cab p{margin:8px 0 0;font-size:14px;line-height:20px;color:var(--t1)}
+.tabla-cab .lila{color:var(--lila);font-weight:700}
+.tabla-cab .acciones{display:flex;gap:16px;flex-wrap:wrap}
+.filtros-aplicados{display:flex;align-items:center;flex-wrap:wrap;gap:10px 12px;padding:0 24px 20px}
+.filtros-aplicados .etq{font-size:14px;color:var(--t3)}
+.chip-f{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 6px 0 14px;border-radius:17px;background:var(--lila-bg);border:1px solid #CBC7F2;color:var(--lila-dk);font-size:14px;animation:entra .2s var(--ease)}
+.chip-f button{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:var(--lila-dk)}
+.chip-f button:hover{background:#DDD9F7}
+.chip-f .ic{width:16px;height:16px;stroke-width:2.2}
+.link{color:var(--verde4);font-weight:700;font-size:14px;text-decoration:underline;text-underline-offset:3px}
+
+.tabla-scroll{overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--verde) var(--g6);position:relative}
+.tabla-scroll::-webkit-scrollbar{height:6px}
+.tabla-scroll::-webkit-scrollbar-track{background:var(--g6)}
+.tabla-scroll::-webkit-scrollbar-thumb{background:var(--verde);border-radius:3px}
+/* Celdas como Figma (Tabla / Celda): 14 regular, interlínea 24, texto #364855 */
+table.tabla{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;line-height:24px;font-variant-numeric:tabular-nums}
+.tabla th{background:var(--fondo-tabla);text-align:left;font-size:14px;line-height:24px;font-weight:700;color:var(--t2);padding:12px 12px;vertical-align:middle}
+.tabla td{padding:14px 12px;border-top:1px solid var(--g6);vertical-align:middle;background:#fff;color:var(--t2)}
+.tabla td.cero{color:var(--t4)}
+.tabla th:first-child,.tabla td:first-child{padding-left:24px}
+.tabla th:last-child,.tabla td:last-child{padding-right:24px}
+/* Cabecera ordenable (como CCP productivo): caret ▼ gris en reposo; activa con fondo verde y caret ▲/▼ */
+.tabla th.ord{padding:0}
+.tabla th.activa{background:#CCEDEB}
+.orden{display:flex;align-items:center;gap:8px;width:100%;min-height:72px;padding:12px;text-align:left;font-weight:700;color:var(--t2);border-radius:0;white-space:nowrap}
+.tabla th.ord:first-child .orden{padding-left:24px}
+.orden:hover{color:var(--t1)}
+.orden:hover .caret{fill:var(--t1)}
+.orden:focus-visible{box-shadow:inset var(--foco);border-radius:0}
+.caret{width:8px;height:5px;flex:none;fill:#67737C;transition:transform .15s var(--ease)}
+.activa .caret{fill:var(--verde4)}
+.activa[aria-sort="ascending"] .caret{transform:rotate(180deg)}
+.tabla tbody tr{transition:background .15s}
+.tabla tbody tr:hover td{background:#FAFBFB}
+.fh{display:flex;flex-direction:column;white-space:nowrap}
+.fh small{font-size:14px;color:var(--t4);line-height:24px}
+.t-bandeja{min-width:1080px}
+.t-bandeja th{white-space:normal}
+.t-bandeja td{height:80px;white-space:nowrap}
+.col-acc{position:sticky;right:0;text-align:center !important;width:96px}
+.desborda .col-acc{box-shadow:var(--sombra-lateral)}
+.t-detalle{min-width:2040px}
+.t-detalle th,.t-detalle td{white-space:nowrap}
+.t-detalle th{white-space:normal}
+.t-detalle td{height:56px}
+.col-err{position:sticky;right:0;width:280px;min-width:280px;box-shadow:var(--sombra-lateral);white-space:normal !important}
+.vacio-celda{color:var(--t4)}
+
+/* Centralizar/Pagos (base as-is de CCP): tabla de 1500 px con scroll horizontal, anchos de cert */
+.card-buscar{padding:24px}
+.card-buscar h2{margin:0 0 16px;font-size:18px;line-height:22px;font-weight:700}
+.fila-buscar{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.fila-buscar .campo{margin:0;width:360px;max-width:100%}
+.fila-buscar .c-cargar{margin-left:auto}
+/* Secundario deshabilitado como el DS (Figma CP-01/02): contorno gris sobre blanco */
+.fila-buscar .c-cargar:disabled,.tabla-cab .c-filtros:disabled{background:#fff;border-color:#BCC2C6;color:#79858E}
+.tabla-cab .c-filtros{width:150px}
+select.input:disabled{background-color:#E9EBEC;border-color:#E9EBEC;color:var(--t4);cursor:not-allowed}
+.t-centralizar{table-layout:fixed;width:100%;min-width:1500px}
+.t-centralizar th{white-space:normal}
+.t-centralizar td{height:80px;white-space:nowrap}
+.trunc{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gris,.gris small{color:var(--t4)}
+.arch{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
+.arch .trunc{max-width:100%}
+.tag-orig{padding:2px 6px;border-radius:4px;background:var(--g6);color:var(--t3);font-size:12px;line-height:16px;font-weight:700}
+.menu.ancho{width:300px}
+.con-tip{cursor:default;border-radius:2px}
+.con-tip:focus-visible{box-shadow:var(--foco)}
+/* Tooltips de CCP: N° Operación (tarjeta blanca con filas) y Estado (oscuro, causal de rechazo) */
+.tip{position:fixed;z-index:70;pointer-events:none;opacity:0;transition:opacity .12s var(--ease)}
+.tip.vis{opacity:1}
+.tip.op{width:360px;background:#fff;border:1px solid var(--g6);border-radius:8px;box-shadow:var(--sombra-elevada);padding:4px 16px}
+.tip.op dl{margin:0}
+.tip.op dl div{display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px solid var(--g6);font-size:14px;line-height:20px}
+.tip.op dl div:last-child{border-bottom:0}
+.tip.op dt{color:var(--t3)}
+.tip.op dd{margin:0;font-weight:700;color:var(--t1);text-align:right;overflow-wrap:anywhere}
+.tip.op .pend{font-weight:400;color:var(--t4)}
+.tip.osc{max-width:280px;background:var(--t1);color:#fff;border-radius:4px;padding:6px 10px;font-size:13px;line-height:18px}
+
+/* chips de estado (sin punto indicador) */
+.chip{display:inline-flex;align-items:center;height:28px;padding:2px 12px 0;border-radius:14px;border:1px solid;font-size:14px;font-weight:700;line-height:1;white-space:nowrap}
+.chip.Pendiente{background:var(--al-bg);border-color:var(--al);color:var(--al-dk)}
+.chip.Aprobada{background:var(--ok-bg);border-color:var(--ok);color:var(--ok-dk)}
+.chip.Rechazada{background:var(--er-bg);border-color:var(--er-bd);color:var(--er-dk)}
+.chip.nueva{animation:pop .45s var(--ease)}
+@keyframes pop{0%{transform:scale(.85);opacity:0}60%{transform:scale(1.06);opacity:1}100%{transform:scale(1)}}
+
+/* kebab + menú de fila */
+.kebab{width:40px;height:40px;border-radius:6px;display:inline-grid;place-items:center;color:var(--t1);transition:background .15s}
+.kebab:hover,.kebab[aria-expanded="true"]{background:var(--verde6);color:var(--verde4)}
+.kebab svg{width:20px;height:20px}
+.menu{position:fixed;z-index:60;width:220px;background:#fff;border:1px solid var(--g6);border-radius:4px;box-shadow:var(--sombra-elevada);padding:0;opacity:0;transform:scale(.96) translateY(-4px);transform-origin:top right;transition:opacity .14s var(--ease),transform .14s var(--ease);pointer-events:none}
+.menu.arriba{transform-origin:bottom right}
+.menu.vis{opacity:1;transform:none;pointer-events:auto}
+.menu button{display:flex;align-items:center;width:100%;height:52px;padding:0 16px;text-align:left;font-size:16px;color:var(--t1);border-bottom:1px solid var(--g6);border-radius:0}
+.menu button:last-of-type{border-bottom:0}
+.menu button:hover:not([aria-disabled="true"]),.menu button:focus-visible:not([aria-disabled="true"]){background:var(--verde6);color:var(--verde4);box-shadow:none}
+.menu button[aria-disabled="true"]{color:var(--t-dis);cursor:not-allowed}
+.menu button[aria-disabled="true"]:focus-visible{background:var(--fondo-tabla);box-shadow:none}
+
+/* paginador */
+.paginador{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px 24px;padding:20px 24px;border-top:1px solid var(--g6);font-size:14px;color:var(--t1)}
+.paginador label{display:flex;align-items:center;gap:24px}
+.sel-chico{appearance:none;-webkit-appearance:none;height:32px;padding:0 32px 0 16px;border:1px solid var(--g5);border-radius:4px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23203442' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center/14px;font-size:14px;cursor:pointer}
+.pag-flechas{display:flex;gap:8px}
+.pag-flechas button{width:32px;height:32px;border-radius:6px;display:grid;place-items:center;color:var(--t1)}
+.pag-flechas button:hover:not(:disabled){background:var(--verde6);color:var(--verde4)}
+.pag-flechas button:disabled{color:var(--g5);cursor:default}
+.pag-flechas .ic{width:20px;height:20px}
+
+/* estado vacío */
+.vacio{padding:56px 24px;text-align:center;border-top:1px solid var(--g6)}
+.vacio-ic{width:56px;height:56px;margin:0 auto 12px;border-radius:50%;background:var(--verde6);color:var(--verde4);display:grid;place-items:center}
+.vacio h3{margin:0;font-size:18px;line-height:22px}
+.vacio p{margin:6px 0 16px;color:var(--t3)}
+/* Sin resultados de filtros, como Figma (F5): lupa gris 48 sin fondo, título 24, sin botón (Limpiar filtros va junto a los chips) */
+.vacio.sin-res{padding:72px 24px}
+.sin-res .vacio-ic{width:48px;height:48px;margin-bottom:16px;background:none;color:var(--t-dis)}
+.sin-res .vacio-ic .ic{width:48px;height:48px;stroke-width:1.6}
+.sin-res h3{font-size:24px;line-height:28px}
+.sin-res p{margin:4px 0 0;line-height:24px}
+
+/* skeleton */
+.sk{display:block;height:12px;border-radius:6px;background:linear-gradient(90deg,var(--g6) 0%,#F4F5F6 50%,var(--g6) 100%);background-size:200% 100%;animation:brillo 1.1s linear infinite}
+@keyframes brillo{from{background-position:200% 0}to{background-position:-200% 0}}
+
+/* ── Detalle ── */
+.alerta{display:flex;gap:10px;align-items:flex-start;margin-top:24px;padding:12px 16px;border-radius:var(--r);background:var(--lila-bg);border:1px solid var(--lila-bd);color:var(--t1)}
+.alerta .ic{color:var(--lila-dk);width:22px;height:22px;margin-top:1px}
+.alerta p{margin:0;line-height:28px}
+.alerta b{font-weight:600}
+/* Alerta simple (SmallMessage Simple · Informativo, Figma 09): aviso de Excluidos bajo el título, al ancho de su texto */
+.alerta.simple{display:inline-flex;align-items:center;gap:8px;margin:8px 0 0;padding:8px 12px;border-radius:8px}
+.alerta.simple .ic{width:24px;height:24px;margin:0}
+.alerta.simple p{margin:0;font-size:12px;line-height:16px;font-weight:500}
+.alerta.nueva{animation:alertaEntra .45s var(--ease)}
+@keyframes alertaEntra{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+.resumen{padding:24px}
+.meta{display:flex;flex-wrap:wrap;gap:16px 0}
+.meta>div{padding:0 24px;border-left:1px solid var(--g6)}
+.meta>div:first-child{padding-left:0;border-left:0}
+.meta dt{font-size:14px;line-height:24px;color:var(--t2)}
+.meta dd{margin:4px 0 0;font-weight:700;font-size:16px;line-height:24px}
+.cuadra{display:grid;grid-template-columns:300px minmax(0,1fr);margin-top:24px;border:1px solid var(--g6);border-radius:6px;overflow:hidden}
+.monto{background:var(--verde4);color:#fff;padding:28px}
+.monto .etq{font-size:14px;font-weight:700;line-height:24px}
+.monto .cifra{font-size:38px;line-height:44px;font-weight:700;margin:8px 0 6px;font-variant-numeric:tabular-nums;letter-spacing:0}
+.monto .sub{font-size:14px;line-height:20px}
+.cuadratura{padding:24px 28px}
+.cuadratura h3{margin:0 0 12px;font-size:16px;line-height:24px;font-weight:700}
+.cuad-cols{display:grid;grid-template-columns:1fr 1fr}
+.cuad-cols>div+div{border-left:1px solid var(--g6);padding-left:24px}
+.cuad-cols .etq{font-size:14px;color:var(--t2);line-height:20px}
+.cuad-cols .val{font-size:20px;line-height:28px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}
+.cuad-cols .sub{font-size:14px;line-height:20px;color:var(--t2);margin-top:2px}
+.tabs{display:flex;width:max-content;max-width:100%;margin-top:24px;overflow-x:auto}
+.tab{position:relative;padding:12px 20px 10px;font-weight:700;color:var(--t4);font-size:16px;white-space:nowrap;border-radius:0;border-bottom:1px solid var(--g5)}
+.tab[aria-selected="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--verde2)}
+.tab:hover{color:var(--t2)}
+.tab[aria-selected="true"]{color:var(--verde2)}
+.barra-decision{position:sticky;bottom:16px;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:24px;padding:20px 24px;background:#fff;border-radius:var(--r);box-shadow:0 -1px 0 var(--g6),var(--sombra-elevada)}
+.barra-decision p{margin:0}
+.barra-decision .botones{display:flex;gap:16px}
+.barra-decision.saliendo{animation:salir .3s var(--ease) forwards}
+@keyframes salir{to{opacity:0;transform:translateY(12px)}}
+
+/* ── Modal ── */
+.capa{position:fixed;inset:0;z-index:80;display:flex;padding:24px 16px;overflow-y:auto;background:var(--scrim);opacity:0;transition:opacity .2s var(--ease)}
+.capa.vis{opacity:1}
+.modal{margin:auto;width:640px;max-width:100%;background:#fff;border-radius:var(--r);box-shadow:var(--sombra-modal);transform:translateY(12px) scale(.97);transition:transform .24s var(--ease)}
+.capa.vis .modal{transform:none}
+.modal-cab{padding:32px 32px 24px;text-align:center;border-bottom:1px solid var(--g6)}
+.modal-cab h2{margin:0;font-size:24px;line-height:28px;font-weight:700}
+.modal-cab p{margin:8px 0 0;color:var(--t3)}
+.modal-cuerpo{padding:24px 32px}
+.modal-cuerpo .campo{margin-top:20px}
+.modal-pie{display:flex;justify-content:space-between;gap:16px;padding:24px 32px 28px;border-top:1px solid var(--g6)}
+/* Ambos botones del pie con el mismo ancho fijo, como Figma (Javier, 07/10) */
+.modal-pie .btn-sec,.modal-pie .btn-pri{width:211px;min-width:0}
+.res-m{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px;margin:0}
+.res-m dt{font-size:14px;line-height:20px;color:var(--t2)}
+.res-m dd{margin:4px 0 0;font-weight:700;font-variant-numeric:tabular-nums}
+.campo{margin-top:24px}
+.campo>label,.campo legend{display:block;font-size:16px;color:var(--t2);margin-bottom:8px;padding:0}
+fieldset.campo{border:0;padding:0;margin-inline:0;min-width:0}
+.input,.combo-btn{width:100%;height:50px;padding:0 16px;border:1px solid #BCC2C6;border-radius:8px;background:#fff;color:var(--t1);transition:border-color .15s,box-shadow .15s}
+.input:hover,.combo-btn:hover{border-color:var(--t4)}
+.input:focus,.combo-btn:focus,.combo-btn[aria-expanded="true"]{border-color:var(--lila);box-shadow:0 0 0 3px rgba(75,77,214,.15);border-radius:8px}
+select.input{appearance:none;-webkit-appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23203442' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center/22px;padding-right:48px;cursor:pointer}
+textarea.input::placeholder{color:var(--t4)}
+textarea.input{height:auto;min-height:102px;padding:12px 16px;resize:vertical;line-height:24px}
+.input.invalido{border-color:#E53935}
+.input.invalido:focus{border-color:#E53935;box-shadow:0 0 0 3px rgba(229,57,53,.15)}
+.campo-pie{display:flex;justify-content:space-between;gap:12px;margin-top:6px;padding:0 16px;font-size:12px;line-height:16px;color:var(--t4)}
+.campo-pie .err{color:#E53935;font-size:14px;line-height:18px;font-weight:700}
+.campo-nota{margin:6px 0 0;font-size:14px;line-height:18px;color:var(--t3)}
+.campo-nota:empty{display:none}
+.combo{position:relative}
+.combo-btn{display:flex;align-items:center;justify-content:space-between;text-align:left}
+.combo-btn .ph{color:var(--t4)}
+.combo-btn .ic{transition:transform .2s var(--ease);color:var(--t1)}
+.combo-btn[aria-expanded="true"] .ic{transform:rotate(180deg)}
+.combo-lista{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;margin:0;padding:0;list-style:none;background:#fff;border:1px solid var(--g6);border-radius:4px;box-shadow:var(--sombra-elevada);opacity:0;transform:translateY(-4px);transition:opacity .14s var(--ease),transform .14s var(--ease)}
+/* Las 6 causales caben sin scroll, como Figma (frame 11) */
+.combo-lista{max-height:314px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--t4) transparent}
+.combo-lista.arriba{top:auto;bottom:calc(100% + 4px);transform:translateY(4px)}
+.combo-lista.vis{opacity:1;transform:none}
+.combo-lista li{display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 16px;cursor:pointer}
+.combo-lista li.activa{background:var(--verde6);color:var(--verde4)}
+.combo-lista li[aria-selected="true"]{font-weight:700;color:var(--verde4)}
+.combo-lista li .ic{width:18px;height:18px;stroke-width:2.2}
+.plegable{display:grid;grid-template-rows:0fr;transition:grid-template-rows .25s var(--ease)}
+.plegable.abierto{grid-template-rows:1fr}
+.plegable>div{overflow:hidden;padding:0 3px 3px;margin:0 -3px}
+.grid-f{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.grid-f .full{grid-column:1/-1}
+.grid-f .campo{margin-top:0}
+.grid-f .campo>label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── Snackbar / toasts ── */
+.toasts{position:fixed;right:24px;bottom:24px;z-index:90;display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;max-width:420px;min-height:40px;padding:7px 16px 7px 12px;border-radius:var(--r);border:1px solid;font-size:12px;line-height:16px;font-weight:500;opacity:0;transform:translateY(calc(100% + 24px));transition:opacity .25s var(--ease),transform .25s var(--ease);pointer-events:auto}
+.toast.vis{opacity:1;transform:none}
+.toast.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--t1)}
+.toast.ok .ic{color:var(--ok-dk)}
+.toast.info{background:var(--lila-bg);border-color:var(--lila-bd);color:var(--t1)}
+.toast.info .ic{color:var(--lila-dk)}
+
+/* ── Notificaciones ── */
+.pop{position:fixed;z-index:60;top:76px;right:180px;width:360px;max-width:calc(100vw - 32px);background:#fff;border-radius:var(--r);box-shadow:var(--sombra-elevada);border:1px solid var(--g6);opacity:0;transform:translateY(-6px);transition:opacity .16s var(--ease),transform .16s var(--ease);pointer-events:none}
+.pop.vis{opacity:1;transform:none;pointer-events:auto}
+.pop h3{margin:0;padding:16px 16px 12px;font-size:16px;line-height:24px;border-bottom:1px solid var(--g6)}
+.pop ul{list-style:none;margin:0;padding:0}
+.pop li button{display:block;width:100%;text-align:left;padding:12px 16px;border-bottom:1px solid var(--g6);border-radius:0}
+.pop li button:hover{background:var(--verde6)}
+.pop li b{display:block;font-size:14px;line-height:20px}
+.pop li small{font-size:12px;color:var(--t3)}
+.pop .nada{padding:16px;color:var(--t3);font-size:14px;margin:0}
+
+/* ── Responsive ── */
+@media (max-width:1100px){
+  .hamb{display:inline-flex}
+  .shell,.shell.colapsado{grid-template-columns:minmax(0,1fr)}
+  .lateral{position:fixed;top:0;left:0;bottom:0;height:100%;width:280px;z-index:70;transform:translateX(-100%);transition:transform .28s var(--ease);box-shadow:var(--sombra-modal)}
+  .lateral.abierto{transform:none}
+  .shell.colapsado .lat-titulo,.shell.colapsado .lat-item span{opacity:1}
+  .shell.colapsado .lat-volver{transform:none}
+  .lat-scrim{display:block;position:fixed;inset:0;z-index:65;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .25s}
+  .lat-scrim.vis{opacity:1;pointer-events:auto}
+  main{padding:24px 24px 56px}
+  .cuadra{grid-template-columns:260px minmax(0,1fr)}
+}
+@media (max-width:820px){
+  .usuario-t,.salir span,.proto .opc{display:none}
+  .usuario{padding-right:12px}
+  .campana{width:56px}
+  .campana .punto{right:16px}
+  .salir{padding-left:12px}
+  .pop{right:16px}
+  .cuadra{grid-template-columns:1fr}
+  .meta{display:grid;grid-template-columns:1fr 1fr;gap:16px 16px}
+  .meta>div{padding:0;border-left:0}
+}
+@media (max-width:640px){
+  .proto{padding:4px 16px}
+  .cabecera{height:64px;padding:0 8px 0 8px;gap:8px}
+  .lateral{top:0}
+  .logo svg{width:34px;height:34px}
+  .logo-t b{font-size:26px;line-height:26px}
+  .logo-t small{font-size:8px}
+  .avatar{width:38px;height:38px;font-size:14px}
+  .cab-sep{height:40px}
+  .campana{width:48px}
+  .campana .punto{top:18px;right:12px}
+  main{padding:20px 16px 48px}
+  .cab-pag h1{font-size:22px;line-height:28px}
+  .card{margin-top:16px}
+  .card-item,.resumen{padding:16px}
+  .tabla-cab{flex-direction:column;align-items:stretch;padding:16px}
+  .tabla-cab .acciones{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .tabla-cab .acciones .btn{padding:0 12px;width:100%}
+  .tabla-cab.una .acciones{grid-template-columns:1fr}
+  .filtros-aplicados{padding:0 16px 16px}
+  .tabla th:first-child,.tabla td:first-child{padding-left:16px}
+  .tabla th:last-child,.tabla td:last-child{padding-right:16px}
+  .paginador{padding:16px;gap:12px 16px}
+  .paginador label{gap:12px}
+  .monto{padding:20px}
+  .monto .cifra{font-size:30px;line-height:36px}
+  .cuadratura{padding:20px}
+  .cuad-cols>div+div{padding-left:16px}
+  .cuad-cols .val{font-size:18px}
+  .barra-decision{flex-direction:column;align-items:stretch;padding:16px;bottom:8px}
+  .barra-decision .botones{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .barra-decision .btn-140{width:100%}
+  .modal-cab{padding:24px 20px 20px}
+  .modal-cab h2{font-size:20px;line-height:26px}
+  .modal-cuerpo{padding:20px}
+  .modal-pie{flex-direction:column-reverse;padding:16px 20px}
+  .modal-pie .btn-sec,.modal-pie .btn-pri{width:100%;min-width:0}
+  .grid-f{grid-template-columns:1fr}
+  .toasts{left:16px;right:16px;bottom:16px;align-items:stretch}
+  .toast{max-width:none}
+}
+@media (max-width:400px){
+  .meta{grid-template-columns:1fr}
+  .cuad-cols{grid-template-columns:1fr;gap:16px}
+  .cuad-cols>div+div{border-left:0;padding-left:0;border-top:1px solid var(--g6);padding-top:16px}
+  .res-m{grid-template-columns:1fr 1fr;gap:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+}
+</style>
+
+<div class="proto" role="note">
+  <b>Prototipo navegable v2</b><span class="sep">·</span><span>Vista aprobador</span><span class="opc"><span class="sep">·</span> Datos ficticios <span class="sep">·</span> Descargas simuladas</span>
+  <button id="btn-reiniciar" type="button">Reiniciar</button>
+</div>
+
+<header class="cabecera">
+  <button class="hamb" id="btn-hamb" type="button" aria-label="Abrir menú" aria-controls="lateral" aria-expanded="false"></button>
+  <a class="logo" href="#/" id="logo" aria-label="Esencial · Inicio">
+    <svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="#fff" stroke-width="3.2"><circle cx="18" cy="17" r="7.5"/><circle cx="30" cy="17" r="7.5"/><circle cx="18" cy="31" r="7.5"/><circle cx="30" cy="31" r="7.5"/></svg>
+    <span class="logo-t"><b>Esencial</b><small>Grupo Alemana</small></span>
+  </a>
+  <div class="cab-der">
+    <div class="usuario">
+      <span class="avatar" aria-hidden="true">CR</span>
+      <span class="usuario-t"><b>Camila Rojas Fuentes</b><small>Aprobador Beneficios</small></span>
+    </div>
+    <span class="cab-sep"></span>
+    <button class="campana" id="btn-campana" type="button" aria-label="Notificaciones" aria-haspopup="true" aria-expanded="false"><span class="punto" id="punto"></span></button>
+    <span class="cab-sep"></span>
+    <button class="salir" id="btn-salir" type="button"><span>Cerrar sesión</span></button>
+  </div>
+</header>
+
+<div class="shell" id="shell">
+  <nav class="lateral" id="lateral" aria-label="Menú principal">
+    <div class="lat-top">
+      <button class="lat-volver" id="btn-lat" type="button" aria-label="Contraer menú"></button>
+      <span class="lat-titulo">Administración</span>
+    </div>
+    <button class="lat-item" id="btn-escritorio" type="button" aria-expanded="true" aria-controls="lat-sub"></button>
+    <div class="lat-sub" id="lat-sub"><div>
+      <a class="lat-item activo" id="nav-aprobaciones" href="#/" aria-current="page"></a>
+      <a class="lat-item sec" id="nav-centralizar" href="#/centralizar"></a>
+      <a class="lat-item sec" id="nav-remesas" href="#/" data-mod="Gestión de Remesas de Vale Vistas"></a>
+    </div></div>
+  </nav>
+  <div class="lat-scrim" id="lat-scrim"></div>
+  <main id="main"><div class="vista" id="vista"></div></main>
+</div>
+
+<div class="menu" id="menu" role="menu" aria-label="Acciones de la OP" hidden></div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+<div class="pop" id="pop" role="dialog" aria-label="Notificaciones" hidden></div>
+<div class="capa" id="capa" hidden></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+/* ═══════════ Íconos ═══════════ */
+const P = {
+  atras:'<path d="M20 12H5M11 18l-6-6 6-6"/>',
+  chevD:'<path d="M6 9l6 6 6-6"/>',
+  pantalla:'<rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19.5h20M12 8.5v4M10 10.5h4"/>',
+  chevR:'<path d="M9 6l6 6-6 6"/>',
+  chevL:'<path d="M15 6l-6 6 6 6"/>',
+  doc:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
+  campana:'<path d="M18 9a6 6 0 0 0-12 0c0 6-2.5 8-2.5 8h17S18 15 18 9"/><path d="M13.7 20.5a2 2 0 0 1-3.4 0"/>',
+  salir:'<path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M15 16l4-4-4-4M19 12H9"/>',
+  filtros:'<path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/>',
+  descarga:'<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.1"/>',
+  check:'<circle cx="12" cy="12" r="9"/><path d="M8 12.4l2.7 2.7L16.2 9.6"/>',
+  tick:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>',
+  hamb:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+  buscar:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
+  subir:'<path d="M12 20V9M7 14l5-5 5 5M5 4h14"/>',
+};
+const ic = (n, c = '') => `<svg class="ic ${c}" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
+const KEBAB = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.7" fill="currentColor"/><circle cx="12" cy="12" r="1.7" fill="currentColor"/><circle cx="12" cy="19" r="1.7" fill="currentColor"/></svg>';
+
+/* ═══════════ Utilidades ═══════════ */
+const $ = (s, r = document) => r.querySelector(s);
+const miles = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+const pesos = n => '$' + miles(n);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const iso = d => { const [dd, mm, aa] = d.split('/'); return `20${aa}-${mm}-${dd}`; };
+const corta = i => { const [y, m, d] = i.split('-'); return `${d}/${m}/${y.slice(2)}`; };
+const rng = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+const dv = rut => { let s = 0, m = 2; for (const c of String(rut).split('').reverse()) { s += +c * m; m = m === 7 ? 2 : m + 1; } const d = 11 - (s % 11); return d === 11 ? '0' : d === 10 ? 'K' : String(d); };
+const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const espera = ms => reducido ? Math.min(ms, 250) : ms;
+
+/* ═══════════ Datos ficticios (fase 1 · Reembolsos) ═══════════ */
+const HOY = '06/10/26';
+const USUARIO = 'Camila Rojas Fuentes';
+const CAUSALES = ['Monto no cuadra', 'Concepto incorrecto', 'Montos menores no procesables', 'Beneficiario o RUT no corresponde', 'Duplicado', 'Otro'];
+const OPS0 = [
+  { id:11696, per:'01/10/26', sol:['05/10/26','15:40'], est:'Pendiente', fe:['05/10/26','15:40'], rec:330, val:314, exc:16, monto:67670420, montoExc:3744960 },
+  { id:11695, per:'01/10/26', sol:['05/10/26','10:03'], est:'Pendiente', fe:['05/10/26','10:03'], rec:382, val:382, exc:0,  monto:83380220, montoExc:0 },
+  { id:11693, per:'01/10/26', sol:['02/10/26','16:13'], est:'Pendiente', fe:['02/10/26','16:13'], rec:115, val:111, exc:4,  monto:23835610, montoExc:861230 },
+  { id:11692, per:'01/10/26', sol:['02/10/26','09:29'], est:'Aprobada',  fe:['05/10/26','16:05'], rec:24,  val:24,  exc:0,  monto:3829590,  montoExc:0, por:USUARIO },
+  { id:11689, per:'01/10/26', sol:['01/10/26','17:53'], est:'Aprobada',  fe:['02/10/26','10:41'], rec:71,  val:66,  exc:5,  monto:1425990,  montoExc:104870, por:USUARIO },
+  { id:11688, per:'01/10/26', sol:['01/10/26','17:40'], est:'Aprobada',  fe:['02/10/26','10:30'], rec:59,  val:59,  exc:0,  monto:12517250, montoExc:0, por:USUARIO },
+  { id:11679, per:'01/09/26', sol:['30/09/26','17:02'], est:'Aprobada',  fe:['30/09/26','18:20'], rec:290, val:287, exc:3,  monto:58004410, montoExc:598310, por:USUARIO },
+  { id:11676, per:'01/09/26', sol:['29/09/26','16:48'], est:'Aprobada',  fe:['30/09/26','09:02'], rec:305, val:305, exc:0,  monto:64230870, montoExc:0, por:USUARIO },
+];
+// Tope por OP (entrevista 06/10): ~990 movimientos en SAP; cada reembolso = debe + haber → 495 reembolsos
+const MAX_REEMB_OP = 495;
+// Historial anterior ficticio desde enero de 2023, como en la plataforma actual (Javier, 07/10)
+(() => {
+  const r = rng(3659), dd = n => String(n).padStart(2, '0');
+  const fmt = x => `${dd(x.getDate())}/${dd(x.getMonth() + 1)}/${String(x.getFullYear()).slice(2)}`;
+  const hora = (min = 9) => `${dd(min + Math.floor(r() * (18 - min)))}:${dd(Math.floor(r() * 60))}`;
+  const habil = (x, paso) => { do x.setDate(x.getDate() + paso); while (x.getDay() === 0 || x.getDay() === 6); };
+  const d = new Date(2026, 8, 29); let id = 11674;
+  const DESDE = new Date(2023, 0, 2);
+  while (d > DESDE) {
+    habil(d, -1);
+    for (let k = 0, n = 1 + Math.floor(r() * 2); k < n && d > DESDE; k++) {
+      const rec = 20 + Math.floor(r() * (MAX_REEMB_OP - 20)), exc = r() < .45 ? 1 + Math.floor(r() * Math.min(20, rec / 10)) : 0;
+      const prom = () => 150000 + r() * 90000, sol = fmt(d), rech = r() < .12, fe = new Date(d); habil(fe, 1);
+      OPS0.push({ id, per:`01/${sol.slice(3)}`, sol:[sol, hora()], est: rech ? 'Rechazada' : 'Aprobada', fe:[fmt(fe), hora()],
+        rec, val: rec - exc, exc, monto: Math.round((rec - exc) * prom() / 10) * 10, montoExc: Math.round(exc * prom() / 10) * 10,
+        por:USUARIO, ...(rech ? { causal: CAUSALES[Math.floor(r() * 5)] } : {}) });
+      id -= 1 + Math.floor(r() * 3);
+    }
+  }
+})();
+const BANCOS = ['001', '012', '037', '016', '028', '039', '049', '051', '009'];
+const ERRORES = ['RUT inválido', 'Fecha inválida', 'Debe y haber no cuadran', 'Cuenta contable sin homologación', 'Falta cuenta bancaria'];
+const VACIO = { op:'', est:'', per:'', sol:'', fe:'' };
+const VACIO_C = { op:'', arch:'', est:'', per:'', sol:'', fe:'' };
+// Periodo Contable es mensual: el filtro ofrece desde enero de 2023 hasta el mes en curso (valor MM/AA)
+const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+const PERIODOS = Array.from({ length: 46 }, (_, k) => { const n = 2026 * 12 + 9 - k, m = n % 12, a = Math.floor(n / 12); return { v: `${String(m + 1).padStart(2, '0')}/${String(a).slice(2)}`, t: `${MESES[m]} ${a}` }; });
+const periodoTxt = v => PERIODOS.find(p => p.v === v)?.t || v;
+
+let OPS, S, C;
+const cacheTx = {};
+function reiniciar() {
+  OPS = OPS0.map(o => ({ ...o, sol:[...o.sol], fe:[...o.fe] }));
+  S = { vista:'bandeja', opId:null, tab:'val', pagB:0, tamB:10, pagD:0, tamD:10, filtros:{ ...VACIO }, orden:{ col:null, dir:null }, ordenD:{ col:null, dir:null }, cargando:false, retener:new Set() };
+  C = { tipo:'', item:'', buscado:null, pag:0, tam:10, orden:{ col:'id', dir:'desc' }, filtros:{ ...VACIO_C }, cargando:false };
+}
+// Las decisiones de la demo viven solo en memoria: al recargar (F5) el prototipo vuelve a su estado inicial (Javier, 07/10)
+const op = id => OPS.find(o => o.id === +id);
+
+/* Reembolsos de cada OP: generados con semilla fija para que siempre sean los mismos */
+function transacciones(o) {
+  if (cacheTx[o.id]) return cacheTx[o.id];
+  const R = rng(o.id);
+  const pool = []; for (let a = 11; a <= o.rec; a++) pool.push(a);
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  const exSet = new Set(pool.slice(0, o.exc));
+  const val = [], exc = [];
+  for (let a = 1; a <= o.rec; a++) {
+    const rut = Math.floor(6000000 + R() * 18000000);
+    const L = 8 + Math.floor(R() * 5);
+    let cuenta = String(1 + Math.floor(R() * 9)); while (cuenta.length < L) cuenta += Math.floor(R() * 10);
+    const t = { asiento:a, fecha:o.sol[0], cc:'21201010', rut, cli:'I' + rut + dv(rut), banco:BANCOS[Math.floor(R() * BANCOS.length)], cuenta, w:Math.exp(R() * 2.4) };
+    (exSet.has(a) ? exc : val).push(t);
+  }
+  const escalar = (arr, total) => { const s = arr.reduce((a, t) => a + t.w, 0); let acc = 0; arr.forEach((t, i) => { t.imp = i < arr.length - 1 ? Math.round(total * t.w / s / 10) * 10 : total - acc; acc += t.imp; }); };
+  escalar(val, o.monto); escalar(exc, o.montoExc);
+  exc.forEach(t => {
+    t.error = ERRORES[Math.floor(R() * ERRORES.length)];
+    if (t.error === 'RUT inválido') { const d = dv(t.rut); t.cli = 'I' + t.rut + (d === '1' ? '2' : '1'); }
+    if (t.error === 'Fecha inválida') t.fecha = '31/09/26';
+    if (t.error === 'Cuenta contable sin homologación') t.cc = null;
+    if (t.error === 'Falta cuenta bancaria') t.cuenta = null;
+  });
+  return (cacheTx[o.id] = { val, exc });
+}
+
+/* ═══════════ Piezas comunes ═══════════ */
+const chip = (est, nueva) => `<span class="chip ${est}${nueva ? ' nueva' : ''}">${est}</span>`;
+const fh = ([d, h]) => `<span class="fh">${d}<small>${h} hrs.</small></span>`;
+const migas = items => `<nav class="migas" aria-label="Migas de pan">${items.map((it, i) => i < items.length - 1
+  ? `<a href="#/" data-a="ir-bandeja">${it}</a>${ic('chevR')}`
+  : `<span aria-current="page">${it}</span>`).join('')}</nav>`;
+function paginador(id, pag, tam, total, opciones) {
+  const ini = total ? pag * tam + 1 : 0, fin = Math.min(total, (pag + 1) * tam);
+  return `<div class="paginador">
+    <label>Mostrar por página <select class="sel-chico" id="${id}-tam" data-c="${id}-tam">${opciones.map(n => `<option ${n === tam ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+    <span aria-live="polite">${ini} - ${fin} de ${miles(total)}</span>
+    <span class="pag-flechas">
+      <button type="button" id="${id}-ant" data-a="${id}-pag" data-v="-1" aria-label="Página anterior" ${pag === 0 ? 'disabled' : ''}>${ic('chevL')}</button>
+      <button type="button" id="${id}-sig" data-a="${id}-pag" data-v="1" aria-label="Página siguiente" ${fin >= total ? 'disabled' : ''}>${ic('chevR')}</button>
+    </span>
+  </div>`;
+}
+
+/* ═══════════ Bandeja ═══════════ */
+function filtradas() {
+  const f = S.filtros;
+  return OPS.filter(o => S.retener.has(o.id) ||
+    (!f.op || String(o.id).includes(f.op.trim())) &&
+    (!f.est || o.est === f.est) &&
+    (!f.per || o.per.slice(3) === f.per) &&
+    (!f.sol || iso(o.sol[0]) === f.sol) &&
+    (!f.fe || iso(o.fe[0]) === f.fe));
+}
+// Columnas ordenables de la bandeja (todas menos Acciones). Salto de línea fijo como en Figma
+const COLS_B = [
+  ['per', 'Periodo <br>contable', o => iso(o.per)], ['id', 'N° <br>operación', o => o.id],
+  ['sol', 'Fecha solicitud <br>centralizador', o => iso(o.sol[0]) + o.sol[1]], ['est', 'Estado <br>aprobación', o => ORDEN_EST[o.est]],
+  ['fe', 'Fecha <br>estado', o => iso(o.fe[0]) + o.fe[1]], ['rec', 'Recibidos', o => o.rec], ['val', 'Validados', o => o.val],
+  ['exc', 'Excluidos', o => o.exc], ['monto', 'Monto <br>a pagar', o => o.monto],
+];
+const ORDEN_EST = { Pendiente:0, Aprobada:1, Rechazada:2 };
+const CARET = '<svg class="caret" viewBox="0 0 8 5" aria-hidden="true"><path d="M0 0h8L4 5z"/></svg>';
+// Por defecto ninguna columna aparece activa y los datos vienen por Fecha Solicitud, más reciente primero.
+// Al ordenar, los empates se resuelven igual (Fecha Solicitud y N° Operación descendentes)
+function ordenadas() {
+  const cmp = (a, b) => a < b ? -1 : a > b ? 1 : 0;
+  const base = (a, b) => -cmp(iso(a.sol[0]) + a.sol[1], iso(b.sol[0]) + b.sol[1]) || b.id - a.id;
+  if (!S.orden.col) return filtradas().sort(base);
+  const [, , v] = COLS_B.find(([k]) => k === S.orden.col), d = S.orden.dir === 'asc' ? 1 : -1;
+  return filtradas().sort((a, b) => d * cmp(v(a), v(b)) || base(a, b));
+}
+// Detalle: por defecto, por N° Asiento; los vacíos (—) quedan al final en ambos sentidos
+const CLAVES_D = { asiento:t => t.asiento, fecha:t => iso(t.fecha), imp:t => t.imp, cli:t => t.cli, banco:t => t.banco, cuenta:t => t.cuenta };
+function ordenadasD(filas) {
+  if (!S.ordenD.col) return filas;
+  const v = CLAVES_D[S.ordenD.col], d = S.ordenD.dir === 'asc' ? 1 : -1;
+  const cmp = (a, b) => typeof a === 'string' ? a.localeCompare(b, 'es', { numeric:true }) : a - b;
+  return [...filas].sort((a, b) => { const x = v(a), y = v(b); return (x == null) - (y == null) || (x == null ? 0 : d * cmp(x, y)) || a.asiento - b.asiento; });
+}
+function chipsFiltro() {
+  const f = S.filtros, c = [];
+  if (f.op) c.push(['op', `N° operación: ${f.op}`]);
+  if (f.est) c.push(['est', `Estado: ${f.est}`]);
+  if (f.per) c.push(['per', `Periodo: ${periodoTxt(f.per)}`]);
+  if (f.sol) c.push(['sol', `Fecha solicitud: ${corta(f.sol)}`]);
+  if (f.fe) c.push(['fe', `Fecha estado: ${corta(f.fe)}`]);
+  return c;
+}
+function vBandeja() {
+  const lista = ordenadas(), chips = chipsFiltro();
+  const maxPag = Math.max(0, Math.ceil(lista.length / S.tamB) - 1);
+  if (S.pagB > maxPag) S.pagB = maxPag;
+  const pagina = lista.slice(S.pagB * S.tamB, (S.pagB + 1) * S.tamB);
+  return `
+  <header class="cab-pag"><h1>Aprobaciones para solicitudes de pagos</h1>${migas(['Inicio', 'Aprobaciones de Pago'])}</header>
+  <section class="card card-item">
+    <label id="lbl-item">Item de operación</label>
+    <div class="select-dis" role="combobox" aria-labelledby="lbl-item" aria-disabled="true" aria-expanded="false">Pago Reembolso ${ic('chevD')}</div>
+  </section>
+  <section class="card" aria-labelledby="t-hist">
+    <div class="tabla-cab">
+      <div><h2 id="t-hist">Historial de aprobaciones</h2><p>Operación seleccionada <span class="lila">Solicitud de pago - Pago Reembolso</span></p></div>
+      <div class="acciones">
+        <button class="btn btn-sec" type="button" id="btn-filtros" data-a="filtros">${ic('filtros')}Filtros</button>
+        <button class="btn btn-sec" type="button" id="btn-exportar" data-a="exportar" ${lista.length ? '' : 'disabled'}>${ic('descarga')}Exportar</button>
+      </div>
+    </div>
+    ${chips.length ? `<div class="filtros-aplicados"><span class="etq">Filtros aplicados</span>
+      ${chips.map(([k, t]) => `<span class="chip-f">${esc(t)}<button type="button" data-a="quitar-filtro" data-v="${k}" aria-label="Quitar filtro ${esc(t)}">${ic('x')}</button></span>`).join('')}
+      <button type="button" class="link" data-a="limpiar-filtros">Limpiar filtros</button></div>` : ''}
+    ${lista.length || S.cargandoB ? `
+    <div class="tabla-scroll" id="scroll-b">
+      <table class="tabla t-bandeja" aria-busy="${!!S.cargandoB}">
+        <thead><tr>
+          ${COLS_B.map(([k, t]) => { const a = S.orden.col === k; return `<th scope="col" class="ord${a ? ' activa' : ''}"${a ? ` aria-sort="${S.orden.dir === 'asc' ? 'ascending' : 'descending'}"` : ''}><button type="button" class="orden" id="ord-${k}" data-a="ordenar" data-v="${k}">${t}${CARET}</button></th>`; }).join('')}
+          <th scope="col" class="col-acc">Acciones</th>
+        </tr></thead>
+        <tbody>${S.cargandoB ? filasSk(pagina.length || 5) : pagina.map(o => `<tr>
+          <td>${o.per}</td><td>${o.id}</td><td>${fh(o.sol)}</td><td>${chip(o.est, o.anim)}</td><td>${fh(o.fe)}</td>
+          <td>${miles(o.rec)}</td><td>${miles(o.val)}</td><td${o.exc ? '' : ' class="cero"'}>${miles(o.exc)}</td><td>${pesos(o.monto)}</td>
+          <td class="col-acc"><button type="button" class="kebab" id="acc-${o.id}" data-a="menu" data-id="${o.id}" aria-haspopup="menu" aria-expanded="false" aria-controls="menu" aria-label="Acciones de la OP ${o.id}">${KEBAB}</button></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+    ${lista.length ? paginador('pb', S.pagB, S.tamB, lista.length, [10, 20, 50]) : ''}` : `
+    <div class="vacio sin-res">
+      <div class="vacio-ic">${ic('buscar')}</div>
+      <h3>Sin resultados</h3>
+      <p>Cambia o quita algún filtro para ver más resultados.</p>
+    </div>`}
+  </section>`;
+}
+
+// Fila de carga de la bandeja: mismas columnas y alto que una fila real; barras de 12 px como Figma (frame 20)
+const SK_B = [55, 50, 60, 55, 60, 45, 45, 35, 70];
+const filasSk = n => Array.from({ length: n }, () => `<tr>${SK_B.map(w => `<td><span class="sk" style="width:${w}%"></span></td>`).join('')}<td class="col-acc"><span class="sk" style="width:24px;margin:0 auto"></span></td></tr>`).join('');
+let timerB;
+// Simula la consulta al cambiar filtros, página o tamaño: skeleton breve y luego los datos (conserva foco y scroll)
+function cargarBandeja() {
+  clearTimeout(timerB); S.cargandoB = true;
+  timerB = setTimeout(() => {
+    S.cargandoB = false; if (S.vista !== 'bandeja') return;
+    const fid = document.activeElement?.id, x = $('#scroll-b')?.scrollLeft || 0;
+    render(false); if (fid) enfocar(fid);
+    const sc = $('#scroll-b'); if (sc) sc.scrollLeft = x; sombraScroll();
+  }, espera(420));
+}
+
+/* ═══════════ Detalle ═══════════ */
+function alerta(o) {
+  if (o.est === 'Pendiente') return '';
+  const [d, h] = o.fe;
+  return `<div class="alerta${o.anim ? ' nueva' : ''}" role="status">${ic('info')}<div>
+    <p><b>${o.est}</b> por <b>${esc(o.por)}</b> el ${d} a las ${h} hrs.</p>
+    ${o.est === 'Rechazada' ? `<p>Causal: <b>${esc(o.causal)}</b>${o.motivo ? ` <span class="sep">·</span> ${esc(o.motivo)}` : ''}</p>` : ''}
+  </div></div>`;
+}
+function vDetalle() {
+  const o = op(S.opId);
+  return `
+  <header class="cab-pag"><h1>Detalle OP ${o.id}</h1>${migas(['Inicio', 'Aprobaciones de Pago', `Detalle OP ${o.id}`])}</header>
+  <div id="zona-alerta">${alerta(o)}</div>
+  <section class="card resumen" aria-label="Resumen de la OP">
+    <dl class="meta" style="margin:0">
+      <div><dt>Estado aprobación</dt><dd id="d-estado">${chip(o.est, o.anim)}</dd></div>
+      <div><dt>Item de operación</dt><dd>Pago Reembolso</dd></div>
+      <div><dt>Periodo contable</dt><dd>${o.per}</dd></div>
+      <div><dt>Fecha solicitud centralizador</dt><dd>${o.sol[0]} <span class="sep">·</span> ${o.sol[1]} hrs.</dd></div>
+    </dl>
+    <div class="cuadra">
+      <div class="monto"><div class="etq">Monto a pagar</div><div class="cifra">${pesos(o.monto)}</div><div class="sub">${miles(o.val)} reembolsos validados</div></div>
+      <div class="cuadratura"><h3>Cuadratura de la OP</h3>
+        <div class="cuad-cols">
+          <div><div class="etq">Recibidos</div><div class="val">${pesos(o.monto + o.montoExc)}</div><div class="sub">${miles(o.rec)} reembolsos</div></div>
+          <div><div class="etq">Excluidos</div><div class="val">${pesos(o.montoExc)}</div><div class="sub">${o.exc ? `${miles(o.exc)} reembolsos con error` : 'Sin reembolsos con error'}</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="tabs" role="tablist" aria-label="Detalle reembolsos">
+    <button class="tab" role="tab" id="tab-val" type="button" aria-selected="${S.tab === 'val'}" tabindex="${S.tab === 'val' ? 0 : -1}" aria-controls="panel-tx" data-a="tab" data-v="val">Validados</button>
+    <button class="tab" role="tab" id="tab-exc" type="button" aria-selected="${S.tab === 'exc'}" tabindex="${S.tab === 'exc' ? 0 : -1}" aria-controls="panel-tx" data-a="tab" data-v="exc">Excluidos</button>
+  </div>
+  <section class="card" id="panel-tx" role="tabpanel" aria-labelledby="tab-${S.tab}"></section>
+  ${o.est === 'Pendiente' ? `
+  <div class="barra-decision" id="barra-decision">
+    <p>Al aprobar, se envían a SAP <b>${miles(o.val)} reembolsos</b> por <b>${pesos(o.monto)}</b>.</p>
+    <div class="botones">
+      <button class="btn btn-sec btn-140" type="button" id="det-rechazar" data-a="rechazar" data-id="${o.id}">Rechazar</button>
+      <button class="btn btn-pri btn-140" type="button" id="det-aprobar" data-a="aprobar" data-id="${o.id}">Aprobar</button>
+    </div>
+  </div>` : ''}`;
+}
+function vTabla() {
+  const o = op(S.opId), tx = transacciones(o), exc = S.tab === 'exc';
+  const filas = ordenadasD(exc ? tx.exc : tx.val);
+  const sap = t => (!exc && o.est === 'Aprobada' && !o.enSesion) ? o.fe[0] : '—';
+  const nulo = v => v == null ? '<span class="vacio-celda">—</span>' : v;
+  // Solo se ordenan las columnas que cambian entre reembolsos; las que son iguales en toda la OP no llevan caret
+  const cols = [
+    ['N° de operación', () => o.id], ['ID proceso', () => 'BEN'], ['Descripción proceso', () => 'Beneficios'],
+    ['Item de proceso', () => 'PRE'], ['Descripción item proceso', () => 'Pago Reembolso'], ['N° asiento', t => t.asiento, 'asiento'],
+    ['Fecha <br>contable', t => t.fecha, 'fecha'], ['Sociedad FI', () => 'CL07'], ['N° cuenta contable', t => nulo(t.cc)],
+    ['Importe <br>documento', t => pesos(t.imp), 'imp'], ['Código cliente', t => t.cli, 'cli'], ['Clave <br>banco', t => t.banco, 'banco'],
+    ['Cuenta <br>bancaria', t => nulo(t.cuenta), 'cuenta'], ['Fecha registro en SAP', t => nulo(sap(t) === '—' ? null : sap(t))],
+  ];
+  // Anchos fijos de cada columna, iguales a Figma (frame 06); los títulos largos pasan a 2 líneas
+  const ANCHOS_D = [140, 112, 160, 128, 200, 120, 136, 120, 168, 168, 152, 116, 152, 168];
+  const ancho = i => ` style="width:${ANCHOS_D[i]}px;min-width:${ANCHOS_D[i]}px"`;
+  const thOrd = (k, t, i) => { const a = S.ordenD.col === k; return `<th scope="col" class="ord${a ? ' activa' : ''}"${ancho(i)}${a ? ` aria-sort="${S.ordenD.dir === 'asc' ? 'ascending' : 'descending'}"` : ''}><button type="button" class="orden" id="ordd-${k}" data-a="ordenar-det" data-v="${k}">${t}${CARET}</button></th>`; };
+  const cab = `<div class="tabla-cab una">
+      <div><h2>${exc ? 'Reembolsos excluidos' : 'Detalle reembolsos'}</h2>${exc && (filas.length || S.cargando) ? `<div class="alerta simple">${ic('info')}<p>No se envían a SAP. Se corrigen y vuelven en una OP nueva.</p></div>` : ''}</div>
+      <div class="acciones"><button class="btn btn-sec" type="button" id="btn-exportar-det" data-a="exportar-det" ${filas.length ? '' : 'disabled'}>${ic('descarga')}Exportar detalle</button></div>
+    </div>`;
+  if (!filas.length && !S.cargando) return cab + `<div class="vacio"><div class="vacio-ic">${ic('check')}</div><h3>Esta OP no tiene reembolsos excluidos</h3><p>Todos los reembolsos recibidos pasaron la validación.</p></div>`;
+  const maxPag = Math.max(0, Math.ceil(filas.length / S.tamD) - 1);
+  if (S.pagD > maxPag) S.pagD = maxPag;
+  const pagina = filas.slice(S.pagD * S.tamD, (S.pagD + 1) * S.tamD);
+  const head = cols.map(([t, , k], i) => k ? thOrd(k, t, i) : `<th scope="col"${ancho(i)}>${t}</th>`).join('') + (exc ? '<th scope="col" class="col-err">Error de validación</th>' : '');
+  const body = S.cargando
+    ? (pagina.length ? pagina : Array(5).fill(0)).map(() => `<tr>${cols.map(() => '<td><span class="sk" style="width:70%"></span></td>').join('')}${exc ? '<td class="col-err"><span class="sk" style="width:60%"></span></td>' : ''}</tr>`).join('')
+    : pagina.map(t => `<tr>${cols.map(([, f]) => `<td>${f(t)}</td>`).join('')}${exc ? `<td class="col-err">${t.error}</td>` : ''}</tr>`).join('');
+  return cab + `<div class="tabla-scroll" id="scroll-d"><table class="tabla t-detalle" aria-busy="${S.cargando}"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`
+    + (filas.length ? paginador('pd', S.pagD, S.tamD, filas.length, [10, 20, 50]) : '');
+}
+let timerCarga;
+// Tras cambiar de página: el foco sigue en la flecha (o en la otra si quedó deshabilitada) y la tabla vuelve a la vista
+function enfocar(id) {
+  let el = $('#' + id);
+  if (el?.disabled) el = $('#' + id.replace(/-(sig|ant)$/, m => m === '-sig' ? '-ant' : '-sig'));
+  el?.focus({ preventScroll: true });
+}
+function verTabla(sel) {
+  const t = $(sel); if (!t) return;
+  const y = t.getBoundingClientRect().top;
+  if (y < 88) window.scrollBy({ top: y - 88, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+}
+function pintarTabla(conCarga) {
+  const panel = $('#panel-tx'); if (!panel) return;
+  clearTimeout(timerCarga);
+  S.cargando = !!conCarga;
+  panel.setAttribute('aria-labelledby', 'tab-' + S.tab);
+  panel.innerHTML = vTabla();
+  sombraScroll();
+  if (conCarga) timerCarga = setTimeout(() => { S.cargando = false; const x = $('#scroll-d')?.scrollLeft || 0, fid = panel.contains(document.activeElement) && document.activeElement.id; panel.innerHTML = vTabla(); if (fid) enfocar(fid); const sc = $('#scroll-d'); if (sc) sc.scrollLeft = x; sombraScroll(); }, espera(420));
+}
+
+/* ═══════════ Centralizar/Pagos (base as-is de CCP, relevada en cert 08/10) ═══════════ */
+// Misma estructura y contenido que CCP con nuestra UI (Javier, 08/10). Solo dos cambios: las OPs por sistema son una fila más
+// y el menú oculta Solicitar Pago y Rechazar Solicitud. Spec: 03_analisis/Centralizar_Pagos_Base_AsIs_v1.md
+// Misma data de OPs que la bandeja: aprobar o rechazar en Aprobaciones de Pago cambia el estado aquí.
+const TIPOS_OP = {
+  'CENTRALIZACIÓN':['BONOS CADUCOS', 'BONOS REACTIVADOS', 'COSTO BONOS', 'COSTO REEMBOLSO', 'COSTO SUBSIDIO', 'SUBSIDIO FUPF'],
+  'SOLICITUD DE PAGO':['PAGO REEMBOLSO', 'PAGO SUBSIDIO', 'PAGO SUBSIDIO FUPF', 'PAGO SUBSIDIO PREVIRED', 'REEMISION REEMBOLSO', 'REEMISION SUBSIDIO',
+    'REEMISION SUBSIDIO PREVIRED', 'REEMISION SUBSIDIO FUPF', 'PAGO SUBSIDIO FUPF PREVIRED', 'REVALIDADOS SIL FUPF', 'EASY CANCHA', 'REEMISION EASY CANCHA',
+    'PAGO SUBSIDIO CADUCO', 'PAGO REEMBOLSO CADUCO', 'REEMISION SUBSIDIO CADUCO', 'REEMISION REEMBOLSO CADUCO', 'DEVOLUCION COPAGO'] };
+// Estados del filtro de CCP, en su orden y escritura
+const ESTADOS_C = ['Cargando Arch.', 'Archivo Cargado', 'Error Carga', 'Validando Arch.', 'Arch. Val. Con Exito', 'Arch. Val. Con Error', 'En Proceso',
+  'Proceso Con Exito', 'Procesado Con Errores', 'Rechazada', 'Borrado', 'En Propuesta', 'Revisada', 'En Proceso De Pago', 'Pagado', 'Pagado Parcial', 'Pagado Rendido'];
+// Etiquetas de los chips de filtro, como CCP
+const ETQ_C = { per:'Periodo', op:'N° Operación', arch:'Nombre Archivo', sol:'Fecha Solicitud', est:'Estado', fe:'Fecha Estado' };
+// CCP muestra el estado en mayúsculas y sin tildes
+const mayus = s => s.normalize('NFD').replace(/\p{M}/gu, '').toUpperCase();
+// Estados: las OPs cargadas por Excel muestran los de CCP; las que llegan por sistema, los propuestos en el to-be (tabla de Figma, 06/10).
+// La propuesta parte en Validada con éxito (código 5); 12–17 se mantienen (Javier, 08/10)
+const EST_SIS = { 'Sol. validada con éxito':'Validada con éxito', 'Sol. validada con error':'Validada con error', 'Proceso con éxito':'Procesada con éxito',
+  'Procesado con errores':'Procesada con errores', 'Borrado':'Borrada' };
+const estTxt = f => f.sistema ? EST_SIS[f.est] || f.est : mayus(f.est);
+const perC = d => `20${d.slice(6)}-${d.slice(3, 5)}`;                       // DD/MM/AA → AAAA-MM
+const fechaC = d => `${d.slice(0, 6).replace(/\//g, '-')}20${d.slice(6)}`;  // DD/MM/AA → DD-MM-AAAA
+// Estado SAP de las OPs aprobadas antes de la demo, como en Figma CP-02. Las aprobadas en la sesión quedan En proceso
+const SAP0 = { 11692:{ est:'En proceso' }, 11689:{ est:'Procesado con errores', err:3, fe:['02/10/26', '11:12'] }, 11688:{ est:'Proceso con éxito', fe:['02/10/26', '10:58'] },
+  11679:{ est:'En propuesta', fe:['01/10/26', '09:40'], real:57913260 }, 11676:{ est:'Pagado', fe:['03/10/26', '12:15'], real:64230870 } };
+// OPs que llegan por sistema (canal AUTOMATICO; en cert sin nombre, aquí con nombre generado + etiqueta).
+// La carga por Excel es anterior al sistema: desde el corte (OP 11674, 28/09/26) todo llega por sistema (Javier, 08/10).
+// Incluye las pendientes de la bandeja del aprobador: aprobar o rechazar ahí cambia su estado aquí
+const SIS0 = new Set(OPS0.filter(o => o.id >= 11674).map(o => o.id));
+// Usuarios ficticios que cargan o solicitan (tooltip de N° Operación)
+const USUARIOS_C = ['psoto@ejemplo.cl', 'mdiaz@ejemplo.cl', 'afuentes@ejemplo.cl'];
+// Rechazos después de SAP: hoy los hace Beneficios (solicitante) con texto libre; causales genéricas como las de cert
+const CAUSALES_SOL = ['Errores SAP', 'Procesar en otro periodo', 'Siniestros duplicados', 'Ya procesado'];
+const sumaHabiles = (dmy, n) => {
+  const [d, m, a] = dmy.split('/').map(Number), x = new Date(2000 + a, m - 1, d), dd = v => String(v).padStart(2, '0');
+  for (let k = 0; k < n;) { x.setDate(x.getDate() + 1); if (x.getDay() % 6) k++; }
+  const t = `${dd(x.getDate())}/${dd(x.getMonth() + 1)}/${String(x.getFullYear()).slice(2)}`;
+  return iso(t) > iso(HOY) ? HOY : t;
+};
+// Estado en CCP del historial según la época, como en cert (07/10): 2023 Proceso con éxito; 2024–2025 En propuesta; 2026 Pagado parcial y Pagado
+function estadoSapHist(r, anio) {
+  const x = r(), t = anio <= 2023 ? [['Proceso con éxito', .78], ['Procesado con errores', .95]]
+    : anio <= 2025 ? [['En propuesta', .86], ['Proceso con éxito', .93], ['Procesado con errores', .96], ['En proceso', .975]]
+    : [['Pagado parcial', .6], ['Pagado', .83], ['En propuesta', .88], ['Revisada', .91], ['Proceso con éxito', .94], ['Procesado con errores', .96], ['Pagado rendido', .97], ['En proceso de pago', .975]];
+  const e = (t.find(([, p]) => x < p) || ['Rechazada'])[0];
+  const dias = ['Proceso con éxito', 'Procesado con errores', 'En proceso'].includes(e) ? 0 : ['En propuesta', 'Rechazada'].includes(e) ? 1 + Math.floor(r() * 3) : 3 + Math.floor(r() * 8);
+  return { est:e, dias };
+}
+// Monto real de pago = asientos OK en SAP (cert): igual al total si todo OK, menor con errores, 0 si no llegó a SAP
+// sap = la OP ya tiene respuesta de SAP (si no, el tooltip muestra "Pendiente" en correctos y con error)
+function filaC(o) {
+  const r = rng(o.id * 7), sistema = SIS0.has(o.id);
+  const [d, h] = o.sol, ss = String(Math.floor(r() * 60)).padStart(2, '0');
+  // Por sistema: nombre tipo generado (sin .xlsx) + etiqueta "Por sistema" (Javier, 08/10)
+  const archivo = sistema ? `${iso(d).replace(/-/g, '')}-${h.replace(':', '')}${ss}-Pago-Reembolso-${o.id}`
+    : `${iso(d).replace(/-/g, '')}-${h.replace(':', '')}${ss}-Pago-Reembolso-${String(1 + o.id % 3).padStart(3, '0')}-${o.id}.xlsx`;
+  // Fecha Solicitud Centralizacion = cuando la OP llegó al sistema (la misma de la bandeja), en todas las filas (Javier, 08/10)
+  const f = { id:o.id, per:o.per, sol:o.sol, fe:o.fe, archivo, sistema, monto:o.monto, real:0, val:o.val, sap:false, causal:'', usuario:USUARIOS_C[o.id % 3] };
+  if (o.est === 'Pendiente') return { ...f, est: sistema ? 'Sol. validada con éxito' : 'Arch. val. con éxito' };
+  if (o.est === 'Rechazada') return { ...f, est:'Rechazada', causal: o.causal === 'Otro' && o.motivo ? o.motivo : o.causal };
+  const parcial = () => Math.round(o.monto * (.9 + r() * .08) / 10) * 10, hora = () => `${String(9 + Math.floor(r() * 9)).padStart(2, '0')}:${String(Math.floor(r() * 60)).padStart(2, '0')}`;
+  let s = o.sapSim || (o.enSesion ? { est:'En proceso' } : SAP0[o.id]);
+  if (!s) { const h0 = estadoSapHist(r, 2000 + +o.fe[0].slice(6)); s = { est:h0.est, fe: h0.dias ? [sumaHabiles(o.fe[0], h0.dias), hora()] : null }; }
+  const e = s.est, x = r();
+  if (e === 'Procesado con errores' && !s.err) s.err = x < .4 ? o.val : 1 + Math.floor(r() * 5);
+  const real = s.real ?? (e === 'En proceso' && (o.enSesion || SAP0[o.id]) ? 0
+    : e === 'Proceso con éxito' ? o.monto
+    : e === 'Procesado con errores' ? Math.round(o.monto * (o.val - s.err) / o.val / 10) * 10
+    : e === 'En proceso' ? (x < .25 ? 0 : parcial())
+    : e === 'Rechazada' ? (x < .55 ? 0 : x < .75 ? o.monto : parcial())
+    : x < .85 ? o.monto : parcial());
+  const causal = e === 'Rechazada' ? CAUSALES_SOL[Math.floor(r() * CAUSALES_SOL.length)] : '';
+  return { ...f, est:e, causal, err:s.err || 0, sap: e !== 'En proceso', real, fe: s.fe || o.fe };
+}
+// Columnas y anchos de CCP (cert, 08/10); salto de línea fijo en la cabecera, como la grilla de Aprobaciones
+const COLS_C = [
+  ['per', 'Periodo <br>Cont.', f => perC(f.per), 117], ['id', 'Nº <br>Operación', f => f.id, 131], ['arch', 'Nombre del archivo', f => f.archivo, 424],
+  ['sol', 'Fecha Solicitud <br>Centralizacion', f => iso(f.sol[0]) + f.sol[1], 173], ['est', 'Estado', f => mayus(estTxt(f)), 210], ['fe', 'Fecha <br>Estado', f => iso(f.fe[0]) + f.fe[1], 112],
+  ['monto', 'Monto <br>Debe/Haber', f => f.monto, 146], ['real', 'Monto <br>Real Pago', f => f.real, 114],
+];
+// En CCP el filtro de estado va por código: Arch. Val. Con Exito también trae las Sol. Validada Con Exito
+const estFiltroC = e => mayus(e.replace('Sol. validada con', 'Arch. val. con'));
+function listaC() {
+  if (!C.buscado || C.buscado.tipo !== 'SOLICITUD DE PAGO' || C.buscado.item !== 'PAGO REEMBOLSO') return [];
+  const q = C.filtros, cmp = (a, b) => a < b ? -1 : a > b ? 1 : 0;
+  // Periodo y N° operación exactos; nombre "contiene"; fechas día exacto (como cert)
+  const filas = OPS.map(filaC).filter(f =>
+    (!q.op || String(f.id) === q.op) && (!q.arch || f.archivo.toLowerCase().includes(q.arch.toLowerCase())) &&
+    (!q.est || estFiltroC(f.est) === mayus(q.est)) && (!q.per || perC(f.per) === q.per) && (!q.sol || iso(f.sol[0]) === q.sol) && (!q.fe || iso(f.fe[0]) === q.fe));
+  const base = (a, b) => b.id - a.id;
+  const v = COLS_C.find(([k]) => k === C.orden.col)[2], d = C.orden.dir === 'asc' ? 1 : -1;
+  return filas.sort((a, b) => d * cmp(v(a), v(b)) || base(a, b));
+}
+const chipsFiltroC = () => Object.keys(ETQ_C).filter(k => C.filtros[k]).map(k => [k, ETQ_C[k]]);
+const opcionesItem = () => (TIPOS_OP[C.tipo] || []).map(i => `<option ${C.item === i ? 'selected' : ''}>${i}</option>`).join('');
+function vCentralizar() {
+  const b = C.buscado, lista = listaC(), chips = chipsFiltroC();
+  const maxPag = Math.max(0, Math.ceil(lista.length / C.tam) - 1);
+  if (C.pag > maxPag) C.pag = maxPag;
+  const pagina = lista.slice(C.pag * C.tam, (C.pag + 1) * C.tam);
+  const vacio = (t, p) => `<div class="vacio sin-res"><div class="vacio-ic">${ic('buscar')}</div><h3>${t}</h3><p>${p}</p></div>`;
+  return `
+  <header class="cab-pag"><h1>Centralización de Costos y Solicitudes de Pago</h1>${migas(['Inicio', 'Centralizar/Pagos'])}</header>
+  <section class="card card-buscar" aria-labelledby="t-buscar">
+    <h2 id="t-buscar">Buscar Centralizaciones o Solicitudes de Pago</h2>
+    <div class="fila-buscar">
+      <div class="campo"><label for="c-tipo">Tipo de Operación</label><select class="input" id="c-tipo" data-c="c-tipo">
+        <option value="">Seleccione Un Tipo</option>${Object.keys(TIPOS_OP).map(t => `<option ${C.tipo === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+      <div class="campo"><label for="c-item">Item de Operación</label><select class="input" id="c-item" data-c="c-item" ${C.tipo ? '' : 'disabled'}>
+        <option value="">Seleccione un Item</option>${opcionesItem()}</select></div>
+      <button class="btn btn-pri" type="button" id="c-buscar" data-a="c-buscar" ${C.tipo && C.item ? '' : 'disabled'}>Buscar</button>
+      <button class="btn btn-sec c-cargar" type="button" disabled>${ic('subir')}Cargar archivo</button>
+    </div>
+  </section>
+  <section class="card" aria-labelledby="t-hist-c">
+    <div class="tabla-cab">
+      <div><h2 id="t-hist-c">Historial de Centralizaciones y Solicitudes de Pago</h2>
+        <p>${b ? `Operación seleccionada <span class="lila">${b.tipo} - ${b.item}</span>` : 'No se ha seleccionado operación'}</p></div>
+      <div class="acciones"><button class="btn btn-sec c-filtros" type="button" id="c-btn-filtros" data-a="c-filtros" ${b && !C.cargando && (lista.length || chips.length) ? '' : 'disabled'}>Filtros</button></div>
+    </div>
+    ${chips.length ? `<div class="filtros-aplicados"><span class="etq">Resultados filtrados por:</span>
+      ${chips.map(([k, t]) => `<span class="chip-f">${t}<button type="button" data-a="c-quitar-filtro" data-v="${k}" aria-label="Quitar filtro ${t}">${ic('x')}</button></span>`).join('')}
+      <button type="button" class="link" data-a="c-limpiar-filtros">Limpiar filtros</button></div>` : ''}
+    ${!b ? vacio('Aún no filtras un tipo de operación', 'Selecciona un tipo e ítem de operación')
+    : lista.length || C.cargando ? `
+    <div class="tabla-scroll" id="scroll-c">
+      <table class="tabla t-centralizar" aria-busy="${!!C.cargando}">
+        <colgroup>${COLS_C.map(c => `<col style="width:${c[3]}px">`).join('')}<col style="width:96px"></colgroup>
+        <thead><tr>
+          ${COLS_C.map(([k, t]) => { const a = C.orden.col === k; return `<th scope="col" class="ord${a ? ' activa' : ''}"${a ? ` aria-sort="${C.orden.dir === 'asc' ? 'ascending' : 'descending'}"` : ''}><button type="button" class="orden" id="ordc-${k}" data-a="ordenar-c" data-v="${k}">${t}${CARET}</button></th>`; }).join('')}
+          <th scope="col" class="col-acc">Acciones</th>
+        </tr></thead>
+        <tbody>${C.cargando ? filasSkC(pagina.length || C.tam) : pagina.map(f => `<tr>
+          <td>${perC(f.per)}</td>
+          <td><span class="con-tip" tabindex="0" data-tip="op" data-id="${f.id}" aria-describedby="tip">${f.id}</span></td>
+          <td><span class="arch"><span class="trunc" title="${f.archivo}">${f.archivo}</span>${f.sistema ? '<span class="tag-orig">Por sistema</span>' : ''}</span></td>
+          <td>${fechaC(f.sol[0])}</td>
+          <td>${f.causal ? `<span class="con-tip" tabindex="0" data-tip="txt" data-txt="${esc(f.causal)}" aria-describedby="tip">${estTxt(f)}</span>` : estTxt(f)}</td>
+          <td>${fechaC(f.fe[0])}</td><td>${miles(f.monto)}</td><td>${miles(f.real)}</td>
+          <td class="col-acc"><button type="button" class="kebab" id="accc-${f.id}" data-a="menu" data-m="c" data-id="${f.id}" aria-haspopup="menu" aria-expanded="false" aria-controls="menu" aria-label="Acciones de la OP ${f.id}">${KEBAB}</button></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+    ${lista.length ? paginador('pc', C.pag, C.tam, lista.length, [10, 20, 50]) : ''}`
+    : vacio('No se encontraron resultados', chips.length ? 'Selecciona otro rango de filtrado para encontrar archivos' : 'Intenta cambiar el tipo o ítem de operación')}
+  </section>`;
+}
+// Tooltip de N° Operación, como CCP: 8 filas; lo que aún no existe dice "Pendiente"
+function tipOp(f) {
+  const pend = '<span class="pend">Pendiente</span>';
+  const filas = [['Num. Operación', f.id], ['Total asientos procesados', miles(f.val)], ['Total Mov. Contables', miles(f.val * 2)],
+    ['Total asientos correctos (SAP)', f.sap ? miles(f.val - f.err) : pend], ['Total asientos con Error (SAP)', f.sap ? miles(f.err) : pend],
+    ['Usuario', f.usuario], ['Canal Origen', f.sistema ? 'AUTOMATICO' : 'MANUAL'], ['Causal Rechazo', f.causal ? esc(f.causal) : pend]];
+  return `<dl>${filas.map(([t, v]) => `<div><dt>${t}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
+}
+function verTip(el) {
+  const t = $('#tip');
+  if (el.dataset.tip === 'op') { t.className = 'tip op'; t.innerHTML = tipOp(filaC(op(el.dataset.id))); }
+  else { t.className = 'tip osc'; t.textContent = el.dataset.txt; }
+  t.hidden = false;
+  const r = el.getBoundingClientRect(), h = t.offsetHeight, w = t.offsetWidth;
+  const abajo = r.bottom + 8 + h < innerHeight - 8;
+  t.style.top = (abajo ? r.bottom + 8 : r.top - 8 - h) + 'px';
+  t.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + 'px';
+  requestAnimationFrame(() => t.classList.add('vis'));
+}
+function ocultarTip() { const t = $('#tip'); t.classList.remove('vis'); t.hidden = true; }
+const SK_C = [55, 40, 80, 50, 70, 60, 60, 40];
+const filasSkC = n => Array.from({ length: n }, () => `<tr>${SK_C.map(w => `<td><span class="sk" style="width:${w}%"></span></td>`).join('')}<td class="col-acc"><span class="sk" style="width:24px;margin:0 auto"></span></td></tr>`).join('');
+let timerC;
+function cargarC() {
+  clearTimeout(timerC); C.cargando = true;
+  timerC = setTimeout(() => {
+    C.cargando = false; if (S.vista !== 'centralizar') return;
+    const fid = document.activeElement?.id;
+    render(false); if (fid) enfocar(fid); sombraScroll();
+  }, espera(420));
+}
+// Tipo e ítem se eligen sin repintar la vista; Buscar se habilita con ambos. Cargar archivo queda deshabilitado en la vista del aprobador (Javier, 08/10)
+function cambioBusqueda(c, v) {
+  if (c === 'c-tipo') { C.tipo = v; C.item = ''; const it = $('#c-item'); it.innerHTML = '<option value="">Seleccione un Item</option>' + opcionesItem(); it.disabled = !v; }
+  else C.item = v;
+  $('#c-buscar').disabled = !(C.tipo && C.item);
+}
+// Menú como CCP: siempre las mismas acciones, deshabilitadas si no aplican. Se ocultan Solicitar Pago y Rechazar Solicitud (Javier, 08/10)
+function menuC(o) {
+  const f = filaC(o), it = (a, t, ok) => `<button type="button" role="menuitem" data-a="${ok ? a : 'nada'}" data-id="${f.id}"${ok ? '' : ' aria-disabled="true"'}>${t}</button>`;
+  // Descargar Archivo siempre habilitado, también en las OPs por sistema (Javier, 08/10)
+  return it('desc-arch', 'Descargar Archivo', true)
+    + it('desc-mov', 'Descargar Movimientos con error', /val\. con error/i.test(f.est))
+    // Sin Borrar Archivo; Centralización Diaria (siempre deshabilitada en CCP) no aparece en las OPs por sistema (Javier, 08/10)
+    + (f.sistema ? '' : it('nada', 'Centralización Diaria', false))
+    + it('desc-sap', 'Descargar asientos con error SAP', f.est === 'Procesado con errores');
+}
+function modalFiltrosC() {
+  const q = C.filtros;
+  abrirModal(`<form class="modal" role="dialog" aria-modal="true" aria-labelledby="m-tit" id="f-filtros-c" novalidate style="width:720px">
+    <div class="modal-cab"><h2 id="m-tit">Selección de filtros</h2><p>Seleccione los criterios de búsqueda para encontrar Solicitudes de Pago específicas.</p></div>
+    <div class="modal-cuerpo"><div class="grid-f">
+      <div class="campo"><label for="fc-per">Periodo</label><input class="input" id="fc-per" maxlength="7" autocomplete="off" placeholder="AAAA-MM" value="${esc(q.per)}"></div>
+      <div class="campo"><label for="fc-op">N° Operación</label><input class="input" id="fc-op" inputmode="numeric" maxlength="6" autocomplete="off" value="${esc(q.op)}"></div>
+      <div class="campo"><label for="fc-arch">Nombre Archivo</label><input class="input" id="fc-arch" autocomplete="off" value="${esc(q.arch)}"></div>
+      <div class="campo"><label for="fc-sol">Fecha Solicitud</label><input class="input" type="date" id="fc-sol" value="${q.sol}" data-cal></div>
+      <div class="campo"><label for="fc-est">Estado</label><select class="input" id="fc-est">
+        <option value=""></option>${ESTADOS_C.map(e => `<option ${q.est === e ? 'selected' : ''}>${e}</option>`).join('')}</select></div>
+      <div class="campo"><label for="fc-fe">Fecha Estado</label><input class="input" type="date" id="fc-fe" value="${q.fe}" data-cal></div>
+    </div></div>
+    <div class="modal-pie">
+      <button class="btn btn-sec" type="button" id="fc-cancelar" data-a="cerrar-modal">Cancelar</button>
+      <button class="btn btn-pri" type="submit" id="fc-aplicar" disabled>Filtrar</button>
+    </div></form>`, () => { revisarFiltrosC(); $('#fc-per').focus(); });
+}
+const leerFiltrosC = () => { const v = id => $('#fc-' + id).value.trim(); return { op:v('op'), arch:v('arch'), est:v('est'), per:v('per'), sol:v('sol'), fe:v('fe') }; };
+function revisarFiltrosC() {
+  const b = $('#fc-aplicar'); if (!b) return;
+  const nf = leerFiltrosC(); b.disabled = Object.keys(nf).every(k => nf[k] === (C.filtros[k] || ''));
+}
+// Sidebar: el ítem activo sigue a la vista
+function marcarNav() {
+  const enC = S.vista === 'centralizar';
+  [['#nav-aprobaciones', !enC], ['#nav-centralizar', enC]].forEach(([sel, a]) => {
+    const e = $(sel); e.classList.toggle('activo', a); e.classList.toggle('sec', !a);
+    if (a) e.setAttribute('aria-current', 'page'); else e.removeAttribute('aria-current');
+  });
+}
+
+/* ═══════════ Render y rutas ═══════════ */
+function render(anim = true) {
+  const v = $('#vista');
+  if (anim && S.vista === 'bandeja') cargarBandeja();
+  v.innerHTML = S.vista === 'detalle' ? vDetalle() : S.vista === 'centralizar' ? vCentralizar() : vBandeja();
+  marcarNav();
+  if (S.vista === 'detalle') pintarTabla(anim);
+  if (anim) { v.classList.remove('entra'); void v.offsetWidth; v.classList.add('entra'); }
+  OPS.forEach(o => { o.anim = false; });
+  $('#punto').hidden = !OPS.some(o => o.est === 'Pendiente');
+  sombraScroll();
+}
+function sombraScroll() {
+  document.querySelectorAll('.tabla-scroll').forEach(sc => sc.classList.toggle('desborda', sc.scrollWidth - sc.clientWidth - sc.scrollLeft > 2));
+}
+function leerHash() {
+  const m = (location.hash || '').match(/^#\/op\/(\d+)(?:\/(excluidos))?/);
+  if (m && op(m[1])) { S.vista = 'detalle'; S.opId = +m[1]; S.tab = m[2] ? 'exc' : 'val'; }
+  else if (location.hash === '#/centralizar') { S.vista = 'centralizar'; S.opId = null; }
+  else { S.vista = 'bandeja'; S.opId = null; }
+}
+function ir(hash) {
+  try { if (location.hash !== hash) history.pushState(null, '', hash); } catch (e) {}
+  if (hash === '#/') { S.vista = 'bandeja'; S.opId = null; }
+  else if (hash === '#/centralizar') { S.vista = 'centralizar'; S.opId = null; }
+  else { const m = hash.match(/^#\/op\/(\d+)(?:\/(excluidos))?/); S.vista = 'detalle'; S.opId = +m[1]; S.tab = m[2] ? 'exc' : 'val'; S.pagD = 0; S.ordenD = { col:null, dir:null }; }
+  cerrarTodo();
+  render(true);
+  window.scrollTo({ top: 0, behavior: reducido ? 'auto' : 'smooth' });
+}
+window.addEventListener('popstate', () => { leerHash(); S.pagD = 0; S.ordenD = { col:null, dir:null }; cerrarTodo(); if (!ocupado) cerrarModal($('#main')); render(true); });
+
+/* ═══════════ Menú de acciones ═══════════ */
+let menuBtn = null;
+function abrirMenu(btn) {
+  cerrarMenu(); cerrarPop();
+  const o = op(btn.dataset.id), pend = o.est === 'Pendiente';
+  const m = $('#menu');
+  m.classList.toggle('ancho', btn.dataset.m === 'c');
+  const dis = pend ? '' : ' aria-disabled="true"';
+  m.innerHTML = btn.dataset.m === 'c' ? menuC(o) : `
+    <button type="button" role="menuitem" id="m-ver" data-a="ver" data-id="${o.id}">Ver detalle</button>
+    <button type="button" role="menuitem" id="m-aprobar" data-a="${pend ? 'aprobar' : 'nada'}" data-id="${o.id}"${dis}>Aprobar</button>
+    <button type="button" role="menuitem" id="m-rechazar" data-a="${pend ? 'rechazar' : 'nada'}" data-id="${o.id}"${dis}>Rechazar</button>`;
+  m.hidden = false;
+  const r = btn.getBoundingClientRect(), h = m.offsetHeight, w = m.offsetWidth;
+  const abajo = r.bottom + 4 + h < innerHeight - 8;
+  m.classList.toggle('arriba', !abajo);
+  m.style.top = (abajo ? r.bottom + 4 : r.top - 4 - h) + 'px';
+  m.style.left = Math.max(8, Math.min(r.right - w, innerWidth - w - 8)) + 'px';
+  requestAnimationFrame(() => m.classList.add('vis'));
+  btn.setAttribute('aria-expanded', 'true');
+  menuBtn = btn;
+  m.querySelector('[role=menuitem]').focus({ preventScroll: true });
+}
+function cerrarMenu(devolverFoco) {
+  const m = $('#menu');
+  if (m.hidden) return;
+  m.classList.remove('vis');
+  setTimeout(() => { if (!m.classList.contains('vis')) m.hidden = true; }, 150);
+  if (menuBtn) { menuBtn.setAttribute('aria-expanded', 'false'); if (devolverFoco) menuBtn.focus(); }
+  menuBtn = null;
+}
+
+/* ═══════════ Notificaciones ═══════════ */
+function abrirPop() {
+  const p = $('#pop'), pend = OPS.filter(o => o.est === 'Pendiente');
+  p.innerHTML = `<h3 tabindex="-1">Notificaciones</h3>${pend.length ? `<ul>${pend.map(o => `<li><button type="button" data-a="ver" data-id="${o.id}"><b>OP ${o.id} espera tu aprobación</b><small>${miles(o.val)} reembolsos <span class="sep">·</span> ${pesos(o.monto)} <span class="sep">·</span> ${o.sol[0]} ${o.sol[1]} hrs.</small></button></li>`).join('')}</ul>` : '<p class="nada">No tienes OPs pendientes de aprobación.</p>'}`;
+  p.hidden = false;
+  const r = $('#btn-campana').getBoundingClientRect();
+  if (innerWidth > 820) p.style.right = Math.max(16, innerWidth - r.right - 40) + 'px'; else p.style.right = '';
+  p.style.top = (r.bottom + 4) + 'px';
+  requestAnimationFrame(() => p.classList.add('vis'));
+  $('#btn-campana').setAttribute('aria-expanded', 'true');
+  ($('#pop button') || $('#pop h3')).focus({ preventScroll: true });
+}
+function cerrarPop() {
+  const p = $('#pop'); if (p.hidden) return;
+  p.classList.remove('vis'); setTimeout(() => { if (!p.classList.contains('vis')) p.hidden = true; }, 170);
+  $('#btn-campana').setAttribute('aria-expanded', 'false');
+}
+
+/* ═══════════ Modales ═══════════ */
+let focoPrevio = null, ocupado = false, abiertoEn = 0;
+function abrirModal(html, alMontar) {
+  focoPrevio = document.activeElement && document.activeElement.closest('#menu') ? menuBtn : document.activeElement;
+  cerrarMenu(); cerrarPop();
+  const c = $('#capa');
+  c.innerHTML = html; c.hidden = false; abiertoEn = performance.now();
+  document.body.style.overflow = 'hidden';
+  requestAnimationFrame(() => c.classList.add('vis'));
+  alMontar && alMontar();
+}
+function cerrarModal(destinoFoco) {
+  const c = $('#capa'); if (c.hidden || ocupado) return;
+  c.classList.remove('vis');
+  document.body.style.overflow = '';
+  setTimeout(() => { if (!c.classList.contains('vis')) { c.hidden = true; c.innerHTML = ''; } }, espera(220));
+  const f = destinoFoco || focoPrevio;
+  if (f && document.contains(f)) f.focus({ preventScroll: true });
+}
+function cuerpoResumen(o, sap) {
+  return `<dl class="res-m">
+    <div><dt>Item de operación</dt><dd>Pago Reembolso</dd></div>
+    <div><dt>Monto a pagar</dt><dd>${pesos(o.monto)}</dd></div>
+    <div><dt>Validados${sap ? ' <span class="sep">·</span> se envían a SAP' : ''}</dt><dd>${miles(o.val)}</dd></div>
+    <div><dt>Excluidos${sap ? ' <span class="sep">·</span> no se envían' : ''}</dt><dd>${miles(o.exc)}</dd></div>
+  </dl>`;
+}
+function modalAprobar(id) {
+  const o = op(id);
+  abrirModal(`<div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-tit" aria-describedby="m-sub">
+    <div class="modal-cab"><h2 id="m-tit">Aprobar OP ${o.id}</h2><p id="m-sub">Se envía a SAP y queda registrada con tu usuario, fecha y hora.</p></div>
+    <div class="modal-cuerpo">${cuerpoResumen(o, true)}</div>
+    <div class="modal-pie">
+      <button class="btn btn-sec" type="button" id="m-cancelar" data-a="cerrar-modal">Cancelar</button>
+      <button class="btn btn-pri" type="button" id="m-confirmar" data-a="confirmar-aprobar" data-id="${o.id}">Enviar a SAP</button>
+    </div></div>`, () => $('#m-cancelar').focus());
+}
+let R = { causal:'', motivo:'', tocado:false };
+function modalRechazar(id) {
+  const o = op(id);
+  R = { causal:'', motivo:'', tocado:false };
+  abrirModal(`<form class="modal" role="dialog" aria-modal="true" aria-labelledby="m-tit" aria-describedby="m-sub" id="f-rechazo" novalidate>
+    <div class="modal-cab"><h2 id="m-tit">Rechazar OP ${o.id}</h2><p id="m-sub">Queda registrada con tu usuario, fecha y hora.</p></div>
+    <div class="modal-cuerpo">
+      ${cuerpoResumen(o, false)}
+      <div class="campo">
+        <label id="lbl-causal" for="causal-btn">Causal de rechazo</label>
+        <div class="combo" id="combo">
+          <button type="button" class="combo-btn" id="causal-btn" data-a="combo" aria-haspopup="listbox" aria-expanded="false" aria-controls="causal-lista" aria-labelledby="lbl-causal causal-btn"><span class="ph" id="causal-txt">Selecciona una causal</span>${ic('chevD')}</button>
+          <ul class="combo-lista" id="causal-lista" role="listbox" aria-labelledby="lbl-causal" hidden>
+            ${CAUSALES.map((c, i) => `<li role="option" id="op-c${i}" data-a="causal" data-v="${c}" aria-selected="false">${c}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+      <div class="plegable" id="pleg-otro"><div>
+        <div class="campo">
+          <label for="motivo">Describe el motivo</label>
+          <textarea class="input" id="motivo" rows="3" maxlength="120" placeholder="Explica qué debe corregir el solicitante" aria-describedby="motivo-err motivo-cont" tabindex="-1"></textarea>
+          <div class="campo-pie"><span class="err" id="motivo-err" aria-live="polite"></span><span id="motivo-cont">0/120</span></div>
+        </div>
+      </div></div>
+    </div>
+    <div class="modal-pie">
+      <button class="btn btn-sec" type="button" id="m-cancelar" data-a="cerrar-modal">Cancelar</button>
+      <button class="btn btn-pri" type="submit" id="m-confirmar" data-id="${o.id}" disabled>Rechazar OP</button>
+    </div></form>`, () => $('#causal-btn').focus());
+}
+let activa = -1;
+function comboAbierto() { const l = $('#causal-lista'); return l && !l.hidden; }
+function abrirCombo() {
+  const l = $('#causal-lista'), b = $('#causal-btn');
+  // La lista hace scroll propio: se ajusta al espacio visible y se abre hacia arriba si abajo no cabe
+  const r = b.getBoundingClientRect(), abajo = innerHeight - r.bottom - 16, arriba = r.top - 16;
+  const subir = abajo < 160 && arriba > abajo;
+  l.classList.toggle('arriba', subir);
+  l.style.maxHeight = Math.max(120, Math.min(314, subir ? arriba : abajo)) + 'px';
+  l.hidden = false; b.setAttribute('aria-expanded', 'true');
+  requestAnimationFrame(() => l.classList.add('vis'));
+  marcarActiva(Math.max(0, CAUSALES.indexOf(R.causal)));
+}
+function cerrarCombo() {
+  const l = $('#causal-lista'), b = $('#causal-btn'); if (!l || l.hidden) return;
+  l.classList.remove('vis'); l.hidden = true;
+  b.setAttribute('aria-expanded', 'false'); b.removeAttribute('aria-activedescendant');
+}
+function marcarActiva(i) {
+  activa = (i + CAUSALES.length) % CAUSALES.length;
+  document.querySelectorAll('#causal-lista li').forEach((li, k) => li.classList.toggle('activa', k === activa));
+  const l = $('#causal-lista'), li = l.children[activa];
+  if (li.offsetTop < l.scrollTop) l.scrollTop = li.offsetTop;
+  else if (li.offsetTop + li.offsetHeight > l.scrollTop + l.clientHeight) l.scrollTop = li.offsetTop + li.offsetHeight - l.clientHeight;
+  $('#causal-btn').setAttribute('aria-activedescendant', 'op-c' + activa);
+}
+function elegirCausal(v) {
+  R.causal = v;
+  const t = $('#causal-txt'); t.textContent = v; t.classList.remove('ph');
+  document.querySelectorAll('#causal-lista li').forEach(li => {
+    const sel = li.dataset.v === v;
+    li.setAttribute('aria-selected', sel);
+    li.innerHTML = esc(li.dataset.v) + (sel ? ic('tick') : '');
+  });
+  cerrarCombo();
+  const otro = v === 'Otro', pleg = $('#pleg-otro'), mot = $('#motivo');
+  pleg.classList.toggle('abierto', otro);
+  mot.tabIndex = otro ? 0 : -1;
+  if (otro) setTimeout(() => mot.focus(), espera(200)); else $('#causal-btn').focus();
+  validarRechazo();
+}
+function validarRechazo() {
+  const ok = R.causal && (R.causal !== 'Otro' || R.motivo.trim().length >= 10);
+  $('#m-confirmar').disabled = !ok;
+  const mostrar = R.causal === 'Otro' && R.tocado && R.motivo.trim().length < 10;
+  const mot = $('#motivo');
+  $('#motivo-err').textContent = mostrar ? 'Escribe al menos 10 caracteres.' : '';
+  mot.classList.toggle('invalido', mostrar);
+  mot.setAttribute('aria-invalid', mostrar);
+  $('#motivo-cont').textContent = R.motivo.trim().length + '/120';
+}
+function modalFiltros() {
+  const f = S.filtros;
+  abrirModal(`<form class="modal" role="dialog" aria-modal="true" aria-labelledby="m-tit" id="f-filtros" novalidate style="width:720px">
+    <div class="modal-cab"><h2 id="m-tit">Filtros</h2><p>Filtra el historial de aprobaciones.</p></div>
+    <div class="modal-cuerpo"><div class="grid-f">
+      <div class="campo"><label for="f-op">N° operación</label><input class="input" id="f-op" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="Ej: 11696" value="${esc(f.op)}"></div>
+      <div class="campo"><label for="f-est">Estado aprobación</label><select class="input" id="f-est">
+        <option value="">Selecciona</option>${['Pendiente', 'Aprobada', 'Rechazada'].map(e => `<option ${f.est === e ? 'selected' : ''}>${e}</option>`).join('')}</select></div>
+      <div class="campo"><label for="f-per">Periodo contable</label><select class="input" id="f-per">
+        <option value="">Selecciona</option>${PERIODOS.map(p => `<option value="${p.v}" ${f.per === p.v ? 'selected' : ''}>${p.t}</option>`).join('')}</select></div>
+      <div class="campo"><label for="f-sol">Fecha solicitud centralizador</label><input class="input" type="date" id="f-sol" value="${f.sol}" aria-describedby="f-sol-nota" data-cal><p class="campo-nota" id="f-sol-nota" aria-live="polite"></p></div>
+      <div class="campo"><label for="f-fe">Fecha estado</label><input class="input" type="date" id="f-fe" value="${f.fe}" aria-describedby="f-fe-nota" data-cal><p class="campo-nota" id="f-fe-nota" aria-live="polite"></p></div>
+    </div></div>
+    <div class="modal-pie">
+      <button class="btn btn-sec" type="button" id="f-cancelar" data-a="cerrar-modal">Cancelar</button>
+      <button class="btn btn-pri" type="submit" id="f-aplicar" disabled>Aplicar filtros</button>
+    </div></form>`, () => { ajustarFechas(); revisarFiltros(); $('#f-op').focus(); });
+}
+// Aplicar filtros se habilita solo si el formulario cambia respecto de los filtros aplicados (Figma F2/F3)
+const leerFiltros = () => { const v = id => $('#' + id).value; return { op:v('f-op').trim(), est:v('f-est'), per:v('f-per'), sol:v('f-sol'), fe:v('f-fe') }; };
+function revisarFiltros() {
+  const b = $('#f-aplicar'); if (!b) return;
+  const nf = leerFiltros(); b.disabled = Object.keys(nf).every(k => nf[k] === (S.filtros[k] || ''));
+}
+/* Fechas del filtro: el periodo acota el calendario (abre en ese mes); sin periodo, abre en el mes en curso.
+   Fecha Estado nunca es anterior a Fecha Solicitud. Una fecha que queda fuera se quita y se avisa. */
+const rangoFechas = per => {
+  const hoy = iso(HOY);
+  if (!per) { const [m, a] = PERIODOS[PERIODOS.length - 1].v.split('/'); return [`20${a}-${m}-01`, hoy]; }
+  const [m, a] = per.split('/'), fin = `20${a}-${m}-${new Date(+`20${a}`, +m, 0).getDate()}`;
+  return [`20${a}-${m}-01`, fin < hoy ? fin : hoy];
+};
+function ajustarFechas(origen) {
+  const per = $('#f-per').value, [ini, fin] = rangoFechas(per), sol = $('#f-sol'), fe = $('#f-fe');
+  const nota = (i, t) => { $('#' + i.id + '-nota').textContent = t; };
+  if (origen) [sol, fe].forEach(i => nota(i, ''));
+  [sol, fe].forEach(i => {
+    if (i.value && (i.value < ini || i.value > fin)) {
+      i.value = '';
+      nota(i, per && origen === 'f-per' ? `Se quitó la fecha: no está en ${periodoTxt(per)}.` : `Elige una fecha entre ${corta(ini)} y ${corta(fin)}.`);
+    }
+  });
+  if (sol.value && fe.value && fe.value < sol.value) {
+    const quitar = origen === 'f-fe' ? fe : sol; quitar.value = '';
+    nota(quitar, quitar === fe ? 'Se quitó: es anterior a la fecha de solicitud.' : 'Se quitó: es posterior a la fecha de estado.');
+  }
+  sol.min = ini; sol.max = fe.value || fin;
+  fe.min = sol.value || ini; fe.max = fin;
+}
+
+function abrirCalendario(i) { try { i.showPicker(); } catch (e) {} }
+document.addEventListener('mousedown', ev => { if (ev.target.matches?.('[data-cal]')) { ev.preventDefault(); ev.target.focus(); abrirCalendario(ev.target); } });
+
+/* ═══════════ Decisiones ═══════════ */
+function horaAhora() { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+// Respuesta simulada de SAP (Javier, 08/10): a los 10 s la OP aprobada sale de En proceso.
+// Se alternan los resultados para mostrar ambos: la 1.ª aprobada de la sesión con éxito, la 2.ª con errores, y así
+function respuestaSap(o) {
+  if (op(o.id) !== o || o.est !== 'Aprobada') return;   // Reiniciar descarta las respuestas pendientes
+  const n = OPS.filter(x => x.sapSim).length, fe = [HOY, horaAhora()];
+  o.sapSim = n % 2 ? { est:'Procesado con errores', err:1 + o.id % 4, fe } : { est:'Proceso con éxito', fe };
+  if (S.vista === 'centralizar' && !C.cargando && $('#capa').hidden && $('#menu').hidden) {
+    const x = $('#scroll-c')?.scrollLeft || 0, fid = document.activeElement?.id;
+    render(false);
+    const sc = $('#scroll-c'); if (sc) sc.scrollLeft = x; sombraScroll(); if (fid) $('#' + fid)?.focus({ preventScroll: true });
+  }
+}
+function decidir(id, est, causal, motivo) {
+  const o = op(id);
+  if (filtradas().includes(o)) S.retener.add(o.id);
+  Object.assign(o, { est, fe:[HOY, horaAhora()], por:USUARIO, causal, motivo, anim:true, enSesion:true });
+  if (est === 'Aprobada') setTimeout(() => respuestaSap(o), espera(10000));
+  ocupado = false;
+  const barra = $('#barra-decision');
+  const pintar = () => {
+    const eraDetalle = S.vista === 'detalle';
+    cerrarModal(eraDetalle ? $('h1') : null);
+    render(false);
+    if (!eraDetalle) { const k = $('#acc-' + id); if (k) k.focus({ preventScroll: true }); }
+    // Desde el detalle se vuelve al inicio de la página para ver el estado actualizado junto al snackbar (Javier, 07/10)
+    else { $('h1').setAttribute('tabindex', '-1'); $('h1').focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: reducido ? 'auto' : 'smooth' }); }
+    toast(est === 'Aprobada' ? `La OP ${id} se aprobó y se envió a SAP` : `La OP ${id} se rechazó`, 'ok');
+  };
+  if (barra && S.vista === 'detalle') { barra.classList.add('saliendo'); setTimeout(pintar, espera(120)); } else pintar();
+}
+function ocupar(btn, texto) {
+  ocupado = true;
+  btn.disabled = false; btn.setAttribute('aria-disabled', 'true'); btn.style.pointerEvents = 'none';
+  btn.style.minWidth = btn.offsetWidth + 'px'; btn.setAttribute('aria-busy', 'true');
+  btn.innerHTML = `<svg class="cargador" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/></svg><span class="sr">${texto}</span>`;
+  $('#m-cancelar').setAttribute('aria-disabled', 'true');
+}
+
+// Exportar: el botón muestra carga, mantiene su ancho y al terminar avisa con snackbar de éxito
+function exportando(btn, msg) {
+  if (btn.getAttribute('aria-busy') === 'true') return;
+  const id = btn.id, html = btn.innerHTML;
+  btn.style.minWidth = btn.offsetWidth + 'px';
+  btn.setAttribute('aria-busy', 'true'); btn.setAttribute('aria-disabled', 'true'); btn.style.pointerEvents = 'none';
+  btn.innerHTML = '<svg class="arco" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="9"/></svg><span class="sr">Exportando…</span>';
+  setTimeout(() => {
+    const b = $('#' + id);
+    if (b && b.getAttribute('aria-busy') === 'true') {
+      b.innerHTML = html; b.style.minWidth = b.style.pointerEvents = '';
+      b.removeAttribute('aria-busy'); b.removeAttribute('aria-disabled');
+    }
+    toast(msg, 'ok');
+  }, espera(1200));
+}
+
+/* ═══════════ Toasts ═══════════ */
+function toast(msg, tipo = 'ok') {
+  const t = document.createElement('div');
+  t.className = 'toast ' + tipo;
+  t.innerHTML = ic(tipo === 'ok' ? 'check' : 'info') + `<span>${esc(msg)}</span>`;
+  $('#toasts').append(t);
+  requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('vis')));
+  setTimeout(() => { t.classList.remove('vis'); setTimeout(() => t.remove(), 300); }, 5000);
+}
+
+/* ═══════════ Lateral ═══════════ */
+const movil = () => innerWidth <= 1100;
+function lateral(abrir) {
+  const l = $('#lateral'), s = $('#lat-scrim');
+  l.classList.toggle('abierto', abrir); s.classList.toggle('vis', abrir);
+  l.inert = movil() && !abrir;
+  $('#btn-hamb').setAttribute('aria-expanded', abrir);
+  if (abrir) $('#btn-lat').focus();
+}
+function cerrarTodo() { cerrarMenu(); cerrarPop(); if (movil()) lateral(false); }
+
+/* ═══════════ Acciones ═══════════ */
+const ACC = {
+  'ir-bandeja': (el, ev) => { ev.preventDefault(); ir('#/'); },
+  menu: el => (menuBtn === el ? cerrarMenu() : abrirMenu(el)),
+  ver: el => ir('#/op/' + el.dataset.id),
+  aprobar: el => modalAprobar(el.dataset.id),
+  rechazar: el => modalRechazar(el.dataset.id),
+  nada: () => {},
+  'cerrar-modal': () => cerrarModal(),
+  'confirmar-aprobar': el => { if (ocupado) return; ocupar(el, 'Enviando a SAP…'); setTimeout(() => decidir(+el.dataset.id, 'Aprobada'), espera(1200)); },
+  combo: () => (comboAbierto() ? cerrarCombo() : abrirCombo()),
+  causal: el => elegirCausal(el.dataset.v),
+  tab: el => {
+    if (S.tab === el.dataset.v) return;
+    S.tab = el.dataset.v; S.pagD = 0; S.ordenD = { col:null, dir:null };
+    try { history.replaceState(null, '', `#/op/${S.opId}${S.tab === 'exc' ? '/excluidos' : ''}`); } catch (e) {}
+    document.querySelectorAll('.tab').forEach(t => { t.setAttribute('aria-selected', t.dataset.v === S.tab); t.tabIndex = t.dataset.v === S.tab ? 0 : -1; });
+    pintarTabla(true);
+  },
+  ordenar: el => {
+    const k = el.dataset.v, o = S.orden;
+    S.orden = { col:k, dir: o.col === k && o.dir === 'asc' ? 'desc' : 'asc' }; S.pagB = 0;
+    cargarBandeja(); render(false); $('#ord-' + k)?.focus({ preventScroll: true });
+  },
+  'ordenar-det': el => {
+    const k = el.dataset.v, o = S.ordenD, x = $('#scroll-d')?.scrollLeft || 0;
+    S.ordenD = { col:k, dir: o.col === k && o.dir === 'asc' ? 'desc' : 'asc' }; S.pagD = 0;
+    pintarTabla(true); const sc = $('#scroll-d'); if (sc) sc.scrollLeft = x; $('#ordd-' + k)?.focus({ preventScroll: true });
+  },
+  'pb-pag': el => { S.pagB += +el.dataset.v; cargarBandeja(); render(false); enfocar(el.id); verTabla('#scroll-b'); },
+  'pd-pag': el => { S.pagD += +el.dataset.v; pintarTabla(true); enfocar(el.id); verTabla('#panel-tx'); },
+  filtros: () => modalFiltros(),
+  'c-buscar': () => { C.buscado = { tipo:C.tipo, item:C.item }; C.pag = 0; C.orden = { col:'id', dir:'desc' }; C.filtros = { ...VACIO_C }; cargarC(); render(false); $('#c-buscar')?.focus({ preventScroll: true }); },
+  'ordenar-c': el => { const k = el.dataset.v, o = C.orden; C.orden = { col:k, dir: o.col === k && o.dir === 'asc' ? 'desc' : 'asc' }; C.pag = 0; cargarC(); render(false); $('#ordc-' + k)?.focus({ preventScroll: true }); },
+  'pc-pag': el => { C.pag += +el.dataset.v; cargarC(); render(false); enfocar(el.id); verTabla('#scroll-c'); },
+  'c-filtros': () => modalFiltrosC(),
+  'c-quitar-filtro': el => { C.filtros[el.dataset.v] = ''; C.pag = 0; cargarC(); render(false); $('#c-btn-filtros')?.focus(); },
+  'c-limpiar-filtros': () => { C.filtros = { ...VACIO_C }; C.pag = 0; cargarC(); render(false); $('#c-btn-filtros')?.focus(); },
+  'desc-arch': () => { cerrarMenu(true); toast('Su documento se esta descargando', 'info'); },
+  'desc-mov': () => { cerrarMenu(true); toast('Se ha generado su documento exitosamente', 'ok'); },
+  'desc-sap': () => { cerrarMenu(true); toast('Se ha generado su documento exitosamente', 'ok'); },
+  'quitar-filtro': el => { const k = el.dataset.v, f = S.filtros; if (k === 'op') f.op = ''; if (k === 'est') f.est = ''; if (k === 'per') f.per = ''; if (k === 'sol') f.sol = ''; if (k === 'fe') f.fe = ''; S.retener.clear(); S.pagB = 0; cargarBandeja(); render(false); $('#btn-filtros')?.focus(); },
+  'limpiar-filtros': () => { S.filtros = { ...VACIO }; S.retener.clear(); S.pagB = 0; cargarBandeja(); render(false); $('#btn-filtros')?.focus(); },
+  exportar: el => exportando(el, `Se descargó HistorialAprobaciones_06102026.xlsx (${filtradas().length} OPs, en el orden de la grilla)`),
+  // En pantalla, una fila por asiento; el Excel lleva 2 filas por asiento (debe y haber), como va a SAP (Javier, 07/10)
+  'exportar-det': el => { const tx = transacciones(op(S.opId)), exc = S.tab === 'exc', n = (exc ? tx.exc : tx.val).length; exportando(el, `Se descargó Detalle_OP_${S.opId}.xlsx (${miles(n)} reembolsos ${exc ? 'excluidos' : 'validados'} en ${miles(n * 2)} filas: debe y haber)`); },
+};
+
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-a]');
+  if (!ev.target.closest('#menu') && !(el && el.dataset.a === 'menu')) cerrarMenu();
+  if (!ev.target.closest('#pop') && !ev.target.closest('#btn-campana')) cerrarPop();
+  if (comboAbierto() && !ev.target.closest('#combo')) cerrarCombo();
+  if (ev.target.id === 'capa') { if (!ocupado && ev.detail < 2 && performance.now() - abiertoEn > 400) cerrarModal(); return; }
+  if (!el) return;
+  const f = ACC[el.dataset.a];
+  if (f) f(el, ev);
+});
+document.addEventListener('change', ev => {
+  const c = ev.target.dataset.c;
+  if (c === 'pb-tam') { S.tamB = +ev.target.value; S.pagB = 0; cargarBandeja(); render(false); $('#pb-tam')?.focus(); }
+  if (c === 'pc-tam') { C.tam = +ev.target.value; C.pag = 0; cargarC(); render(false); $('#pc-tam')?.focus(); }
+  if (c === 'c-tipo' || c === 'c-item') cambioBusqueda(c, ev.target.value);
+  if (ev.target.closest?.('#f-filtros-c')) revisarFiltrosC();
+  if (c === 'pd-tam') { S.tamD = +ev.target.value; S.pagD = 0; pintarTabla(true); $('#pd-tam')?.focus(); }
+  if (['f-per', 'f-sol', 'f-fe'].includes(ev.target.id)) ajustarFechas(ev.target.id);
+  if (ev.target.closest?.('#f-filtros')) revisarFiltros();
+});
+document.addEventListener('input', ev => {
+  if (ev.target.id === 'motivo') { R.motivo = ev.target.value; if (R.motivo.trim().length >= 10) R.tocado = true; validarRechazo(); }
+  if (ev.target.id === 'f-op') { ev.target.value = ev.target.value.replace(/\D/g, ''); revisarFiltros(); }
+  if (ev.target.id === 'fc-op') ev.target.value = ev.target.value.replace(/\D/g, '');
+  if (ev.target.closest?.('#f-filtros-c')) revisarFiltrosC();
+});
+// Tooltips de Centralizar: hover y foco de teclado
+document.addEventListener('mouseover', ev => { const el = ev.target.closest?.('[data-tip]'); if (el && !el.contains(ev.relatedTarget)) verTip(el); });
+document.addEventListener('mouseout', ev => { const el = ev.target.closest?.('[data-tip]'); if (el && !el.contains(ev.relatedTarget)) ocultarTip(); });
+document.addEventListener('focusin', ev => { if (ev.target.dataset?.tip) verTip(ev.target); });
+document.addEventListener('focusout', ev => { if (ev.target.dataset?.tip) ocultarTip(); });
+document.addEventListener('focusout', ev => { if (ev.target.id === 'motivo' && R.motivo.length) { R.tocado = true; validarRechazo(); } });
+document.addEventListener('submit', ev => {
+  ev.preventDefault();
+  if (ev.target.id === 'f-rechazo') {
+    const b = $('#m-confirmar'); if (b.disabled || ocupado) return;
+    ocupar(b, 'Rechazando…');
+    setTimeout(() => decidir(+b.dataset.id, 'Rechazada', R.causal, R.causal === 'Otro' ? R.motivo.trim() : ''), espera(800));
+  }
+  if (ev.target.id === 'f-filtros-c') {
+    if ($('#fc-aplicar').disabled) return;
+    C.filtros = leerFiltrosC(); C.pag = 0;
+    cerrarModal($('#c-btn-filtros'));
+    cargarC(); render(false);
+    $('#c-btn-filtros')?.focus({ preventScroll: true });
+  }
+  if (ev.target.id === 'f-filtros') {
+    if ($('#f-aplicar').disabled) return;
+    S.filtros = leerFiltros(); S.retener.clear(); S.pagB = 0;
+    cerrarModal($('#btn-filtros'));
+    cargarBandeja(); render(false);
+    $('#btn-filtros')?.focus({ preventScroll: true });
+  }
+});
+
+document.addEventListener('keydown', ev => {
+  const capa = $('#capa');
+  // Fechas del filtro: se eligen solo con el calendario (Enter/Espacio/↓ lo abren, Supr/Retroceso la borra)
+  if (ev.target.matches?.('[data-cal]') && !['Tab', 'Escape'].includes(ev.key)) {
+    ev.preventDefault();
+    if (['Enter', ' ', 'ArrowDown'].includes(ev.key)) abrirCalendario(ev.target);
+    if (['Delete', 'Backspace'].includes(ev.key) && ev.target.value) { ev.target.value = ''; if (ev.target.closest('#f-filtros')) { ajustarFechas(ev.target.id); revisarFiltros(); } else revisarFiltrosC(); }
+    return;
+  }
+  // Pestañas: flechas, Inicio y Fin
+  if (ev.target.matches?.('[role=tab]') && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(ev.key)) {
+    ev.preventDefault();
+    const tabs = [...document.querySelectorAll('[role=tab]')], i = tabs.indexOf(ev.target);
+    const k = ev.key === 'Home' ? 0 : ev.key === 'End' ? tabs.length - 1 : (i + (ev.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+    tabs[k].focus(); tabs[k].click(); return;
+  }
+  // Combo de causales
+  if (ev.target.id === 'causal-btn') {
+    const abierto = comboAbierto();
+    if (['ArrowDown', 'ArrowUp'].includes(ev.key)) { ev.preventDefault(); if (!abierto) abrirCombo(); else marcarActiva(activa + (ev.key === 'ArrowDown' ? 1 : -1)); return; }
+    if ((ev.key === 'Enter' || ev.key === ' ') && abierto) { ev.preventDefault(); elegirCausal(CAUSALES[activa]); return; }
+    if (ev.key === 'Home' && abierto) { ev.preventDefault(); marcarActiva(0); return; }
+    if (ev.key === 'End' && abierto) { ev.preventDefault(); marcarActiva(CAUSALES.length - 1); return; }
+    if (ev.key === 'Escape' && abierto) { ev.preventDefault(); cerrarCombo(); return; }
+    if (ev.key === 'Tab' && abierto) cerrarCombo();
+  }
+  // Menú de fila
+  if (!$('#menu').hidden && ev.target.closest('#menu')) {
+    const items = [...document.querySelectorAll('#menu [role=menuitem]')];
+    const i = items.indexOf(document.activeElement);
+    if (ev.key === 'ArrowDown') { ev.preventDefault(); items[(i + 1) % items.length].focus(); return; }
+    if (ev.key === 'ArrowUp') { ev.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); return; }
+    if (ev.key === 'Tab') { cerrarMenu(); return; }
+  }
+  if (ev.key === 'Escape') {
+    if (!capa.hidden) { if (!ocupado) cerrarModal(); return; }
+    if (!$('#menu').hidden) { cerrarMenu(true); return; }
+    if (!$('#pop').hidden) { cerrarPop(); $('#btn-campana').focus(); return; }
+    if ($('#lateral').classList.contains('abierto')) { lateral(false); $('#btn-hamb').focus(); return; }
+  }
+  // Trampa de foco del modal
+  if (ev.key === 'Tab' && !capa.hidden) {
+    const f = [...capa.querySelectorAll('button:not([disabled]),input,select,textarea:not([tabindex="-1"]),[tabindex="0"]')].filter(e => e.offsetParent !== null);
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+    else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+  }
+});
+
+window.addEventListener('resize', () => { cerrarMenu(); cerrarPop(); sombraScroll(); if (!movil()) { $('#lateral').classList.remove('abierto'); $('#lat-scrim').classList.remove('vis'); } $('#lateral').inert = movil() && !$('#lateral').classList.contains('abierto'); });
+window.addEventListener('scroll', () => { cerrarMenu(); }, { passive: true });
+document.addEventListener('scroll', ev => { ocultarTip(); if (ev.target.classList && ev.target.classList.contains('tabla-scroll')) { cerrarMenu(); sombraScroll(); } }, true);
+
+/* ═══════════ Shell ═══════════ */
+$('#btn-hamb').innerHTML = ic('hamb');
+$('#btn-campana').insertAdjacentHTML('afterbegin', ic('campana'));
+$('#btn-salir').insertAdjacentHTML('beforeend', ic('salir'));
+$('#btn-lat').innerHTML = ic('atras');
+$('#btn-escritorio').innerHTML = ic('chevD') + '<span>Escritorio de Trabajo</span>';
+$('#nav-aprobaciones').innerHTML = ic('pantalla') + '<span>Aprobaciones de Pago</span>';
+document.querySelectorAll('[data-mod]').forEach(a => {
+  a.innerHTML = ic('pantalla') + `<span>${a.dataset.mod}</span>`;
+  a.addEventListener('click', ev => { ev.preventDefault(); toast(`${a.dataset.mod} no está disponible en el prototipo`, 'info'); });
+});
+$('#logo').addEventListener('click', ev => { ev.preventDefault(); ir('#/'); });
+$('#nav-aprobaciones').addEventListener('click', ev => { ev.preventDefault(); ir('#/'); });
+$('#nav-centralizar').innerHTML = ic('pantalla') + '<span>Centralizar/Pagos</span>';
+$('#nav-centralizar').addEventListener('click', ev => { ev.preventDefault(); ir('#/centralizar'); });
+$('#btn-hamb').addEventListener('click', () => lateral(true));
+$('#lat-scrim').addEventListener('click', () => lateral(false));
+$('#btn-lat').addEventListener('click', () => {
+  if (movil()) { lateral(false); $('#btn-hamb').focus(); return; }
+  const c = $('#shell').classList.toggle('colapsado');
+  $('#btn-lat').setAttribute('aria-label', c ? 'Expandir menú' : 'Contraer menú');
+  setTimeout(sombraScroll, 300);
+});
+$('#btn-escritorio').addEventListener('click', () => {
+  const b = $('#btn-escritorio'), abierto = b.getAttribute('aria-expanded') === 'true';
+  b.setAttribute('aria-expanded', !abierto);
+  $('#lat-sub').classList.toggle('cerrado', abierto);
+});
+$('#btn-campana').addEventListener('click', () => ($('#pop').hidden ? abrirPop() : cerrarPop()));
+$('#btn-salir').addEventListener('click', () => toast('Cerrar sesión no está disponible en el prototipo', 'info'));
+$('#btn-reiniciar').addEventListener('click', () => {
+  reiniciar(); for (const k in cacheTx) delete cacheTx[k];
+  ocupado = false; cerrarModal(); ir('#/'); toast('Prototipo reiniciado', 'info');
+});
+
+reiniciar();
+$('#lateral').inert = movil();
+leerHash();
+render(true);
+</script>
