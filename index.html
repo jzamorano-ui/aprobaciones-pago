@@ -120,6 +120,8 @@ main{min-width:0;padding:24px 32px 56px}
 .btn-pri{background:var(--verde4);color:#fff;border:1px solid var(--verde4)}
 .btn-pri:hover:not(:disabled){background:var(--verde-hover);border-color:var(--verde-hover)}
 .btn:disabled{background:var(--fondo);border-color:var(--fondo);color:#79858E;cursor:not-allowed}
+/* Secundario deshabilitado del DS (Boton L, Secondary/Disabled): sin relleno, borde y texto gris */
+.btn-sec:disabled{background:#fff;border-color:#79858E}
 .btn-140{width:140px}
 .spin{width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;animation:gira .7s linear infinite}
 .btn-sec .spin{border-color:var(--g5);border-top-color:currentColor}
@@ -857,9 +859,10 @@ const ETQ_C = { per:'Periodo', op:'N° Operación', arch:'Nombre Archivo', sol:'
 // CCP muestra el estado en mayúsculas y sin tildes
 const mayus = s => s.normalize('NFD').replace(/\p{M}/gu, '').toUpperCase();
 // Estados: las OPs cargadas por Excel muestran los de CCP; las que llegan por sistema, los propuestos en el to-be (tabla de Figma, 06/10).
-// La propuesta parte en Validada con éxito (código 5); 12–17 se mantienen (Javier, 08/10)
-const EST_SIS = { 'Sol. validada con éxito':'Validada con éxito', 'Sol. validada con error':'Validada con error', 'Proceso con éxito':'Procesada con éxito',
-  'Procesado con errores':'Procesada con errores', 'Borrado':'Borrada' };
+// La propuesta parte en Por aprobar (código 5, ya validada); 12–17 se mantienen (Javier, 08/10).
+// Con excluidos = código 6: llega solo lo validado. Sin Borrada: la OP por sistema no se borra, se rechaza (tabla to-be, 09/10)
+const EST_SIS = { 'Sol. validada con éxito':'Por aprobar', 'Sol. validada con error':'Por aprobar con excluidos', 'Proceso con éxito':'Procesada con éxito',
+  'Procesado con errores':'Procesada con errores' };
 const estTxt = f => f.sistema ? EST_SIS[f.est] || f.est : mayus(f.est);
 const perC = d => `20${d.slice(6)}-${d.slice(3, 5)}`;                       // DD/MM/AA → AAAA-MM
 const fechaC = d => `${d.slice(0, 6).replace(/\//g, '-')}20${d.slice(6)}`;  // DD/MM/AA → DD-MM-AAAA
@@ -899,7 +902,7 @@ function filaC(o) {
     : `${iso(d).replace(/-/g, '')}-${h.replace(':', '')}${ss}-Pago-Reembolso-${String(1 + o.id % 3).padStart(3, '0')}-${o.id}.xlsx`;
   // Fecha Solicitud Centralizacion = cuando la OP llegó al sistema (la misma de la bandeja), en todas las filas (Javier, 08/10)
   const f = { id:o.id, per:o.per, sol:o.sol, fe:o.fe, archivo, sistema, monto:o.monto, real:0, val:o.val, sap:false, causal:'', usuario:USUARIOS_C[o.id % 3] };
-  if (o.est === 'Pendiente') return { ...f, est: sistema ? 'Sol. validada con éxito' : 'Arch. val. con éxito' };
+  if (o.est === 'Pendiente') return { ...f, est: sistema ? `Sol. validada con ${o.exc ? 'error' : 'éxito'}` : 'Arch. val. con éxito' };
   if (o.est === 'Rechazada') return { ...f, est:'Rechazada', causal: o.causal === 'Otro' && o.motivo ? o.motivo : o.causal };
   const parcial = () => Math.round(o.monto * (.9 + r() * .08) / 10) * 10, hora = () => `${String(9 + Math.floor(r() * 9)).padStart(2, '0')}:${String(Math.floor(r() * 60)).padStart(2, '0')}`;
   let s = o.sapSim || (o.enSesion ? { est:'En proceso' } : SAP0[o.id]);
@@ -1030,7 +1033,7 @@ function menuC(o) {
   const f = filaC(o), it = (a, t, ok) => `<button type="button" role="menuitem" data-a="${ok ? a : 'nada'}" data-id="${f.id}"${ok ? '' : ' aria-disabled="true"'}>${t}</button>`;
   // Descargar Archivo siempre habilitado, también en las OPs por sistema (Javier, 08/10)
   return it('desc-arch', 'Descargar Archivo', true)
-    + it('desc-mov', 'Descargar Movimientos con error', /val\. con error/i.test(f.est))
+    + it('desc-mov', 'Descargar Movimientos con error', /val(\.|idada) con error/i.test(f.est))
     // Sin Borrar Archivo; Centralización Diaria (siempre deshabilitada en CCP) no aparece en las OPs por sistema (Javier, 08/10)
     + (f.sistema ? '' : it('nada', 'Centralización Diaria', false))
     + it('desc-sap', 'Descargar asientos con error SAP', f.est === 'Procesado con errores');
