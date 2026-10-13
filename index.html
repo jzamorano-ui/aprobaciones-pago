@@ -952,12 +952,9 @@ const ESTADOS_C = ['Cargando Arch.', 'Archivo Cargado', 'Error Carga', 'Validand
 const ETQ_C = { per:'Periodo', op:'N° Operación', arch:'Nombre Archivo', sol:'Fecha Solicitud', est:'Estado', fe:'Fecha Estado' };
 // CCP muestra el estado en mayúsculas y sin tildes
 const mayus = s => s.normalize('NFD').replace(/\p{M}/gu, '').toUpperCase();
-// Estados: las OPs cargadas por Excel muestran los de CCP; las que llegan por sistema, los propuestos en el to-be (tabla de Figma, 06/10).
-// La propuesta parte en Por aprobar (código 5, ya validada); 12–17 se mantienen (Javier, 08/10).
-// Con excluidos = código 6: llega solo lo validado. Sin Borrada: la OP por sistema no se borra, se rechaza (tabla to-be, 09/10)
-const EST_SIS = { 'Sol. validada con éxito':'Por aprobar', 'Sol. validada con error':'Por aprobar con excluidos', 'Proceso con éxito':'Procesada con éxito',
-  'Procesado con errores':'Procesada con errores' };
-const estTxt = f => f.sistema ? EST_SIS[f.est] || f.est : mayus(f.est);
+// Estados como hoy en CCP, iguales para OPs por sistema y manuales; los labels to-be van por otro carril (Javier, 13/10).
+// Pendiente de aprobación: Sol. validada con éxito (por sistema) o Arch. val. con éxito (manual). Sin excluidos
+const estTxt = f => mayus(f.est);
 const perC = d => `20${d.slice(6)}-${d.slice(3, 5)}`;                       // DD/MM/AA → AAAA-MM
 const fechaC = d => `${d.slice(0, 6).replace(/\//g, '-')}20${d.slice(6)}`;  // DD/MM/AA → DD-MM-AAAA
 // Estado SAP de las OPs aprobadas antes de la demo, como en Figma CP-02. Las aprobadas en la sesión quedan En proceso
