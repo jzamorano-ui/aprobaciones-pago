@@ -15,7 +15,7 @@
   --ok:#7CB342; --ok-bg:#F1F8E9; --ok-dk:#33691E;
   --al:#FFB300; --al-bg:#FFF8E1; --al-dk:#7A4A00;
   --er-bg:#FFE7E7; --er-bd:#E8A0A4; --er-dk:#991B1B; --salmon:#CF464E;
-  --lila:#4B4DD6; --lila-bg:#EEECFB; --lila-bd:#857BE2; --lila-dk:#392F95;
+  --lila:#4B4DD6; --lila-bg:#EEECFB; --lila-bd:#978EE6; --lila-dk:#392F95;
   --scrim:rgba(26,27,41,.55);
   --sombra-tarjeta:0 1px 2px rgba(32,52,66,.06),0 1px 4px rgba(32,52,66,.06);
   --sombra-elevada:0 4px 16px rgba(32,52,66,.14);
@@ -44,19 +44,21 @@ b,strong{font-weight:700}
 .proto{display:flex;align-items:center;gap:12px;min-height:32px;padding:4px 16px;background:#1A1B29;color:#C9CDD8;font-size:12px;line-height:16px}
 .proto b{color:#fff;font-weight:700}
 .proto .sep{opacity:.4}
-.proto button{margin-left:auto;color:#fff;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.3)}
+.proto button{color:#fff;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.3)}
 .proto button:hover{background:rgba(255,255,255,.1)}
 .proto .opc{display:inline}
+/* Simular: estados que no se dan en el flujo normal (sin operaciones y errores) */
+.proto .sim{margin-left:auto;display:flex;align-items:center;gap:8px}
+.proto select{appearance:none;-webkit-appearance:none;height:26px;padding:0 28px 0 10px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 9px center/12px;color:#fff;font-size:12px;line-height:16px;cursor:pointer}
+.proto select:hover{background-color:rgba(255,255,255,.1)}
+.proto option{color:var(--t1);background:#fff}
 
 /* ── Cabecera ── */
 .cabecera{position:sticky;top:0;z-index:40;height:72px;display:flex;align-items:center;gap:16px;padding:0 24px 0 28px;background:var(--cab);color:#fff}
 .hamb{display:none;width:40px;height:40px;align-items:center;justify-content:center;border-radius:8px;color:#fff}
 .hamb:hover{background:rgba(255,255,255,.1)}
-.logo{display:flex;align-items:center;gap:6px;color:#fff;text-decoration:none}
-.logo svg{width:44px;height:44px}
-.logo-t{display:flex;flex-direction:column;line-height:1}
-.logo-t b{font-size:36px;font-weight:800;letter-spacing:.01em;line-height:34px}
-.logo-t small{font-size:10px;letter-spacing:.14em;align-self:flex-end;margin-top:-2px;opacity:.9}
+.logo{display:flex;align-items:center;flex:none}
+.logo img{display:block;width:202px;height:45px}
 .cab-der{margin-left:auto;display:flex;align-items:center;height:100%}
 .usuario{display:flex;align-items:center;gap:16px;padding-right:24px}
 .avatar{width:48px;height:48px;border-radius:50%;background:#E3F1F0;color:var(--cab);display:grid;place-items:center;font-weight:800;font-size:16px;border:2px solid rgba(255,255,255,.7)}
@@ -110,7 +112,10 @@ main{min-width:0;padding:24px 32px 56px}
 .card{background:#fff;border-radius:var(--r);box-shadow:var(--sombra-tarjeta);margin-top:24px}
 .card-item{padding:24px}
 .card-item label{display:block;font-size:16px;color:var(--t2);margin-bottom:8px}
-.select-dis{display:flex;align-items:center;justify-content:space-between;width:360px;max-width:100%;height:50px;padding:0 16px;border-radius:6px;background:#E9EBEC;color:var(--t4);cursor:not-allowed}
+.select-dis{display:flex;align-items:center;justify-content:space-between;width:360px;max-width:100%;height:50px;padding:0 16px;border-radius:8px;background:#E9EBEC;color:var(--t4);cursor:not-allowed}
+/* Ítem de operación (componente Bandeja aprobador / Ítem de operación, variante "Uno (fase 1)"): select y Buscar deshabilitados */
+.fila-item{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.fila-item .btn{padding:0 16px;border-radius:8px}
 
 /* ── Botones ── */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:50px;padding:0 20px;border-radius:6px;font-weight:700;font-size:16px;white-space:nowrap;transition:background .15s,border-color .15s,color .15s,box-shadow .15s,transform .1s}
@@ -157,7 +162,6 @@ main{min-width:0;padding:24px 32px 56px}
 table.tabla{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;line-height:24px;font-variant-numeric:tabular-nums}
 .tabla th{background:var(--fondo-tabla);text-align:left;font-size:14px;line-height:24px;font-weight:700;color:var(--t2);padding:12px 12px;vertical-align:middle}
 .tabla td{padding:14px 12px;border-top:1px solid var(--g6);vertical-align:middle;background:#fff;color:var(--t2)}
-.tabla td.cero{color:var(--t4)}
 .tabla th:first-child,.tabla td:first-child{padding-left:24px}
 .tabla th:last-child,.tabla td:last-child{padding-right:24px}
 /* Cabecera ordenable (como CCP productivo): caret ▼ gris en reposo; activa con fondo verde y caret ▲/▼ */
@@ -184,7 +188,6 @@ table.tabla{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;
 .t-detalle th,.t-detalle td{white-space:nowrap}
 .t-detalle th{white-space:normal}
 .t-detalle td{height:56px}
-.col-err{position:sticky;right:0;width:280px;min-width:280px;box-shadow:var(--sombra-lateral);white-space:normal !important}
 .vacio-celda{color:var(--t4)}
 
 /* Centralizar/Pagos (base as-is de CCP): tabla de 1500 px con scroll horizontal, anchos de cert */
@@ -208,7 +211,7 @@ select.input:disabled{background-color:#E9EBEC;border-color:#E9EBEC;color:var(--
 .menu.ancho{width:300px}
 .con-tip{cursor:default;border-radius:2px}
 .con-tip:focus-visible{box-shadow:var(--foco)}
-/* Tooltips de CCP: N° Operación (tarjeta blanca con filas) y Estado (oscuro, causal de rechazo) */
+/* Tooltip de N° Operación, como CCP: tarjeta blanca con filas */
 .tip{position:fixed;z-index:70;pointer-events:none;opacity:0;transition:opacity .12s var(--ease)}
 .tip.vis{opacity:1}
 .tip.op{width:360px;background:#fff;border:1px solid var(--g6);border-radius:8px;box-shadow:var(--sombra-elevada);padding:4px 16px}
@@ -218,7 +221,11 @@ select.input:disabled{background-color:#E9EBEC;border-color:#E9EBEC;color:var(--
 .tip.op dt{color:var(--t3)}
 .tip.op dd{margin:0;font-weight:700;color:var(--t1);text-align:right;overflow-wrap:anywhere}
 .tip.op .pend{font-weight:400;color:var(--t4)}
-.tip.osc{max-width:280px;background:var(--t1);color:#fff;border-radius:4px;padding:6px 10px;font-size:13px;line-height:18px}
+/* Tooltip de causal en el chip Rechazada (componente Aprobación / Tooltip causal): a la derecha del chip, con punta; con "Otro", el comentario en máx. 2 líneas */
+.tip.causal{max-width:320px;background:var(--t2);color:#fff;border-radius:8px;padding:12px 16px;font-size:14px;line-height:24px}
+.tip.causal::before{content:"";position:absolute;left:-7px;top:50%;transform:translateY(-50%);border-style:solid;border-width:7px 7px 7px 0;border-color:transparent var(--t2) transparent transparent}
+.tip.causal span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.con-tip.chip-tip{display:inline-flex;border-radius:14px}
 
 /* chips de estado (sin punto indicador) */
 .chip{display:inline-flex;align-items:center;height:28px;padding:2px 12px 0;border-radius:14px;border:1px solid;font-size:14px;font-weight:700;line-height:1;white-space:nowrap}
@@ -262,45 +269,53 @@ select.input:disabled{background-color:#E9EBEC;border-color:#E9EBEC;color:var(--
 .sin-res .vacio-ic .ic{width:48px;height:48px;stroke-width:1.6}
 .sin-res h3{font-size:24px;line-height:28px}
 .sin-res p{margin:4px 0 0;line-height:24px}
+/* Sin operaciones (frame 01b): ampolleta gris 48, título 24 y bajada 14; Filtros y Exportar deshabilitados, sin tabla ni paginador */
+.vacio.sin-ops{padding:64px 24px}
+.sin-ops .vacio-ic{width:48px;height:48px;margin-bottom:16px;background:none;color:#79858E}
+.sin-ops .vacio-ic svg{display:block;width:48px;height:48px}
+.sin-ops h3{font-size:24px;line-height:28px}
+.sin-ops p{margin:4px 0 0;font-size:14px;line-height:24px}
 
 /* skeleton */
 .sk{display:block;height:12px;border-radius:6px;background:linear-gradient(90deg,var(--g6) 0%,#F4F5F6 50%,var(--g6) 100%);background-size:200% 100%;animation:brillo 1.1s linear infinite}
 @keyframes brillo{from{background-position:200% 0}to{background-position:-200% 0}}
 
 /* ── Detalle ── */
-.alerta{display:flex;gap:10px;align-items:flex-start;margin-top:24px;padding:12px 16px;border-radius:var(--r);background:var(--lila-bg);border:1px solid var(--lila-bd);color:var(--t1)}
-.alerta .ic{color:var(--lila-dk);width:22px;height:22px;margin-top:1px}
-.alerta p{margin:0;line-height:28px}
-.alerta b{font-weight:600}
-/* Alerta simple (SmallMessage Simple · Informativo, Figma 09): aviso de Excluidos bajo el título, al ancho de su texto */
-.alerta.simple{display:inline-flex;align-items:center;gap:8px;margin:8px 0 0;padding:8px 12px;border-radius:8px}
-.alerta.simple .ic{width:24px;height:24px;margin:0}
-.alerta.simple p{margin:0;font-size:12px;line-height:16px;font-weight:500}
+/* Alerta de decisión, una sola para todas las acciones (componente Detalle OP / Franja decisión = SmallMessage informativo).
+   Con más de una decisión suma "Ver historial" a la derecha; la causal va en segunda línea (Javier, 09/10) */
+/* Padding 12/16/12/12 de Figma menos el borde de 1 px (en Figma el trazo va por dentro). Texto 14/24 (Footnote), como el aviso
+   de periodo de CCP; el ícono se alinea con la primera línea, también cuando la causal suma una segunda (Javier, 09/10) */
+.alerta{display:flex;align-items:center;gap:10px;margin-top:24px;padding:11px 15px 11px 11px;font-size:14px;line-height:24px;border-radius:8px;background:var(--lila-bg);border:1px solid var(--lila-bd);color:var(--t1)}
+.alerta-m{flex:1;min-width:0;display:flex;align-items:flex-start;gap:8px}
+.alerta-ic{flex:none;width:24px;height:24px;border-radius:50%;background:radial-gradient(circle,#fff 9.5px,transparent 10px);color:var(--lila-dk)}
+.alerta-ic .ic{width:24px;height:24px}
+.alerta-t{flex:1;min-width:0}
+.alerta-t p{margin:0}
+.alerta-t p+p{margin-top:4px}
+.alerta b{font-weight:700}
+.alerta .ver{flex:none;font-size:14px;font-weight:700;line-height:24px;text-decoration:underline;text-underline-offset:2px}
+.alerta .ver:hover{color:var(--verde4)}
 .alerta.nueva{animation:alertaEntra .45s var(--ease)}
 @keyframes alertaEntra{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
-.resumen{padding:24px}
-.meta{display:flex;flex-wrap:wrap;gap:16px 0}
+/* Tarjeta resumen (componente Detalle OP / Resumen, versión de Javier 09/10): monto a sangre a la izquierda y datos de la OP en una fila */
+.resumen{container-type:inline-size;overflow:hidden}
+.resumen-in{display:grid;grid-template-columns:184px minmax(0,1fr)}
+.monto{display:flex;flex-direction:column;justify-content:center;gap:4px;padding:16px;background:var(--cab);color:#fff}
+.monto .etq{font-size:14px;font-weight:700;line-height:24px}
+.monto .cifra{font-size:24px;line-height:28px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:0}
+.monto .sub{font-size:14px;line-height:24px}
+.meta{display:flex;align-items:flex-start;align-self:center;margin:0;padding:24px}
 .meta>div{padding:0 24px;border-left:1px solid var(--g6)}
 .meta>div:first-child{padding-left:0;border-left:0}
 .meta dt{font-size:14px;line-height:24px;color:var(--t2)}
 .meta dd{margin:4px 0 0;font-weight:700;font-size:16px;line-height:24px}
-.cuadra{display:grid;grid-template-columns:300px minmax(0,1fr);margin-top:24px;border:1px solid var(--g6);border-radius:6px;overflow:hidden}
-.monto{background:var(--verde4);color:#fff;padding:28px}
-.monto .etq{font-size:14px;font-weight:700;line-height:24px}
-.monto .cifra{font-size:38px;line-height:44px;font-weight:700;margin:8px 0 6px;font-variant-numeric:tabular-nums;letter-spacing:0}
-.monto .sub{font-size:14px;line-height:20px}
-.cuadratura{padding:24px 28px}
-.cuadratura h3{margin:0 0 12px;font-size:16px;line-height:24px;font-weight:700}
-.cuad-cols{display:grid;grid-template-columns:1fr 1fr}
-.cuad-cols>div+div{border-left:1px solid var(--g6);padding-left:24px}
-.cuad-cols .etq{font-size:14px;color:var(--t2);line-height:20px}
-.cuad-cols .val{font-size:20px;line-height:28px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}
-.cuad-cols .sub{font-size:14px;line-height:20px;color:var(--t2);margin-top:2px}
-.tabs{display:flex;width:max-content;max-width:100%;margin-top:24px;overflow-x:auto}
-.tab{position:relative;padding:12px 20px 10px;font-weight:700;color:var(--t4);font-size:16px;white-space:nowrap;border-radius:0;border-bottom:1px solid var(--g5)}
-.tab[aria-selected="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--verde2)}
-.tab:hover{color:var(--t2)}
-.tab[aria-selected="true"]{color:var(--verde2)}
+/* Dos variantes por ancho (set Detalle OP / Resumen), Escritorio y Mediano, porque la app se usa solo en escritorio.
+   El corte depende del ancho de la tarjeta, no de la ventana, porque el menú lateral cambia el espacio disponible (Javier, 09/10) */
+/* Mediano (hasta 1109): 3 columnas que abrazan su contenido; el separador va solo entre columnas */
+@container (max-width:1109px){
+  .meta{display:grid;grid-template-columns:repeat(3,max-content);row-gap:16px}
+  .meta>div:nth-child(3n+1){padding-left:0;border-left:0}
+}
 .barra-decision{position:sticky;bottom:16px;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:24px;padding:20px 24px;background:#fff;border:1px solid #00A499;border-radius:var(--r);box-shadow:0 -1px 0 var(--g6),var(--sombra-elevada)}
 .barra-decision p{margin:0}
 .barra-decision .botones{display:flex;gap:16px}
@@ -310,8 +325,12 @@ select.input:disabled{background-color:#E9EBEC;border-color:#E9EBEC;color:var(--
 /* ── Modal ── */
 .capa{position:fixed;inset:0;z-index:80;display:flex;padding:24px 16px;overflow-y:auto;background:var(--scrim);opacity:0;transition:opacity .2s var(--ease)}
 .capa.vis{opacity:1}
-.modal{margin:auto;width:640px;max-width:100%;background:#fff;border-radius:var(--r);box-shadow:var(--sombra-modal);transform:translateY(12px) scale(.97);transition:transform .24s var(--ease)}
+.modal{margin:auto;width:640px;max-width:100%;display:flex;flex-direction:column;max-height:min(720px,100%);background:#fff;border-radius:var(--r);box-shadow:var(--sombra-modal);transform:translateY(12px) scale(.97);transition:transform .24s var(--ease)}
 .capa.vis .modal{transform:none}
+/* Alto máx. del modal: 720 px o la ventana − 48 px. Cabecera y pie quedan fijos; si el contenido no cabe, solo el cuerpo hace scroll (Javier, 09/10) */
+.modal>*{flex:none}
+.modal>.modal-cuerpo,.modal>.linea{flex:0 1 auto;min-height:0}
+.modal>.con-scroll{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--t4) transparent}
 .modal-cab{padding:32px 32px 24px;text-align:center;border-bottom:1px solid var(--g6)}
 .modal-cab h2{margin:0;font-size:24px;line-height:28px;font-weight:700}
 .modal-cab p{margin:8px 0 0;color:var(--t3)}
@@ -322,7 +341,40 @@ select.input:disabled{background-color:#E9EBEC;border-color:#E9EBEC;color:var(--
 .modal-pie .btn-sec,.modal-pie .btn-pri{width:211px;min-width:0}
 .res-m{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px;margin:0}
 .res-m dt{font-size:14px;line-height:20px;color:var(--t2)}
-.res-m dd{margin:4px 0 0;font-weight:700;font-variant-numeric:tabular-nums}
+.res-m dd{margin:4px 0 0;font-weight:700;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.res-m .full{grid-column:1/-1}
+/* Modal historial (componente Aprobación / Modal historial · v3): línea de tiempo descendente, se cierra solo con la X */
+.hist-cab{display:flex;align-items:flex-start;gap:16px;padding:32px 24px 24px 32px;border-bottom:1px solid var(--g6)}
+.hist-cab>div{flex:1;min-width:0}
+.hist-cab h2{margin:0;font-size:24px;line-height:28px;font-weight:700}
+.hist-cab p{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:8px 0 0;font-size:14px;line-height:24px;color:var(--t2)}
+.cerrar{flex:none;width:40px;height:40px;margin:-8px -8px 0 0;border-radius:6px;display:grid;place-items:center;color:var(--t1)}
+.cerrar:hover{background:var(--verde6);color:var(--verde4)}
+.cerrar .ic{width:24px;height:24px}
+.linea{list-style:none;margin:0;padding:24px 32px 32px}
+.paso{display:flex;gap:16px}
+.riel{flex:none;width:12px;display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:6px}
+.hito{width:12px;height:12px;border-radius:50%;background:var(--al)}
+.hito.Rechazada{background:var(--salmon)}
+.hito.Aprobada{background:var(--ok)}
+.riel i{flex:1;width:2px;background:var(--g5)}
+.paso:last-child .riel i{display:none}
+.paso-c{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;padding-bottom:24px}
+.paso:last-child .paso-c{padding-bottom:0}
+.paso-c>b{font-size:16px;line-height:24px}
+.paso-c>span{font-size:14px;line-height:24px;color:var(--t2)}
+.caja-causal{margin-top:4px;padding:8px 12px;border-radius:8px;background:var(--fondo);font-size:14px;line-height:24px;overflow-wrap:anywhere}
+/* Error del sistema (componente Plataforma / Modal de error del sistema): ícono, título y mensaje centrados y un solo botón */
+.modal-err{width:520px}
+.modal-err .modal-cab{display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 32px 8px}
+.modal-err .modal-cab p{margin:0;color:#79858E}
+.err-ic{width:48px;height:48px;border-radius:50%;background:var(--er-bg);color:var(--er-dk);display:grid;place-items:center;font-size:24px;line-height:28px;font-weight:700}
+.modal-err .modal-pie{justify-content:center;padding:8px 32px 28px;border-top:0}
+.modal-err .modal-pie .btn-pri{width:140px}
+/* Error de una acción dentro del modal (SmallMessage de error): queda bajo lo ingresado y el botón principal permite reintentar */
+.alerta.error{margin-top:20px;background:#FFEBEE;border-color:#E57373}
+.ic-err{flex:none;width:24px;height:24px;border-radius:50%;background:radial-gradient(circle,#fff 9.5px,transparent 10px);color:#B71C1C}
+.ic-err svg{display:block;width:24px;height:24px}
 .campo{margin-top:24px}
 .campo>label,.campo legend{display:block;font-size:16px;color:var(--t2);margin-bottom:8px;padding:0}
 fieldset.campo{border:0;padding:0;margin-inline:0;min-width:0}
@@ -334,8 +386,9 @@ textarea.input::placeholder{color:var(--t4)}
 textarea.input{height:auto;min-height:102px;padding:12px 16px;resize:vertical;line-height:24px}
 .input.invalido{border-color:#E53935}
 .input.invalido:focus{border-color:#E53935;box-shadow:0 0 0 3px rgba(229,57,53,.15)}
-.campo-pie{display:flex;justify-content:space-between;gap:12px;margin-top:6px;padding:0 16px;font-size:12px;line-height:16px;color:var(--t4)}
-.campo-pie .err{color:#E53935;font-size:14px;line-height:18px;font-weight:700}
+/* Ayuda "Mínimo 10 caracteres" y contador en 14/16; el error reemplaza a la ayuda (frame 12c) */
+.campo-pie{display:flex;justify-content:space-between;gap:12px;margin-top:6px;padding:0 16px;font-size:14px;line-height:16px;color:#67737C}
+.campo-pie .err{color:#E53935;font-weight:700}
 .campo-nota{margin:6px 0 0;font-size:14px;line-height:18px;color:var(--t3)}
 .campo-nota:empty{display:none}
 .combo{position:relative}
@@ -344,7 +397,7 @@ textarea.input{height:auto;min-height:102px;padding:12px 16px;resize:vertical;li
 .combo-btn .ic{transition:transform .2s var(--ease);color:var(--t1)}
 .combo-btn[aria-expanded="true"] .ic{transform:rotate(180deg)}
 .combo-lista{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;margin:0;padding:0;list-style:none;background:#fff;border:1px solid var(--g6);border-radius:4px;box-shadow:var(--sombra-elevada);opacity:0;transform:translateY(-4px);transition:opacity .14s var(--ease),transform .14s var(--ease)}
-/* Las 6 causales caben sin scroll, como Figma (frame 11) */
+/* Las 4 causales (3 + Otro, Javier 09/10) caben sin scroll */
 .combo-lista{max-height:314px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--t4) transparent}
 .combo-lista.arriba{top:auto;bottom:calc(100% + 4px);transform:translateY(4px)}
 .combo-lista.vis{opacity:1;transform:none}
@@ -368,6 +421,7 @@ textarea.input{height:auto;min-height:102px;padding:12px 16px;resize:vertical;li
 .toast.ok .ic{color:var(--ok-dk)}
 .toast.info{background:var(--lila-bg);border-color:var(--lila-bd);color:var(--t1)}
 .toast.info .ic{color:var(--lila-dk)}
+.toast.error{background:#FFEBEE;border-color:#E57373;color:var(--t1)}
 
 /* ── Notificaciones ── */
 .pop{position:fixed;z-index:60;top:76px;right:180px;width:360px;max-width:calc(100vw - 32px);background:#fff;border-radius:var(--r);box-shadow:var(--sombra-elevada);border:1px solid var(--g6);opacity:0;transform:translateY(-6px);transition:opacity .16s var(--ease),transform .16s var(--ease);pointer-events:none}
@@ -384,14 +438,14 @@ textarea.input{height:auto;min-height:102px;padding:12px 16px;resize:vertical;li
 @media (max-width:1100px){
   .hamb{display:inline-flex}
   .shell,.shell.colapsado{grid-template-columns:minmax(0,1fr)}
-  .lateral{position:fixed;top:0;left:0;bottom:0;height:100%;width:280px;z-index:70;transform:translateX(-100%);transition:transform .28s var(--ease);box-shadow:var(--sombra-modal)}
-  .lateral.abierto{transform:none}
+  /* La sombra va solo con el menú abierto: cerrado, asomaba en el borde izquierdo de la página */
+  .lateral{position:fixed;top:0;left:0;bottom:0;height:100%;width:280px;z-index:70;transform:translateX(-100%);transition:transform .28s var(--ease),box-shadow .28s}
+  .lateral.abierto{transform:none;box-shadow:var(--sombra-modal)}
   .shell.colapsado .lat-titulo,.shell.colapsado .lat-item span{opacity:1}
   .shell.colapsado .lat-volver{transform:none}
   .lat-scrim{display:block;position:fixed;inset:0;z-index:65;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .25s}
   .lat-scrim.vis{opacity:1;pointer-events:auto}
   main{padding:24px 24px 56px}
-  .cuadra{grid-template-columns:260px minmax(0,1fr)}
 }
 @media (max-width:820px){
   .usuario-t,.salir span,.proto .opc{display:none}
@@ -400,17 +454,12 @@ textarea.input{height:auto;min-height:102px;padding:12px 16px;resize:vertical;li
   .campana .punto{right:16px}
   .salir{padding-left:12px}
   .pop{right:16px}
-  .cuadra{grid-template-columns:1fr}
-  .meta{display:grid;grid-template-columns:1fr 1fr;gap:16px 16px}
-  .meta>div{padding:0;border-left:0}
 }
 @media (max-width:640px){
   .proto{padding:4px 16px}
   .cabecera{height:64px;padding:0 8px 0 8px;gap:8px}
   .lateral{top:0}
-  .logo svg{width:34px;height:34px}
-  .logo-t b{font-size:26px;line-height:26px}
-  .logo-t small{font-size:8px}
+  .logo img{width:153px;height:34px}
   .avatar{width:38px;height:38px;font-size:14px}
   .cab-sep{height:40px}
   .campana{width:48px}
@@ -418,7 +467,7 @@ textarea.input{height:auto;min-height:102px;padding:12px 16px;resize:vertical;li
   main{padding:20px 16px 48px}
   .cab-pag h1{font-size:22px;line-height:28px}
   .card{margin-top:16px}
-  .card-item,.resumen{padding:16px}
+  .card-item{padding:16px}
   .tabla-cab{flex-direction:column;align-items:stretch;padding:16px}
   .tabla-cab .acciones{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .tabla-cab .acciones .btn{padding:0 12px;width:100%}
@@ -428,15 +477,16 @@ textarea.input{height:auto;min-height:102px;padding:12px 16px;resize:vertical;li
   .tabla th:last-child,.tabla td:last-child{padding-right:16px}
   .paginador{padding:16px;gap:12px 16px}
   .paginador label{gap:12px}
-  .monto{padding:20px}
-  .monto .cifra{font-size:30px;line-height:36px}
-  .cuadratura{padding:20px}
-  .cuad-cols>div+div{padding-left:16px}
-  .cuad-cols .val{font-size:18px}
+  .alerta{flex-wrap:wrap;row-gap:4px}
+  .alerta-m{flex-basis:100%}
+  .alerta .ver{margin-left:32px}
   .barra-decision{flex-direction:column;align-items:stretch;padding:16px;bottom:8px}
   .barra-decision .botones{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .barra-decision .btn-140{width:100%}
+  .barra-decision .botones.una{grid-template-columns:1fr}
   .modal-cab{padding:24px 20px 20px}
+  .hist-cab{padding:24px 16px 20px 20px}
+  .linea{padding:20px}
   .modal-cab h2{font-size:20px;line-height:26px}
   .modal-cuerpo{padding:20px}
   .modal-pie{flex-direction:column-reverse;padding:16px 20px}
@@ -446,9 +496,6 @@ textarea.input{height:auto;min-height:102px;padding:12px 16px;resize:vertical;li
   .toast{max-width:none}
 }
 @media (max-width:400px){
-  .meta{grid-template-columns:1fr}
-  .cuad-cols{grid-template-columns:1fr;gap:16px}
-  .cuad-cols>div+div{border-left:0;padding-left:0;border-top:1px solid var(--g6);padding-top:16px}
   .res-m{grid-template-columns:1fr 1fr;gap:16px}
 }
 @media (prefers-reduced-motion:reduce){
@@ -457,15 +504,25 @@ textarea.input{height:auto;min-height:102px;padding:12px 16px;resize:vertical;li
 </style>
 
 <div class="proto" role="note">
-  <b>Prototipo navegable v2</b><span class="sep">·</span><span>Vista aprobador</span><span class="opc"><span class="sep">·</span> Datos ficticios <span class="sep">·</span> Descargas simuladas</span>
+  <b>Prototipo navegable v3</b><span class="sep">·</span><span>Vista aprobador</span><span class="opc"><span class="sep">·</span> Datos ficticios <span class="sep">·</span> Descargas simuladas</span>
+  <label class="sim" for="sim">Simular
+    <select id="sim">
+      <option value="">Sin simulación</option>
+      <option value="vacio">Historial sin operaciones</option>
+      <option value="error-carga">Error al cargar</option>
+      <option value="error-aprobar">Error al aprobar o revocar</option>
+      <option value="error-rechazar">Error al rechazar</option>
+      <option value="error-exportar">Error al exportar</option>
+    </select>
+  </label>
   <button id="btn-reiniciar" type="button">Reiniciar</button>
 </div>
 
 <header class="cabecera">
   <button class="hamb" id="btn-hamb" type="button" aria-label="Abrir menú" aria-controls="lateral" aria-expanded="false"></button>
   <a class="logo" href="#/" id="logo" aria-label="Esencial · Inicio">
-    <svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="#fff" stroke-width="3.2"><circle cx="18" cy="17" r="7.5"/><circle cx="30" cy="17" r="7.5"/><circle cx="18" cy="31" r="7.5"/><circle cx="30" cy="31" r="7.5"/></svg>
-    <span class="logo-t"><b>Esencial</b><small>Grupo Alemana</small></span>
+    <!-- Logotipo exportado del header de Figma (PNG 2x) -->
+    <img src="data:image/png;base64,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" alt="" width="202" height="45">
   </a>
   <div class="cab-der">
     <div class="usuario">
@@ -524,6 +581,9 @@ const P = {
   subir:'<path d="M12 20V9M7 14l5-5 5 5M5 4h14"/>',
 };
 const ic = (n, c = '') => `<svg class="ic ${c}" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
+// Íconos de relleno exportados de Figma: ampolleta (sin operaciones) y círculo con X (errores)
+const BULB = '<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="currentColor" d="M24 11.7001C22.0514 11.7025 20.1833 12.4777 18.8054 13.8555C17.4276 15.2334 16.6524 17.1015 16.65 19.0501C16.65 19.3286 16.7606 19.5957 16.9575 19.7926C17.1545 19.9895 17.4215 20.1001 17.7 20.1001C17.9785 20.1001 18.2455 19.9895 18.4425 19.7926C18.6394 19.5957 18.75 19.3286 18.75 19.0501C18.7516 17.6582 19.3052 16.3237 20.2894 15.3395C21.2736 14.3553 22.6081 13.8017 24 13.8001C24.2785 13.8001 24.5455 13.6895 24.7425 13.4926C24.9394 13.2956 25.05 13.0286 25.05 12.7501C25.05 12.4716 24.9394 12.2045 24.7425 12.0076C24.5455 11.8107 24.2785 11.7001 24 11.7001ZM24 7.50009C17.2446 7.50009 12.4421 12.9831 12.45 19.0652C12.4498 21.8563 13.466 24.5519 15.3086 26.6482C16.9926 28.5658 18.6082 31.6954 18.75 32.7001L18.7539 37.6345C18.7541 37.8409 18.8155 38.0425 18.9305 38.214L20.5383 40.6316C20.634 40.7756 20.7639 40.8937 20.9162 40.9754C21.0686 41.0572 21.2388 41.1 21.4118 41.1002H26.5863C26.7595 41.1003 26.9301 41.0577 27.0829 40.9759C27.2356 40.8941 27.3658 40.7759 27.4617 40.6316L29.0695 38.2127C29.1834 38.0408 29.2448 37.8394 29.2461 37.6332L29.25 32.7001C29.3977 31.6685 31.0219 28.5533 32.6914 26.6482C34.153 24.979 35.1026 22.9241 35.4266 20.7292C35.7505 18.5344 35.4352 16.2927 34.5182 14.2724C33.6012 12.2522 32.1214 10.539 30.256 9.3379C28.3906 8.13683 26.2186 7.49877 24 7.50009ZM27.1461 37.3142L26.0239 39.0002H21.9735L20.8539 37.3142V36.9002H27.148L27.1461 37.3142ZM27.15 34.8001H20.85L20.8461 32.7001H27.15V34.8001ZM31.1144 25.2642C30.1957 26.3109 28.7309 28.4201 27.7957 30.5988H20.2082C19.2711 28.4194 17.8063 26.3109 16.8876 25.2642C15.3811 23.5448 14.5517 21.3361 14.5539 19.0501C14.5421 13.997 18.5164 9.60009 24 9.60009C29.2113 9.60009 33.45 13.8388 33.45 19.0501C33.4499 21.3363 32.6192 23.5447 31.1124 25.2642H31.1144ZM9.3 19.0501C9.3 18.7716 9.18937 18.5046 8.99246 18.3076C8.79555 18.1107 8.52848 18.0001 8.25 18.0001H4.05C3.77152 18.0001 3.50445 18.1107 3.30754 18.3076C3.11062 18.5046 3 18.7716 3 19.0501C3 19.3286 3.11062 19.5957 3.30754 19.7926C3.50445 19.9895 3.77152 20.1001 4.05 20.1001H8.25C8.52848 20.1001 8.79555 19.9895 8.99246 19.7926C9.18937 19.5957 9.3 19.3286 9.3 19.0501ZM37.65 11.7001C37.8131 11.6997 37.9739 11.6618 38.1199 11.5892L42.3199 9.48918C42.5689 9.36457 42.7583 9.14611 42.8463 8.88188C42.9343 8.61764 42.9137 8.32928 42.7891 8.08021C42.7274 7.95689 42.642 7.84693 42.5378 7.7566C42.4336 7.66628 42.3126 7.59737 42.1818 7.5538C41.9176 7.4658 41.6292 7.48637 41.3801 7.61099L37.1801 9.711C36.9686 9.81681 36.7989 9.99095 36.6987 10.2052C36.5985 10.4195 36.5736 10.6613 36.6279 10.8915C36.6823 11.1217 36.8128 11.3268 36.9983 11.4736C37.1838 11.6203 37.4135 11.7001 37.65 11.7001ZM43.95 18.0001H39.75C39.4715 18.0001 39.2044 18.1107 39.0075 18.3076C38.8106 18.5046 38.7 18.7716 38.7 19.0501C38.7 19.3286 38.8106 19.5957 39.0075 19.7926C39.2044 19.9895 39.4715 20.1001 39.75 20.1001H43.95C44.2285 20.1001 44.4955 19.9895 44.6925 19.7926C44.8894 19.5957 45 19.3286 45 19.0501C45 18.7716 44.8894 18.5046 44.6925 18.3076C44.4955 18.1107 44.2285 18.0001 43.95 18.0001ZM10.8199 9.711L6.61987 7.61099C6.49655 7.54929 6.36228 7.51248 6.22473 7.50266C6.08718 7.49285 5.94905 7.51022 5.81821 7.5538C5.55398 7.64179 5.33552 7.83115 5.21091 8.08021C5.08629 8.32928 5.06571 8.61764 5.15371 8.88188C5.2417 9.14611 5.43106 9.36457 5.68012 9.48918L9.88012 11.5892C10.0261 11.6618 10.1869 11.6997 10.35 11.7001C10.5865 11.7001 10.8162 11.6203 11.0017 11.4736C11.1872 11.3268 11.3177 11.1217 11.3721 10.8915C11.4264 10.6613 11.4015 10.4195 11.3013 10.2052C11.2011 9.99095 11.0314 9.81681 10.8199 9.711ZM42.3199 28.611L38.1199 26.511C37.8707 26.3864 37.5823 26.3659 37.318 26.4539C37.0537 26.542 36.8352 26.7314 36.7106 26.9806C36.586 27.2297 36.5654 27.5182 36.6535 27.7825C36.7415 28.0468 36.931 28.2653 37.1801 28.3899L41.3801 30.4899C41.6293 30.6145 41.9177 30.635 42.182 30.547C42.4463 30.4589 42.6648 30.2695 42.7894 30.0203C42.914 29.7712 42.9346 29.4827 42.8465 29.2184C42.7585 28.9541 42.569 28.7357 42.3199 28.611ZM10.35 26.4001C10.1869 26.4005 10.0261 26.4385 9.88012 26.511L5.68012 28.611C5.43097 28.7357 5.24153 28.9541 5.15348 29.2184C5.10987 29.3493 5.09248 29.4875 5.10227 29.6251C5.11207 29.7627 5.14887 29.897 5.21058 30.0203C5.27228 30.1437 5.35768 30.2537 5.4619 30.3441C5.56612 30.4344 5.68711 30.5034 5.81798 30.547C6.08227 30.635 6.37072 30.6145 6.61987 30.4899L10.8199 28.3899C11.0318 28.2843 11.2018 28.1101 11.3023 27.8957C11.4028 27.6813 11.4278 27.4392 11.3734 27.2088C11.319 26.9784 11.1883 26.7731 11.0025 26.6263C10.8167 26.4795 10.5868 26.3998 10.35 26.4001Z"/></svg>';
+const XCIRC = '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2C6.47581 2 2 6.47581 2 12C2 17.5242 6.47581 22 12 22C17.5242 22 22 17.5242 22 12C22 6.47581 17.5242 2 12 2ZM12 20.7097C7.21371 20.7097 3.29032 16.8347 3.29032 12C3.29032 7.21371 7.16532 3.29032 12 3.29032C16.7863 3.29032 20.7097 7.16532 20.7097 12C20.7097 16.7863 16.8347 20.7097 12 20.7097ZM15.8226 9.20564L13.0282 12L15.8226 14.7944C16.0121 14.9839 16.0121 15.2903 15.8226 15.4798L15.4798 15.8226C15.2903 16.0121 14.9839 16.0121 14.7944 15.8226L12 13.0282L9.20564 15.8226C9.01613 16.0121 8.70968 16.0121 8.52016 15.8226L8.17742 15.4798C7.9879 15.2903 7.9879 14.9839 8.17742 14.7944L10.9718 12L8.17742 9.20564C7.9879 9.01613 7.9879 8.70968 8.17742 8.52016L8.52016 8.17742C8.70968 7.9879 9.01613 7.9879 9.20564 8.17742L12 10.9718L14.7944 8.17742C14.9839 7.9879 15.2903 7.9879 15.4798 8.17742L15.8226 8.52016C16.0081 8.70968 16.0081 9.01613 15.8226 9.20564Z"/></svg>';
 const KEBAB = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.7" fill="currentColor"/><circle cx="12" cy="12" r="1.7" fill="currentColor"/><circle cx="12" cy="19" r="1.7" fill="currentColor"/></svg>';
 
 /* ═══════════ Utilidades ═══════════ */
@@ -541,16 +601,19 @@ const espera = ms => reducido ? Math.min(ms, 250) : ms;
 /* ═══════════ Datos ficticios (fase 1 · Reembolsos) ═══════════ */
 const HOY = '06/10/26';
 const USUARIO = 'Camila Rojas Fuentes';
-const CAUSALES = ['Monto no cuadra', 'Concepto incorrecto', 'Montos menores no procesables', 'Beneficiario o RUT no corresponde', 'Duplicado', 'Otro'];
+// Causales por ahora (Javier, 09/10): 3 + Otro; la lista final la define el equipo
+const CAUSALES = ['Monto no cuadra', 'Error en detalle', 'Duplicado', 'Otro'];
+// Sin excluidos (refinamiento 09/10): al aprobador solo llegan OPs validadas sin errores; val = reembolsos de la OP.
+// Canal de origen: Sistema o Manual (OP cargada por Excel), como en Figma v3
 const OPS0 = [
-  { id:11696, per:'01/10/26', sol:['05/10/26','15:40'], est:'Pendiente', fe:['05/10/26','15:40'], rec:330, val:314, exc:16, monto:67670420, montoExc:3744960 },
-  { id:11695, per:'01/10/26', sol:['05/10/26','10:03'], est:'Pendiente', fe:['05/10/26','10:03'], rec:382, val:382, exc:0,  monto:83380220, montoExc:0 },
-  { id:11693, per:'01/10/26', sol:['02/10/26','16:13'], est:'Pendiente', fe:['02/10/26','16:13'], rec:115, val:111, exc:4,  monto:23835610, montoExc:861230 },
-  { id:11692, per:'01/10/26', sol:['02/10/26','09:29'], est:'Aprobada',  fe:['05/10/26','16:05'], rec:24,  val:24,  exc:0,  monto:3829590,  montoExc:0, por:USUARIO },
-  { id:11689, per:'01/10/26', sol:['01/10/26','17:53'], est:'Aprobada',  fe:['02/10/26','10:41'], rec:71,  val:66,  exc:5,  monto:1425990,  montoExc:104870, por:USUARIO },
-  { id:11688, per:'01/10/26', sol:['01/10/26','17:40'], est:'Aprobada',  fe:['02/10/26','10:30'], rec:59,  val:59,  exc:0,  monto:12517250, montoExc:0, por:USUARIO },
-  { id:11679, per:'01/09/26', sol:['30/09/26','17:02'], est:'Aprobada',  fe:['30/09/26','18:20'], rec:290, val:287, exc:3,  monto:58004410, montoExc:598310, por:USUARIO },
-  { id:11676, per:'01/09/26', sol:['29/09/26','16:48'], est:'Aprobada',  fe:['30/09/26','09:02'], rec:305, val:305, exc:0,  monto:64230870, montoExc:0, por:USUARIO },
+  { id:11696, per:'01/10/26', sol:['05/10/26','15:40'], est:'Pendiente', fe:['05/10/26','15:40'], canal:'Sistema', val:314, monto:67670420 },
+  { id:11695, per:'01/10/26', sol:['05/10/26','10:03'], est:'Pendiente', fe:['05/10/26','10:03'], canal:'Sistema', val:382, monto:83380220 },
+  { id:11693, per:'01/10/26', sol:['02/10/26','16:13'], est:'Pendiente', fe:['02/10/26','16:13'], canal:'Manual',  val:111, monto:23835610 },
+  { id:11692, per:'01/10/26', sol:['02/10/26','09:29'], est:'Aprobada',  fe:['05/10/26','16:05'], canal:'Sistema', val:24,  monto:3829590,  por:USUARIO },
+  { id:11689, per:'01/10/26', sol:['01/10/26','17:53'], est:'Aprobada',  fe:['02/10/26','10:41'], canal:'Sistema', val:66,  monto:1425990,  por:USUARIO },
+  { id:11688, per:'01/10/26', sol:['01/10/26','17:40'], est:'Aprobada',  fe:['02/10/26','10:30'], canal:'Manual',  val:59,  monto:12517250, por:USUARIO },
+  { id:11679, per:'01/09/26', sol:['30/09/26','17:02'], est:'Aprobada',  fe:['30/09/26','18:20'], canal:'Sistema', val:287, monto:58004410, por:USUARIO },
+  { id:11676, per:'01/09/26', sol:['29/09/26','16:48'], est:'Aprobada',  fe:['30/09/26','09:02'], canal:'Sistema', val:305, monto:64230870, por:USUARIO },
 ];
 // Tope por OP (entrevista 06/10): ~990 movimientos en SAP; cada reembolso = debe + haber → 495 reembolsos
 const MAX_REEMB_OP = 495;
@@ -567,16 +630,17 @@ const MAX_REEMB_OP = 495;
     for (let k = 0, n = 1 + Math.floor(r() * 2); k < n && d > DESDE; k++) {
       const rec = 20 + Math.floor(r() * (MAX_REEMB_OP - 20)), exc = r() < .45 ? 1 + Math.floor(r() * Math.min(20, rec / 10)) : 0;
       const prom = () => 150000 + r() * 90000, sol = fmt(d), rech = r() < .12, fe = new Date(d); habil(fe, 1);
-      OPS0.push({ id, per:`01/${sol.slice(3)}`, sol:[sol, hora()], est: rech ? 'Rechazada' : 'Aprobada', fe:[fmt(fe), hora()],
-        rec, val: rec - exc, exc, monto: Math.round((rec - exc) * prom() / 10) * 10, montoExc: Math.round(exc * prom() / 10) * 10,
-        por:USUARIO, ...(rech ? { causal: CAUSALES[Math.floor(r() * 5)] } : {}) });
+      // Mismo orden de sorteos que v2 para conservar el historial; el sorteo del monto excluido se descarta
+      const solH = hora(), feH = hora(), val = rec - exc, monto = Math.round(val * prom() / 10) * 10; prom();
+      OPS0.push({ id, per:`01/${sol.slice(3)}`, sol:[sol, solH], est: rech ? 'Rechazada' : 'Aprobada', fe:[fmt(fe), feH],
+        canal: id >= 11674 ? 'Sistema' : 'Manual', val, monto, por:USUARIO, ...(rech ? { causal: CAUSALES[Math.floor(r() * 3)] } : {}) });
       id -= 1 + Math.floor(r() * 3);
     }
   }
 })();
 const BANCOS = ['001', '012', '037', '016', '028', '039', '049', '051', '009'];
-const ERRORES = ['RUT inválido', 'Fecha inválida', 'Debe y haber no cuadran', 'Cuenta contable sin homologación', 'Falta cuenta bancaria'];
-const VACIO = { op:'', est:'', per:'', sol:'', fe:'' };
+const VACIO = { op:'', est:'', per:'', sol:'', fe:'', canal:'' };
+const VACIO_D = { asiento:'', cli:'', banco:'', cuenta:'' };
 const VACIO_C = { op:'', arch:'', est:'', per:'', sol:'', fe:'' };
 // Periodo Contable es mensual: el filtro ofrece desde enero de 2023 hasta el mes en curso (valor MM/AA)
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -586,38 +650,43 @@ const periodoTxt = v => PERIODOS.find(p => p.v === v)?.t || v;
 let OPS, S, C;
 const cacheTx = {};
 function reiniciar() {
-  OPS = OPS0.map(o => ({ ...o, sol:[...o.sol], fe:[...o.fe] }));
-  S = { vista:'bandeja', opId:null, tab:'val', pagB:0, tamB:10, pagD:0, tamD:10, filtros:{ ...VACIO }, orden:{ col:null, dir:null }, ordenD:{ col:null, dir:null }, cargando:false, retener:new Set() };
+  // ev = decisiones de la OP (aprobar, rechazar, revocar), para la alerta y el historial. Revocar no borra el rechazo
+  OPS = OPS0.map(o => ({ ...o, sol:[...o.sol], fe:[...o.fe], ev: o.est === 'Pendiente' ? [] : [{ est:o.est, por:o.por, fe:[...o.fe], causal:o.causal || '', motivo:'' }] }));
+  S = { vista:'bandeja', opId:null, pagB:0, tamB:10, pagD:0, tamD:10, filtros:{ ...VACIO }, filtrosD:{ ...VACIO_D }, orden:{ col:null, dir:null }, ordenD:{ col:null, dir:null }, cargando:false, retener:new Set() };
   C = { tipo:'', item:'', buscado:null, pag:0, tam:10, orden:{ col:'id', dir:'desc' }, filtros:{ ...VACIO_C }, cargando:false };
+}
+// Simular (barra del prototipo): muestra estados que no ocurren en el flujo normal. Los errores se consumen al primer
+// intento, así el reintento funciona; "sin operaciones" y "error al cargar" quedan hasta cambiar la opción
+let SIM = '';
+const falla = tipo => { if (SIM !== tipo) return false; SIM = ''; $('#sim').value = ''; return true; };
+function simular(v) {
+  const antes = SIM; SIM = v;
+  if (v === 'vacio') { S.filtros = { ...VACIO }; S.retener.clear(); S.pagB = 0; }
+  if (v === 'vacio' || v === 'error-carga') {
+    ocupado = false; cerrarModal();
+    if (S.vista === 'centralizar' || (v === 'vacio' && S.vista === 'detalle')) ir('#/'); else render(true);
+  } else if (antes === 'vacio' || antes === 'error-carga') { cerrarModal(); render(true); }
 }
 // Las decisiones de la demo viven solo en memoria: al recargar (F5) el prototipo vuelve a su estado inicial (Javier, 07/10)
 const op = id => OPS.find(o => o.id === +id);
+// Con "Otro", la causal se muestra como el comentario solo (tooltip, modal revocar, alerta e historial)
+const causalTxt = o => o.causal === 'Otro' && o.motivo ? o.motivo : o.causal;
 
-/* Reembolsos de cada OP: generados con semilla fija para que siempre sean los mismos */
+/* Reembolsos de cada OP: generados con semilla fija para que siempre sean los mismos. Sin excluidos: todos se envían a SAP */
 function transacciones(o) {
   if (cacheTx[o.id]) return cacheTx[o.id];
-  const R = rng(o.id);
-  const pool = []; for (let a = 11; a <= o.rec; a++) pool.push(a);
-  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
-  const exSet = new Set(pool.slice(0, o.exc));
-  const val = [], exc = [];
-  for (let a = 1; a <= o.rec; a++) {
+  const R = rng(o.id), filas = [];
+  for (let a = 1; a <= o.val; a++) {
     const rut = Math.floor(6000000 + R() * 18000000);
     const L = 8 + Math.floor(R() * 5);
     let cuenta = String(1 + Math.floor(R() * 9)); while (cuenta.length < L) cuenta += Math.floor(R() * 10);
     const t = { asiento:a, fecha:o.sol[0], cc:'21201010', rut, cli:'I' + rut + dv(rut), banco:BANCOS[Math.floor(R() * BANCOS.length)], cuenta, w:Math.exp(R() * 2.4) };
-    (exSet.has(a) ? exc : val).push(t);
+    filas.push(t);
   }
-  const escalar = (arr, total) => { const s = arr.reduce((a, t) => a + t.w, 0); let acc = 0; arr.forEach((t, i) => { t.imp = i < arr.length - 1 ? Math.round(total * t.w / s / 10) * 10 : total - acc; acc += t.imp; }); };
-  escalar(val, o.monto); escalar(exc, o.montoExc);
-  exc.forEach(t => {
-    t.error = ERRORES[Math.floor(R() * ERRORES.length)];
-    if (t.error === 'RUT inválido') { const d = dv(t.rut); t.cli = 'I' + t.rut + (d === '1' ? '2' : '1'); }
-    if (t.error === 'Fecha inválida') t.fecha = '31/09/26';
-    if (t.error === 'Cuenta contable sin homologación') t.cc = null;
-    if (t.error === 'Falta cuenta bancaria') t.cuenta = null;
-  });
-  return (cacheTx[o.id] = { val, exc });
+  // Importes escalados para que sumen el monto de la OP
+  const s = filas.reduce((a, t) => a + t.w, 0); let acc = 0;
+  filas.forEach((t, i) => { t.imp = i < filas.length - 1 ? Math.round(o.monto * t.w / s / 10) * 10 : o.monto - acc; acc += t.imp; });
+  return (cacheTx[o.id] = filas);
 }
 
 /* ═══════════ Piezas comunes ═══════════ */
@@ -646,14 +715,14 @@ function filtradas() {
     (!f.est || o.est === f.est) &&
     (!f.per || o.per.slice(3) === f.per) &&
     (!f.sol || iso(o.sol[0]) === f.sol) &&
-    (!f.fe || iso(o.fe[0]) === f.fe));
+    (!f.fe || iso(o.fe[0]) === f.fe) &&
+    (!f.canal || o.canal === f.canal));
 }
 // Columnas ordenables de la bandeja (todas menos Acciones). Salto de línea fijo como en Figma
 const COLS_B = [
-  ['per', 'Periodo <br>contable', o => iso(o.per)], ['id', 'N° <br>operación', o => o.id],
+  ['per', 'Periodo <br>contable', o => iso(o.per)], ['id', 'N° <br>operación', o => o.id], ['canal', 'Canal de <br>origen', o => o.canal],
   ['sol', 'Fecha solicitud <br>centralizador', o => iso(o.sol[0]) + o.sol[1]], ['est', 'Estado <br>aprobación', o => ORDEN_EST[o.est]],
-  ['fe', 'Fecha <br>estado', o => iso(o.fe[0]) + o.fe[1]], ['rec', 'Recibidos', o => o.rec], ['val', 'Validados', o => o.val],
-  ['exc', 'Excluidos', o => o.exc], ['monto', 'Monto <br>a pagar', o => o.monto],
+  ['fe', 'Fecha <br>estado', o => iso(o.fe[0]) + o.fe[1]], ['val', 'Reembolsos', o => o.val], ['monto', 'Monto <br>a pagar', o => o.monto],
 ];
 const ORDEN_EST = { Pendiente:0, Aprobada:1, Rechazada:2 };
 const CARET = '<svg class="caret" viewBox="0 0 8 5" aria-hidden="true"><path d="M0 0h8L4 5z"/></svg>';
@@ -681,10 +750,14 @@ function chipsFiltro() {
   if (f.per) c.push(['per', `Periodo: ${periodoTxt(f.per)}`]);
   if (f.sol) c.push(['sol', `Fecha solicitud: ${corta(f.sol)}`]);
   if (f.fe) c.push(['fe', `Fecha estado: ${corta(f.fe)}`]);
+  if (f.canal) c.push(['canal', `Canal de origen: ${f.canal}`]);
   return c;
 }
+// Rechazada lleva tooltip con la causal (con "Otro", el comentario), como el CP-04 de Centralizar (Javier, 09/10)
+const chipEst = o => o.est === 'Rechazada'
+  ? `<span class="con-tip chip-tip" tabindex="0" data-tip="causal" data-id="${o.id}" aria-describedby="tip">${chip(o.est, o.anim)}</span>` : chip(o.est, o.anim);
 function vBandeja() {
-  const lista = ordenadas(), chips = chipsFiltro();
+  const sinOps = SIM === 'vacio', lista = sinOps ? [] : ordenadas(), chips = sinOps ? [] : chipsFiltro();
   const maxPag = Math.max(0, Math.ceil(lista.length / S.tamB) - 1);
   if (S.pagB > maxPag) S.pagB = maxPag;
   const pagina = lista.slice(S.pagB * S.tamB, (S.pagB + 1) * S.tamB);
@@ -692,13 +765,13 @@ function vBandeja() {
   <header class="cab-pag"><h1>Aprobaciones para solicitudes de pagos</h1>${migas(['Inicio', 'Aprobaciones de Pago'])}</header>
   <section class="card card-item">
     <label id="lbl-item">Item de operación</label>
-    <div class="select-dis" role="combobox" aria-labelledby="lbl-item" aria-disabled="true" aria-expanded="false">Pago Reembolso ${ic('chevD')}</div>
+    <div class="fila-item"><div class="select-dis" role="combobox" aria-labelledby="lbl-item" aria-disabled="true" aria-expanded="false">Pago Reembolso ${ic('chevD')}</div><button class="btn btn-pri" type="button" disabled>Buscar</button></div>
   </section>
   <section class="card" aria-labelledby="t-hist">
     <div class="tabla-cab">
       <div><h2 id="t-hist">Historial de aprobaciones</h2><p>Operación seleccionada <span class="lila">Solicitud de pago - Pago Reembolso</span></p></div>
       <div class="acciones">
-        <button class="btn btn-sec" type="button" id="btn-filtros" data-a="filtros">${ic('filtros')}Filtros</button>
+        <button class="btn btn-sec" type="button" id="btn-filtros" data-a="filtros" ${sinOps ? 'disabled' : ''}>${ic('filtros')}Filtros</button>
         <button class="btn btn-sec" type="button" id="btn-exportar" data-a="exportar" ${lista.length ? '' : 'disabled'}>${ic('descarga')}Exportar</button>
       </div>
     </div>
@@ -713,13 +786,18 @@ function vBandeja() {
           <th scope="col" class="col-acc">Acciones</th>
         </tr></thead>
         <tbody>${S.cargandoB ? filasSk(pagina.length || 5) : pagina.map(o => `<tr>
-          <td>${o.per}</td><td>${o.id}</td><td>${fh(o.sol)}</td><td>${chip(o.est, o.anim)}</td><td>${fh(o.fe)}</td>
-          <td>${miles(o.rec)}</td><td>${miles(o.val)}</td><td${o.exc ? '' : ' class="cero"'}>${miles(o.exc)}</td><td>${pesos(o.monto)}</td>
+          <td>${o.per}</td><td>${o.id}</td><td>${o.canal}</td><td>${fh(o.sol)}</td><td>${chipEst(o)}</td><td>${fh(o.fe)}</td>
+          <td>${miles(o.val)}</td><td>${pesos(o.monto)}</td>
           <td class="col-acc"><button type="button" class="kebab" id="acc-${o.id}" data-a="menu" data-id="${o.id}" aria-haspopup="menu" aria-expanded="false" aria-controls="menu" aria-label="Acciones de la OP ${o.id}">${KEBAB}</button></td>
         </tr>`).join('')}</tbody>
       </table>
     </div>
-    ${lista.length ? paginador('pb', S.pagB, S.tamB, lista.length, [10, 20, 50]) : ''}` : `
+    ${lista.length ? paginador('pb', S.pagB, S.tamB, lista.length, [10, 20, 50]) : ''}` : sinOps ? `
+    <div class="vacio sin-ops">
+      <div class="vacio-ic">${BULB}</div>
+      <h3>Aún no hay operaciones</h3>
+      <p>Aquí verás las OPs que lleguen para aprobar.</p>
+    </div>` : `
     <div class="vacio sin-res">
       <div class="vacio-ic">${ic('buscar')}</div>
       <h3>Sin resultados</h3>
@@ -729,14 +807,17 @@ function vBandeja() {
 }
 
 // Fila de carga de la bandeja: mismas columnas y alto que una fila real; barras de 12 px como Figma (frame 20)
-const SK_B = [55, 50, 60, 55, 60, 45, 45, 35, 70];
+const SK_B = [55, 50, 55, 60, 55, 60, 40, 70];
 const filasSk = n => Array.from({ length: n }, () => `<tr>${SK_B.map(w => `<td><span class="sk" style="width:${w}%"></span></td>`).join('')}<td class="col-acc"><span class="sk" style="width:24px;margin:0 auto"></span></td></tr>`).join('');
 let timerB;
 // Simula la consulta al cambiar filtros, página o tamaño: skeleton breve y luego los datos (conserva foco y scroll)
 function cargarBandeja() {
   clearTimeout(timerB); S.cargandoB = true;
   timerB = setTimeout(() => {
-    S.cargandoB = false; if (S.vista !== 'bandeja') return;
+    if (S.vista !== 'bandeja') { S.cargandoB = false; return; }
+    // Error al cargar: la tabla sigue en carga y se avisa con el modal de error del sistema
+    if (SIM === 'error-carga') { modalErrorSistema(); return; }
+    S.cargandoB = false;
     const fid = document.activeElement?.id, x = $('#scroll-b')?.scrollLeft || 0;
     render(false); if (fid) enfocar(fid);
     const sc = $('#scroll-b'); if (sc) sc.scrollLeft = x; sombraScroll();
@@ -744,13 +825,18 @@ function cargarBandeja() {
 }
 
 /* ═══════════ Detalle ═══════════ */
+// Una sola alerta para todas las decisiones: la última, con quién, cuándo y la causal en segunda línea. Con más de una
+// (p. ej. rechazo + revocación) suma "Ver historial", que abre la secuencia completa (Javier, 09/10)
+const accionTxt = e => e.est === 'Revocado' ? 'Rechazo revocado' : e.est;
 function alerta(o) {
-  if (o.est === 'Pendiente') return '';
-  const [d, h] = o.fe;
-  return `<div class="alerta${o.anim ? ' nueva' : ''}" role="status">${ic('info')}<div>
-    <p><b>${o.est}</b> por <b>${esc(o.por)}</b> el ${d} a las ${h} hrs.</p>
-    ${o.est === 'Rechazada' ? `<p>Causal: <b>${esc(o.causal)}</b>${o.motivo ? ` <span class="sep">·</span> ${esc(o.motivo)}` : ''}</p>` : ''}
-  </div></div>`;
+  const u = o.ev[o.ev.length - 1];
+  if (!u) return '';
+  const [d, h] = u.fe, nueva = o.anim ? ' nueva' : '', causal = u.est === 'Rechazada' ? esc(causalTxt(u)) : '';
+  return `<div class="alerta${nueva}" role="status"><div class="alerta-m"><span class="alerta-ic">${ic('info')}</span><div class="alerta-t">
+      <p><b>${accionTxt(u)}</b> por <b>${esc(u.por)}</b> el ${d} a las ${h} hrs.</p>
+      ${causal ? `<p>Causal: <b>${causal}</b></p>` : ''}
+    </div></div>
+    ${o.ev.length > 1 ? '<button type="button" class="ver" id="ver-historial" data-a="historial">Ver historial</button>' : ''}</div>`;
 }
 function vDetalle() {
   const o = op(S.opId);
@@ -758,27 +844,18 @@ function vDetalle() {
   <header class="cab-pag"><h1>Detalle OP ${o.id}</h1>${migas(['Inicio', 'Aprobaciones de Pago', `Detalle OP ${o.id}`])}</header>
   <div id="zona-alerta">${alerta(o)}</div>
   <section class="card resumen" aria-label="Resumen de la OP">
-    <dl class="meta" style="margin:0">
+    <div class="resumen-in">
+    <div class="monto"><div class="etq">Monto a pagar</div><div class="cifra">${pesos(o.monto)}</div><div class="sub">${miles(o.val)} reembolsos</div></div>
+    <dl class="meta">
       <div><dt>Estado aprobación</dt><dd id="d-estado">${chip(o.est, o.anim)}</dd></div>
       <div><dt>Item de operación</dt><dd>Pago Reembolso</dd></div>
       <div><dt>Periodo contable</dt><dd>${o.per}</dd></div>
       <div><dt>Fecha solicitud centralizador</dt><dd>${o.sol[0]} <span class="sep">·</span> ${o.sol[1]} hrs.</dd></div>
+      <div><dt>Canal de origen</dt><dd>${o.canal}</dd></div>
     </dl>
-    <div class="cuadra">
-      <div class="monto"><div class="etq">Monto a pagar</div><div class="cifra">${pesos(o.monto)}</div><div class="sub">${miles(o.val)} reembolsos validados</div></div>
-      <div class="cuadratura"><h3>Cuadratura de la OP</h3>
-        <div class="cuad-cols">
-          <div><div class="etq">Recibidos</div><div class="val">${pesos(o.monto + o.montoExc)}</div><div class="sub">${miles(o.rec)} reembolsos</div></div>
-          <div><div class="etq">Excluidos</div><div class="val">${pesos(o.montoExc)}</div><div class="sub">${o.exc ? `${miles(o.exc)} reembolsos con error` : 'Sin reembolsos con error'}</div></div>
-        </div>
-      </div>
     </div>
   </section>
-  <div class="tabs" role="tablist" aria-label="Detalle reembolsos">
-    <button class="tab" role="tab" id="tab-val" type="button" aria-selected="${S.tab === 'val'}" tabindex="${S.tab === 'val' ? 0 : -1}" aria-controls="panel-tx" data-a="tab" data-v="val">Validados</button>
-    <button class="tab" role="tab" id="tab-exc" type="button" aria-selected="${S.tab === 'exc'}" tabindex="${S.tab === 'exc' ? 0 : -1}" aria-controls="panel-tx" data-a="tab" data-v="exc">Excluidos</button>
-  </div>
-  <section class="card" id="panel-tx" role="tabpanel" aria-labelledby="tab-${S.tab}"></section>
+  <section class="card" id="panel-tx" aria-label="Detalle reembolsos"></section>
   ${o.est === 'Pendiente' ? `
   <div class="barra-decision" id="barra-decision">
     <p>Al aprobar, se envían a SAP <b>${miles(o.val)} reembolsos</b> por <b>${pesos(o.monto)}</b>.</p>
@@ -786,12 +863,24 @@ function vDetalle() {
       <button class="btn btn-sec btn-140" type="button" id="det-rechazar" data-a="rechazar" data-id="${o.id}">Rechazar</button>
       <button class="btn btn-pri btn-140" type="button" id="det-aprobar" data-a="aprobar" data-id="${o.id}">Aprobar</button>
     </div>
+  </div>` : o.est === 'Rechazada' ? `
+  <div class="barra-decision" id="barra-decision">
+    <p><b>La OP no se envió a SAP.</b> Si el rechazo fue un error, puedes revocarlo.</p>
+    <div class="botones una"><button class="btn btn-pri" type="button" id="det-revocar" data-a="revocar" data-id="${o.id}">Revocar rechazo</button></div>
   </div>` : ''}`;
 }
+// Filtros del detalle (Javier, 09/10, "de momento, los definimos nosotros"): N° asiento exacto; el resto "contiene"
+const ETQ_D = { asiento:'N° asiento', cli:'Código cliente', banco:'Clave banco', cuenta:'Cuenta bancaria' };
+function filasD(o) {
+  const f = S.filtrosD, tiene = (x, v) => x != null && String(x).toLowerCase().includes(v.toLowerCase());
+  return transacciones(o).filter(t => (!f.asiento || t.asiento === +f.asiento) && (!f.cli || tiene(t.cli, f.cli))
+    && (!f.banco || tiene(t.banco, f.banco)) && (!f.cuenta || tiene(t.cuenta, f.cuenta)));
+}
+const chipsFiltroD = () => Object.keys(ETQ_D).filter(k => S.filtrosD[k]).map(k => [k, `${ETQ_D[k]}: ${S.filtrosD[k]}`]);
 function vTabla() {
-  const o = op(S.opId), tx = transacciones(o), exc = S.tab === 'exc';
-  const filas = ordenadasD(exc ? tx.exc : tx.val);
-  const sap = t => (!exc && o.est === 'Aprobada' && !o.enSesion) ? o.fe[0] : '—';
+  // Filtrar no cambia lo que se aprueba: la tarjeta resumen y la barra siguen con la OP completa
+  const o = op(S.opId), filas = ordenadasD(filasD(o)), chips = chipsFiltroD();
+  const sap = () => o.est === 'Aprobada' && !o.enSesion ? o.fe[0] : null;
   const nulo = v => v == null ? '<span class="vacio-celda">—</span>' : v;
   // Solo se ordenan las columnas que cambian entre reembolsos; las que son iguales en toda la OP no llevan caret
   const cols = [
@@ -799,24 +888,30 @@ function vTabla() {
     ['Item de proceso', () => 'PRE'], ['Descripción item proceso', () => 'Pago Reembolso'], ['N° asiento', t => t.asiento, 'asiento'],
     ['Fecha <br>contable', t => t.fecha, 'fecha'], ['Sociedad FI', () => 'CL07'], ['N° cuenta contable', t => nulo(t.cc)],
     ['Importe <br>documento', t => pesos(t.imp), 'imp'], ['Código cliente', t => t.cli, 'cli'], ['Clave <br>banco', t => t.banco, 'banco'],
-    ['Cuenta <br>bancaria', t => nulo(t.cuenta), 'cuenta'], ['Fecha registro en SAP', t => nulo(sap(t) === '—' ? null : sap(t))],
+    ['Cuenta <br>bancaria', t => nulo(t.cuenta), 'cuenta'], ['Fecha registro en SAP', () => nulo(sap())],
   ];
   // Anchos fijos de cada columna, iguales a Figma (frame 06); los títulos largos pasan a 2 líneas
   const ANCHOS_D = [140, 112, 160, 128, 200, 120, 136, 120, 168, 168, 152, 116, 152, 168];
   const ancho = i => ` style="width:${ANCHOS_D[i]}px;min-width:${ANCHOS_D[i]}px"`;
   const thOrd = (k, t, i) => { const a = S.ordenD.col === k; return `<th scope="col" class="ord${a ? ' activa' : ''}"${ancho(i)}${a ? ` aria-sort="${S.ordenD.dir === 'asc' ? 'ascending' : 'descending'}"` : ''}><button type="button" class="orden" id="ordd-${k}" data-a="ordenar-det" data-v="${k}">${t}${CARET}</button></th>`; };
-  const cab = `<div class="tabla-cab una">
-      <div><h2>${exc ? 'Reembolsos excluidos' : 'Detalle reembolsos'}</h2>${exc && (filas.length || S.cargando) ? `<div class="alerta simple">${ic('info')}<p>No se envían a SAP. Se corrigen y vuelven en una OP nueva.</p></div>` : ''}</div>
-      <div class="acciones"><button class="btn btn-sec" type="button" id="btn-exportar-det" data-a="exportar-det" ${filas.length ? '' : 'disabled'}>${ic('descarga')}Exportar detalle</button></div>
-    </div>`;
-  if (!filas.length && !S.cargando) return cab + `<div class="vacio"><div class="vacio-ic">${ic('check')}</div><h3>Esta OP no tiene reembolsos excluidos</h3><p>Todos los reembolsos recibidos pasaron la validación.</p></div>`;
+  const cab = `<div class="tabla-cab">
+      <div><h2>Detalle reembolsos</h2></div>
+      <div class="acciones">
+        <button class="btn btn-sec" type="button" id="btn-filtros-det" data-a="filtros-det">${ic('filtros')}Filtros</button>
+        <button class="btn btn-sec" type="button" id="btn-exportar-det" data-a="exportar-det" ${filas.length ? '' : 'disabled'}>${ic('descarga')}Exportar detalle</button>
+      </div>
+    </div>
+    ${chips.length ? `<div class="filtros-aplicados"><span class="etq">Filtros aplicados</span>
+      ${chips.map(([k, t]) => `<span class="chip-f">${esc(t)}<button type="button" data-a="quitar-filtro-det" data-v="${k}" aria-label="Quitar filtro ${esc(t)}">${ic('x')}</button></span>`).join('')}
+      <button type="button" class="link" data-a="limpiar-filtros-det">Limpiar filtros</button></div>` : ''}`;
+  if (!filas.length && !S.cargando) return cab + `<div class="vacio sin-res"><div class="vacio-ic">${ic('buscar')}</div><h3>Sin resultados</h3><p>Cambia o quita algún filtro para ver más resultados.</p></div>`;
   const maxPag = Math.max(0, Math.ceil(filas.length / S.tamD) - 1);
   if (S.pagD > maxPag) S.pagD = maxPag;
   const pagina = filas.slice(S.pagD * S.tamD, (S.pagD + 1) * S.tamD);
-  const head = cols.map(([t, , k], i) => k ? thOrd(k, t, i) : `<th scope="col"${ancho(i)}>${t}</th>`).join('') + (exc ? '<th scope="col" class="col-err">Error de validación</th>' : '');
+  const head = cols.map(([t, , k], i) => k ? thOrd(k, t, i) : `<th scope="col"${ancho(i)}>${t}</th>`).join('');
   const body = S.cargando
-    ? (pagina.length ? pagina : Array(5).fill(0)).map(() => `<tr>${cols.map(() => '<td><span class="sk" style="width:70%"></span></td>').join('')}${exc ? '<td class="col-err"><span class="sk" style="width:60%"></span></td>' : ''}</tr>`).join('')
-    : pagina.map(t => `<tr>${cols.map(([, f]) => `<td>${f(t)}</td>`).join('')}${exc ? `<td class="col-err">${t.error}</td>` : ''}</tr>`).join('');
+    ? (pagina.length ? pagina : Array(5).fill(0)).map(() => `<tr>${cols.map(() => '<td><span class="sk" style="width:70%"></span></td>').join('')}</tr>`).join('')
+    : pagina.map(t => `<tr>${cols.map(([, f]) => `<td>${f(t)}</td>`).join('')}</tr>`).join('');
   return cab + `<div class="tabla-scroll" id="scroll-d"><table class="tabla t-detalle" aria-busy="${S.cargando}"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`
     + (filas.length ? paginador('pd', S.pagD, S.tamD, filas.length, [10, 20, 50]) : '');
 }
@@ -836,10 +931,9 @@ function pintarTabla(conCarga) {
   const panel = $('#panel-tx'); if (!panel) return;
   clearTimeout(timerCarga);
   S.cargando = !!conCarga;
-  panel.setAttribute('aria-labelledby', 'tab-' + S.tab);
   panel.innerHTML = vTabla();
   sombraScroll();
-  if (conCarga) timerCarga = setTimeout(() => { S.cargando = false; const x = $('#scroll-d')?.scrollLeft || 0, fid = panel.contains(document.activeElement) && document.activeElement.id; panel.innerHTML = vTabla(); if (fid) enfocar(fid); const sc = $('#scroll-d'); if (sc) sc.scrollLeft = x; sombraScroll(); }, espera(420));
+  if (conCarga) timerCarga = setTimeout(() => { if (SIM === 'error-carga') { modalErrorSistema(); return; } S.cargando = false; const x = $('#scroll-d')?.scrollLeft || 0, fid = panel.contains(document.activeElement) && document.activeElement.id; panel.innerHTML = vTabla(); if (fid) enfocar(fid); const sc = $('#scroll-d'); if (sc) sc.scrollLeft = x; sombraScroll(); }, espera(420));
 }
 
 /* ═══════════ Centralizar/Pagos (base as-is de CCP, relevada en cert 08/10) ═══════════ */
@@ -870,9 +964,9 @@ const fechaC = d => `${d.slice(0, 6).replace(/\//g, '-')}20${d.slice(6)}`;  // D
 const SAP0 = { 11692:{ est:'En proceso' }, 11689:{ est:'Procesado con errores', err:3, fe:['02/10/26', '11:12'] }, 11688:{ est:'Proceso con éxito', fe:['02/10/26', '10:58'] },
   11679:{ est:'En propuesta', fe:['01/10/26', '09:40'], real:57913260 }, 11676:{ est:'Pagado', fe:['03/10/26', '12:15'], real:64230870 } };
 // OPs que llegan por sistema (canal AUTOMATICO; en cert sin nombre, aquí con nombre generado + etiqueta).
-// La carga por Excel es anterior al sistema: desde el corte (OP 11674, 28/09/26) todo llega por sistema (Javier, 08/10).
-// Incluye las pendientes de la bandeja del aprobador: aprobar o rechazar ahí cambia su estado aquí
-const SIS0 = new Set(OPS0.filter(o => o.id >= 11674).map(o => o.id));
+// Sale del Canal de origen de la bandeja: las Manual (Excel) se muestran como fila Excel; pendientes, ARCH. VAL. CON EXITO (Javier, 09/10).
+// Incluye las pendientes de la bandeja del aprobador: aprobar, rechazar o revocar ahí cambia su estado aquí
+const SIS0 = new Set(OPS0.filter(o => o.canal === 'Sistema').map(o => o.id));
 // Usuarios ficticios que cargan o solicitan (tooltip de N° Operación)
 const USUARIOS_C = ['psoto@ejemplo.cl', 'mdiaz@ejemplo.cl', 'afuentes@ejemplo.cl'];
 // Rechazos después de SAP: hoy los hace Beneficios (solicitante) con texto libre; causales genéricas como las de cert
@@ -897,13 +991,13 @@ function estadoSapHist(r, anio) {
 function filaC(o) {
   const r = rng(o.id * 7), sistema = SIS0.has(o.id);
   const [d, h] = o.sol, ss = String(Math.floor(r() * 60)).padStart(2, '0');
-  // Por sistema: nombre tipo generado (sin .xlsx) + etiqueta "Por sistema" (Javier, 08/10)
+  // Por sistema: nombre tipo generado (sin .xlsx). Todas las filas llevan tag de origen, "Por sistema" o "Manual" (Excel) (Javier, 09/10)
   const archivo = sistema ? `${iso(d).replace(/-/g, '')}-${h.replace(':', '')}${ss}-Pago-Reembolso-${o.id}`
     : `${iso(d).replace(/-/g, '')}-${h.replace(':', '')}${ss}-Pago-Reembolso-${String(1 + o.id % 3).padStart(3, '0')}-${o.id}.xlsx`;
   // Fecha Solicitud Centralizacion = cuando la OP llegó al sistema (la misma de la bandeja), en todas las filas (Javier, 08/10)
   const f = { id:o.id, per:o.per, sol:o.sol, fe:o.fe, archivo, sistema, monto:o.monto, real:0, val:o.val, sap:false, causal:'', usuario:USUARIOS_C[o.id % 3] };
-  if (o.est === 'Pendiente') return { ...f, est: sistema ? `Sol. validada con ${o.exc ? 'error' : 'éxito'}` : 'Arch. val. con éxito' };
-  if (o.est === 'Rechazada') return { ...f, est:'Rechazada', causal: o.causal === 'Otro' && o.motivo ? o.motivo : o.causal };
+  if (o.est === 'Pendiente') return { ...f, est: sistema ? 'Sol. validada con éxito' : 'Arch. val. con éxito' };
+  if (o.est === 'Rechazada') return { ...f, est:'Rechazada', causal: causalTxt(o) };
   const parcial = () => Math.round(o.monto * (.9 + r() * .08) / 10) * 10, hora = () => `${String(9 + Math.floor(r() * 9)).padStart(2, '0')}:${String(Math.floor(r() * 60)).padStart(2, '0')}`;
   let s = o.sapSim || (o.enSesion ? { est:'En proceso' } : SAP0[o.id]);
   if (!s) { const h0 = estadoSapHist(r, 2000 + +o.fe[0].slice(6)); s = { est:h0.est, fe: h0.dias ? [sumaHabiles(o.fe[0], h0.dias), hora()] : null }; }
@@ -955,7 +1049,7 @@ function vCentralizar() {
       <div class="campo"><label for="c-item">Item de Operación</label><select class="input" id="c-item" data-c="c-item" ${C.tipo ? '' : 'disabled'}>
         <option value="">Seleccione un Item</option>${opcionesItem()}</select></div>
       <button class="btn btn-pri" type="button" id="c-buscar" data-a="c-buscar" ${C.tipo && C.item ? '' : 'disabled'}>Buscar</button>
-      <button class="btn btn-sec c-cargar" type="button" disabled>${ic('subir')}Cargar archivo</button>
+      <button class="btn btn-sec c-cargar" type="button" id="c-cargar" data-a="c-cargar" ${b ? '' : 'disabled'}>${ic('subir')}Cargar archivo</button>
     </div>
   </section>
   <section class="card" aria-labelledby="t-hist-c">
@@ -979,9 +1073,9 @@ function vCentralizar() {
         <tbody>${C.cargando ? filasSkC(pagina.length || C.tam) : pagina.map(f => `<tr>
           <td>${perC(f.per)}</td>
           <td><span class="con-tip" tabindex="0" data-tip="op" data-id="${f.id}" aria-describedby="tip">${f.id}</span></td>
-          <td><span class="arch"><span class="trunc" title="${f.archivo}">${f.archivo}</span>${f.sistema ? '<span class="tag-orig">Por sistema</span>' : ''}</span></td>
+          <td><span class="arch"><span class="trunc" title="${f.archivo}">${f.archivo}</span><span class="tag-orig">${f.sistema ? 'Por sistema' : 'Manual'}</span></span></td>
           <td>${fechaC(f.sol[0])}</td>
-          <td>${f.causal ? `<span class="con-tip" tabindex="0" data-tip="txt" data-txt="${esc(f.causal)}" aria-describedby="tip">${estTxt(f)}</span>` : estTxt(f)}</td>
+          <td>${estTxt(f)}</td>
           <td>${fechaC(f.fe[0])}</td><td>${miles(f.monto)}</td><td>${miles(f.real)}</td>
           <td class="col-acc"><button type="button" class="kebab" id="accc-${f.id}" data-a="menu" data-m="c" data-id="${f.id}" aria-haspopup="menu" aria-expanded="false" aria-controls="menu" aria-label="Acciones de la OP ${f.id}">${KEBAB}</button></td>
         </tr>`).join('')}</tbody>
@@ -1001,8 +1095,19 @@ function tipOp(f) {
 }
 function verTip(el) {
   const t = $('#tip');
-  if (el.dataset.tip === 'op') { t.className = 'tip op'; t.innerHTML = tipOp(filaC(op(el.dataset.id))); }
-  else { t.className = 'tip osc'; t.textContent = el.dataset.txt; }
+  // Causal de la Rechazada en la bandeja: a la derecha del chip, centrado, con punta a la izquierda
+  if (el.dataset.tip === 'causal') {
+    const o = op(el.dataset.id);
+    t.className = 'tip causal';
+    t.innerHTML = o.causal === 'Otro' && o.motivo ? `<span>${esc(o.motivo)}</span>` : `<b>${esc(o.causal)}</b>`;
+    t.hidden = false;
+    const r = el.getBoundingClientRect();
+    t.style.top = (r.top + r.height / 2 - t.offsetHeight / 2) + 'px';
+    t.style.left = Math.min(r.right + 12, innerWidth - t.offsetWidth - 8) + 'px';
+    requestAnimationFrame(() => t.classList.add('vis'));
+    return;
+  }
+  t.className = 'tip op'; t.innerHTML = tipOp(filaC(op(el.dataset.id)));
   t.hidden = false;
   const r = el.getBoundingClientRect(), h = t.offsetHeight, w = t.offsetWidth;
   const abajo = r.bottom + 8 + h < innerHeight - 8;
@@ -1022,20 +1127,19 @@ function cargarC() {
     render(false); if (fid) enfocar(fid); sombraScroll();
   }, espera(420));
 }
-// Tipo e ítem se eligen sin repintar la vista; Buscar se habilita con ambos. Cargar archivo queda deshabilitado en la vista del aprobador (Javier, 08/10)
+// Tipo e ítem se eligen sin repintar la vista; Buscar se habilita con ambos. Cargar archivo se habilita con una operación buscada, como CCP (Javier, 09/10)
 function cambioBusqueda(c, v) {
   if (c === 'c-tipo') { C.tipo = v; C.item = ''; const it = $('#c-item'); it.innerHTML = '<option value="">Seleccione un Item</option>' + opcionesItem(); it.disabled = !v; }
   else C.item = v;
   $('#c-buscar').disabled = !(C.tipo && C.item);
 }
-// Menú como CCP: siempre las mismas acciones, deshabilitadas si no aplican. Se ocultan Solicitar Pago y Rechazar Solicitud (Javier, 08/10)
+// Menú solo con las descargas de CCP, deshabilitado lo que no aplica. Se quitan Borrar Archivo, Centralización Diaria,
+// Solicitar Pago y Rechazar Solicitud (Javier, 09/10)
 function menuC(o) {
   const f = filaC(o), it = (a, t, ok) => `<button type="button" role="menuitem" data-a="${ok ? a : 'nada'}" data-id="${f.id}"${ok ? '' : ' aria-disabled="true"'}>${t}</button>`;
   // Descargar Archivo siempre habilitado, también en las OPs por sistema (Javier, 08/10)
   return it('desc-arch', 'Descargar Archivo', true)
     + it('desc-mov', 'Descargar Movimientos con error', /val(\.|idada) con error/i.test(f.est))
-    // Sin Borrar Archivo; Centralización Diaria (siempre deshabilitada en CCP) no aparece en las OPs por sistema (Javier, 08/10)
-    + (f.sistema ? '' : it('nada', 'Centralización Diaria', false))
     + it('desc-sap', 'Descargar asientos con error SAP', f.est === 'Procesado con errores');
 }
 function modalFiltrosC() {
@@ -1079,15 +1183,16 @@ function render(anim = true) {
   if (S.vista === 'detalle') pintarTabla(anim);
   if (anim) { v.classList.remove('entra'); void v.offsetWidth; v.classList.add('entra'); }
   OPS.forEach(o => { o.anim = false; });
-  $('#punto').hidden = !OPS.some(o => o.est === 'Pendiente');
+  $('#punto').hidden = SIM === 'vacio' || !OPS.some(o => o.est === 'Pendiente');
   sombraScroll();
+  ubicarToasts();
 }
 function sombraScroll() {
   document.querySelectorAll('.tabla-scroll').forEach(sc => sc.classList.toggle('desborda', sc.scrollWidth - sc.clientWidth - sc.scrollLeft > 2));
 }
 function leerHash() {
-  const m = (location.hash || '').match(/^#\/op\/(\d+)(?:\/(excluidos))?/);
-  if (m && op(m[1])) { S.vista = 'detalle'; S.opId = +m[1]; S.tab = m[2] ? 'exc' : 'val'; }
+  const m = (location.hash || '').match(/^#\/op\/(\d+)/);
+  if (m && op(m[1])) { S.vista = 'detalle'; S.opId = +m[1]; }
   else if (location.hash === '#/centralizar') { S.vista = 'centralizar'; S.opId = null; }
   else { S.vista = 'bandeja'; S.opId = null; }
 }
@@ -1095,25 +1200,27 @@ function ir(hash) {
   try { if (location.hash !== hash) history.pushState(null, '', hash); } catch (e) {}
   if (hash === '#/') { S.vista = 'bandeja'; S.opId = null; }
   else if (hash === '#/centralizar') { S.vista = 'centralizar'; S.opId = null; }
-  else { const m = hash.match(/^#\/op\/(\d+)(?:\/(excluidos))?/); S.vista = 'detalle'; S.opId = +m[1]; S.tab = m[2] ? 'exc' : 'val'; S.pagD = 0; S.ordenD = { col:null, dir:null }; }
+  else { const m = hash.match(/^#\/op\/(\d+)/); S.vista = 'detalle'; S.opId = +m[1]; S.pagD = 0; S.ordenD = { col:null, dir:null }; S.filtrosD = { ...VACIO_D }; }
   cerrarTodo();
   render(true);
   window.scrollTo({ top: 0, behavior: reducido ? 'auto' : 'smooth' });
 }
-window.addEventListener('popstate', () => { leerHash(); S.pagD = 0; S.ordenD = { col:null, dir:null }; cerrarTodo(); if (!ocupado) cerrarModal($('#main')); render(true); });
+window.addEventListener('popstate', () => { leerHash(); S.pagD = 0; S.ordenD = { col:null, dir:null }; S.filtrosD = { ...VACIO_D }; cerrarTodo(); if (!ocupado) cerrarModal($('#main')); render(true); });
 
 /* ═══════════ Menú de acciones ═══════════ */
 let menuBtn = null;
 function abrirMenu(btn) {
   cerrarMenu(); cerrarPop();
-  const o = op(btn.dataset.id), pend = o.est === 'Pendiente';
+  const o = op(btn.dataset.id), pend = o.est === 'Pendiente', rech = o.est === 'Rechazada';
   const m = $('#menu');
   m.classList.toggle('ancho', btn.dataset.m === 'c');
   const dis = pend ? '' : ' aria-disabled="true"';
   m.innerHTML = btn.dataset.m === 'c' ? menuC(o) : `
     <button type="button" role="menuitem" id="m-ver" data-a="ver" data-id="${o.id}">Ver detalle</button>
     <button type="button" role="menuitem" id="m-aprobar" data-a="${pend ? 'aprobar' : 'nada'}" data-id="${o.id}"${dis}>Aprobar</button>
-    <button type="button" role="menuitem" id="m-rechazar" data-a="${pend ? 'rechazar' : 'nada'}" data-id="${o.id}"${dis}>Rechazar</button>`;
+    ${rech // En la Rechazada, "Revocar rechazo" reemplaza a Rechazar (Javier, 09/10)
+      ? `<button type="button" role="menuitem" id="m-revocar" data-a="revocar" data-id="${o.id}">Revocar rechazo</button>`
+      : `<button type="button" role="menuitem" id="m-rechazar" data-a="${pend ? 'rechazar' : 'nada'}" data-id="${o.id}"${dis}>Rechazar</button>`}`;
   m.hidden = false;
   const r = btn.getBoundingClientRect(), h = m.offsetHeight, w = m.offsetWidth;
   const abajo = r.bottom + 4 + h < innerHeight - 8;
@@ -1136,7 +1243,7 @@ function cerrarMenu(devolverFoco) {
 
 /* ═══════════ Notificaciones ═══════════ */
 function abrirPop() {
-  const p = $('#pop'), pend = OPS.filter(o => o.est === 'Pendiente');
+  const p = $('#pop'), pend = SIM === 'vacio' ? [] : OPS.filter(o => o.est === 'Pendiente');
   p.innerHTML = `<h3 tabindex="-1">Notificaciones</h3>${pend.length ? `<ul>${pend.map(o => `<li><button type="button" data-a="ver" data-id="${o.id}"><b>OP ${o.id} espera tu aprobación</b><small>${miles(o.val)} reembolsos <span class="sep">·</span> ${pesos(o.monto)} <span class="sep">·</span> ${o.sol[0]} ${o.sol[1]} hrs.</small></button></li>`).join('')}</ul>` : '<p class="nada">No tienes OPs pendientes de aprobación.</p>'}`;
   p.hidden = false;
   const r = $('#btn-campana').getBoundingClientRect();
@@ -1154,11 +1261,14 @@ function cerrarPop() {
 
 /* ═══════════ Modales ═══════════ */
 let focoPrevio = null, ocupado = false, abiertoEn = 0;
+// El cuerpo pasa a scroll solo si el contenido supera el alto máximo (con una lista de causales abierta no se recalcula)
+const roModal = new ResizeObserver(es => es.forEach(({ target:b }) => b.querySelector('.combo-lista.vis') || b.classList.toggle('con-scroll', b.scrollHeight > b.clientHeight + 1)));
 function abrirModal(html, alMontar) {
   focoPrevio = document.activeElement && document.activeElement.closest('#menu') ? menuBtn : document.activeElement;
   cerrarMenu(); cerrarPop();
   const c = $('#capa');
   c.innerHTML = html; c.hidden = false; abiertoEn = performance.now();
+  roModal.disconnect(); const cuerpo = c.querySelector('.modal>.modal-cuerpo, .modal>.linea'); cuerpo && roModal.observe(cuerpo);
   document.body.style.overflow = 'hidden';
   requestAnimationFrame(() => c.classList.add('vis'));
   alMontar && alMontar();
@@ -1175,8 +1285,8 @@ function cuerpoResumen(o, sap) {
   return `<dl class="res-m">
     <div><dt>Item de operación</dt><dd>Pago Reembolso</dd></div>
     <div><dt>Monto a pagar</dt><dd>${pesos(o.monto)}</dd></div>
-    <div><dt>Validados${sap ? ' <span class="sep">·</span> se envían a SAP' : ''}</dt><dd>${miles(o.val)}</dd></div>
-    <div><dt>Excluidos${sap ? ' <span class="sep">·</span> no se envían' : ''}</dt><dd>${miles(o.exc)}</dd></div>
+    <div><dt>Reembolsos${sap ? ' <span class="sep">·</span> se envían a SAP' : ''}</dt><dd>${miles(o.val)}</dd></div>
+    <div><dt>Canal de origen</dt><dd>${o.canal}</dd></div>
   </dl>`;
 }
 function modalAprobar(id) {
@@ -1188,6 +1298,14 @@ function modalAprobar(id) {
       <button class="btn btn-sec" type="button" id="m-cancelar" data-a="cerrar-modal">Cancelar</button>
       <button class="btn btn-pri" type="button" id="m-confirmar" data-a="confirmar-aprobar" data-id="${o.id}">Enviar a SAP</button>
     </div></div>`, () => $('#m-cancelar').focus());
+}
+// Error del sistema (ER1): no se pudo cargar la información; un solo botón, que cierra
+function modalErrorSistema() {
+  if (ocupado) return;
+  abrirModal(`<div class="modal modal-err" role="alertdialog" aria-modal="true" aria-labelledby="m-tit" aria-describedby="m-sub">
+    <div class="modal-cab"><span class="err-ic" aria-hidden="true">!</span><h2 id="m-tit">Tuvimos un problema</h2><p id="m-sub">El sistema no responde. Vuelve a intentarlo en unos minutos.</p></div>
+    <div class="modal-pie"><button class="btn btn-pri" type="button" id="m-entendido" data-a="cerrar-modal">Entendido</button></div>
+  </div>`, () => $('#m-entendido').focus());
 }
 let R = { causal:'', motivo:'', tocado:false };
 function modalRechazar(id) {
@@ -1209,8 +1327,8 @@ function modalRechazar(id) {
       <div class="plegable" id="pleg-otro"><div>
         <div class="campo">
           <label for="motivo">Describe el motivo</label>
-          <textarea class="input" id="motivo" rows="3" maxlength="120" placeholder="Explica qué debe corregir el solicitante" aria-describedby="motivo-err motivo-cont" tabindex="-1"></textarea>
-          <div class="campo-pie"><span class="err" id="motivo-err" aria-live="polite"></span><span id="motivo-cont">0/120</span></div>
+          <textarea class="input" id="motivo" rows="3" maxlength="80" placeholder="Explica qué debe corregir el solicitante" aria-describedby="motivo-msj motivo-cont" tabindex="-1"></textarea>
+          <div class="campo-pie"><span id="motivo-msj" aria-live="polite">Mínimo 10 caracteres</span><span id="motivo-cont">0/80</span></div>
         </div>
       </div></div>
     </div>
@@ -1265,10 +1383,60 @@ function validarRechazo() {
   $('#m-confirmar').disabled = !ok;
   const mostrar = R.causal === 'Otro' && R.tocado && R.motivo.trim().length < 10;
   const mot = $('#motivo');
-  $('#motivo-err').textContent = mostrar ? 'Escribe al menos 10 caracteres.' : '';
+  const msj = $('#motivo-msj');
+  msj.textContent = mostrar ? 'Escribe al menos 10 caracteres.' : 'Mínimo 10 caracteres';
+  msj.classList.toggle('err', mostrar);
   mot.classList.toggle('invalido', mostrar);
   mot.setAttribute('aria-invalid', mostrar);
-  $('#motivo-cont').textContent = R.motivo.trim().length + '/120';
+  $('#motivo-cont').textContent = R.motivo.trim().length + '/80';
+}
+// Revocar rechazo (Javier, 09/10): sin motivo; la OP vuelve a Pendiente y queda el registro de quién y cuándo
+function modalRevocar(id) {
+  const o = op(id), u = o.ev[o.ev.length - 1];
+  abrirModal(`<div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-tit" aria-describedby="m-sub">
+    <div class="modal-cab"><h2 id="m-tit">Revocar rechazo OP ${o.id}</h2><p id="m-sub">La OP vuelve a Pendiente. Queda registrado con tu usuario, fecha y hora.</p></div>
+    <div class="modal-cuerpo"><dl class="res-m">
+      <div><dt>Rechazada por</dt><dd>${esc(u.por)}</dd></div>
+      <div><dt>Fecha de rechazo</dt><dd>${u.fe[0]} <span class="sep">·</span> ${u.fe[1]} hrs.</dd></div>
+      <div class="full"><dt>Causal</dt><dd>${esc(causalTxt(o))}</dd></div>
+    </dl></div>
+    <div class="modal-pie">
+      <button class="btn btn-sec" type="button" id="m-cancelar" data-a="cerrar-modal">Cancelar</button>
+      <button class="btn btn-pri" type="button" id="m-confirmar" data-a="confirmar-revocar" data-id="${o.id}">Confirmar</button>
+    </div></div>`, () => $('#m-cancelar').focus());
+}
+// Historial de decisiones (Javier, 09/10): la más reciente arriba y "Llegó para aprobación" al final. Se cierra con la X, sin botones
+function modalHistorial(id) {
+  const o = op(id), quien = (p, [d, h]) => `${esc(p)} <span class="sep">·</span> ${d} <span class="sep">·</span> ${h} hrs.`;
+  const pasos = [...o.ev].reverse().map(e => ({ hito: e.est === 'Revocado' ? 'Pendiente' : e.est, acc: accionTxt(e), quien: quien(e.por, e.fe), causal: e.est === 'Rechazada' ? causalTxt(e) : '' }))
+    .concat({ hito:'Pendiente', acc:'Llegó para aprobación', quien: quien(o.canal, o.sol), causal:'' });
+  abrirModal(`<div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-tit">
+    <div class="hist-cab"><div><h2 id="m-tit">Historial de decisiones</h2><p>OP ${o.id} <span class="sep">·</span> Estado actual ${chip(o.est)}</p></div>
+      <button type="button" class="cerrar" id="m-cerrar" data-a="cerrar-modal" aria-label="Cerrar">${ic('x')}</button></div>
+    <ol class="linea">${pasos.map(p => `<li class="paso"><span class="riel" aria-hidden="true"><span class="hito ${p.hito}"></span><i></i></span>
+      <div class="paso-c"><b>${p.acc}</b><span>${p.quien}</span>${p.causal ? `<div class="caja-causal">Causal: <b>${esc(p.causal)}</b></div>` : ''}</div></li>`).join('')}</ol>
+  </div>`, () => $('#m-cerrar').focus());
+}
+// Filtros del detalle: mismo patrón que la bandeja (Aplicar se habilita solo si hay cambios)
+function modalFiltrosD() {
+  const f = S.filtrosD;
+  abrirModal(`<form class="modal" role="dialog" aria-modal="true" aria-labelledby="m-tit" id="f-filtros-d" novalidate style="width:720px">
+    <div class="modal-cab"><h2 id="m-tit">Filtros</h2><p>Filtra los reembolsos de la OP ${S.opId}.</p></div>
+    <div class="modal-cuerpo"><div class="grid-f">
+      <div class="campo"><label for="fd-asiento">N° asiento</label><input class="input" id="fd-asiento" inputmode="numeric" maxlength="3" autocomplete="off" placeholder="Ej: 25" value="${esc(f.asiento)}"></div>
+      <div class="campo"><label for="fd-cli">Código cliente</label><input class="input" id="fd-cli" maxlength="12" autocomplete="off" placeholder="Ej: I15521774K" value="${esc(f.cli)}"></div>
+      <div class="campo"><label for="fd-banco">Clave banco</label><input class="input" id="fd-banco" inputmode="numeric" maxlength="3" autocomplete="off" placeholder="Ej: 037" value="${esc(f.banco)}"></div>
+      <div class="campo"><label for="fd-cuenta">Cuenta bancaria</label><input class="input" id="fd-cuenta" inputmode="numeric" maxlength="12" autocomplete="off" placeholder="Ej: 57974882" value="${esc(f.cuenta)}"></div>
+    </div></div>
+    <div class="modal-pie">
+      <button class="btn btn-sec" type="button" id="fd-cancelar" data-a="cerrar-modal">Cancelar</button>
+      <button class="btn btn-pri" type="submit" id="fd-aplicar" disabled>Aplicar filtros</button>
+    </div></form>`, () => $('#fd-asiento').focus());
+}
+const leerFiltrosD = () => { const v = id => $('#fd-' + id).value.trim(); return { asiento:v('asiento'), cli:v('cli'), banco:v('banco'), cuenta:v('cuenta') }; };
+function revisarFiltrosD() {
+  const b = $('#fd-aplicar'); if (!b) return;
+  const nf = leerFiltrosD(); b.disabled = Object.keys(nf).every(k => nf[k] === S.filtrosD[k]);
 }
 function modalFiltros() {
   const f = S.filtros;
@@ -1282,6 +1450,8 @@ function modalFiltros() {
         <option value="">Selecciona</option>${PERIODOS.map(p => `<option value="${p.v}" ${f.per === p.v ? 'selected' : ''}>${p.t}</option>`).join('')}</select></div>
       <div class="campo"><label for="f-sol">Fecha solicitud centralizador</label><input class="input" type="date" id="f-sol" value="${f.sol}" aria-describedby="f-sol-nota" data-cal><p class="campo-nota" id="f-sol-nota" aria-live="polite"></p></div>
       <div class="campo"><label for="f-fe">Fecha estado</label><input class="input" type="date" id="f-fe" value="${f.fe}" aria-describedby="f-fe-nota" data-cal><p class="campo-nota" id="f-fe-nota" aria-live="polite"></p></div>
+      <div class="campo"><label for="f-canal">Canal de origen</label><select class="input" id="f-canal">
+        <option value="">Selecciona</option>${['Sistema', 'Manual'].map(c => `<option ${f.canal === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
     </div></div>
     <div class="modal-pie">
       <button class="btn btn-sec" type="button" id="f-cancelar" data-a="cerrar-modal">Cancelar</button>
@@ -1289,7 +1459,7 @@ function modalFiltros() {
     </div></form>`, () => { ajustarFechas(); revisarFiltros(); $('#f-op').focus(); });
 }
 // Aplicar filtros se habilita solo si el formulario cambia respecto de los filtros aplicados (Figma F2/F3)
-const leerFiltros = () => { const v = id => $('#' + id).value; return { op:v('f-op').trim(), est:v('f-est'), per:v('f-per'), sol:v('f-sol'), fe:v('f-fe') }; };
+const leerFiltros = () => { const v = id => $('#' + id).value; return { op:v('f-op').trim(), est:v('f-est'), per:v('f-per'), sol:v('f-sol'), fe:v('f-fe'), canal:v('f-canal') }; };
 function revisarFiltros() {
   const b = $('#f-aplicar'); if (!b) return;
   const nf = leerFiltros(); b.disabled = Object.keys(nf).every(k => nf[k] === (S.filtros[k] || ''));
@@ -1337,10 +1507,12 @@ function respuestaSap(o) {
     const sc = $('#scroll-c'); if (sc) sc.scrollLeft = x; sombraScroll(); if (fid) $('#' + fid)?.focus({ preventScroll: true });
   }
 }
-function decidir(id, est, causal, motivo) {
-  const o = op(id);
+// est = 'Pendiente' es revocar un rechazo. Cada decisión queda como evento; Fecha estado = la de la última decisión (Javier, 09/10)
+function decidir(id, est, causal = '', motivo = '') {
+  const o = op(id), fe = [HOY, horaAhora()];
   if (filtradas().includes(o)) S.retener.add(o.id);
-  Object.assign(o, { est, fe:[HOY, horaAhora()], por:USUARIO, causal, motivo, anim:true, enSesion:true });
+  o.ev.push({ est: est === 'Pendiente' ? 'Revocado' : est, por:USUARIO, fe:[...fe], causal, motivo });
+  Object.assign(o, { est, fe, por:USUARIO, causal, motivo, anim:true, enSesion:true });
   if (est === 'Aprobada') setTimeout(() => respuestaSap(o), espera(10000));
   ocupado = false;
   const barra = $('#barra-decision');
@@ -1351,19 +1523,35 @@ function decidir(id, est, causal, motivo) {
     if (!eraDetalle) { const k = $('#acc-' + id); if (k) k.focus({ preventScroll: true }); }
     // Desde el detalle se vuelve al inicio de la página para ver el estado actualizado junto al snackbar (Javier, 07/10)
     else { $('h1').setAttribute('tabindex', '-1'); $('h1').focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: reducido ? 'auto' : 'smooth' }); }
-    toast(est === 'Aprobada' ? `La OP ${id} se aprobó y se envió a SAP` : `La OP ${id} se rechazó`, 'ok');
+    toast(est === 'Aprobada' ? `La OP ${id} se aprobó y se envió a SAP` : est === 'Rechazada' ? `La OP ${id} se rechazó` : `La OP ${id} volvió a Pendiente`, 'ok');
   };
   if (barra && S.vista === 'detalle') { barra.classList.add('saliendo'); setTimeout(pintar, espera(120)); } else pintar();
 }
 function ocupar(btn, texto) {
-  ocupado = true;
+  ocupado = true; btn._html = btn.innerHTML;
+  $('#aviso-error')?.remove();
   btn.disabled = false; btn.setAttribute('aria-disabled', 'true'); btn.style.pointerEvents = 'none';
   btn.style.minWidth = btn.offsetWidth + 'px'; btn.setAttribute('aria-busy', 'true');
   btn.innerHTML = `<svg class="cargador" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/></svg><span class="sr">${texto}</span>`;
   $('#m-cancelar').setAttribute('aria-disabled', 'true');
 }
+function liberar(btn) {
+  btn.innerHTML = btn._html; btn.style.minWidth = btn.style.pointerEvents = '';
+  btn.removeAttribute('aria-busy'); btn.removeAttribute('aria-disabled');
+  $('#m-cancelar').removeAttribute('aria-disabled');
+  ocupado = false;
+}
+// Error de una acción (ER2, ER3): el modal sigue abierto con lo ingresado y un aviso de error; el botón principal reintenta
+function falloAccion(btn, msg) {
+  liberar(btn);
+  const cuerpo = $('#capa .modal-cuerpo');
+  cuerpo.insertAdjacentHTML('beforeend', `<div class="alerta error nueva" id="aviso-error" role="alert"><div class="alerta-m"><span class="ic-err">${XCIRC}</span><div class="alerta-t"><p>${msg}</p></div></div></div>`);
+  cuerpo.classList.toggle('con-scroll', cuerpo.scrollHeight > cuerpo.clientHeight + 1);
+  cuerpo.scrollTo({ top: cuerpo.scrollHeight, behavior: reducido ? 'auto' : 'smooth' });
+  btn.focus({ preventScroll: true });
+}
 
-// Exportar: el botón muestra carga, mantiene su ancho y al terminar avisa con snackbar de éxito
+// Exportar: el botón muestra carga, mantiene su ancho y al terminar avisa con snackbar de éxito (o de error, ER4)
 function exportando(btn, msg) {
   if (btn.getAttribute('aria-busy') === 'true') return;
   const id = btn.id, html = btn.innerHTML;
@@ -1376,15 +1564,21 @@ function exportando(btn, msg) {
       b.innerHTML = html; b.style.minWidth = b.style.pointerEvents = '';
       b.removeAttribute('aria-busy'); b.removeAttribute('aria-disabled');
     }
-    toast(msg, 'ok');
+    if (falla('error-exportar')) toast('No pudimos descargar el archivo. Vuelve a intentarlo.', 'error'); else toast(msg, 'ok');
   }, espera(1200));
 }
 
 /* ═══════════ Toasts ═══════════ */
+// Con barra de decisión visible, los avisos salen sobre ella para no tapar los botones
+function ubicarToasts() {
+  const b = $('.barra-decision'), r = b && b.getBoundingClientRect();
+  $('#toasts').style.bottom = r && r.top > 0 && r.top < innerHeight ? (innerHeight - r.top + 12) + 'px' : '';
+}
 function toast(msg, tipo = 'ok') {
   const t = document.createElement('div');
   t.className = 'toast ' + tipo;
-  t.innerHTML = ic(tipo === 'ok' ? 'check' : 'info') + `<span>${esc(msg)}</span>`;
+  t.innerHTML = (tipo === 'error' ? `<span class="ic-err">${XCIRC}</span>` : ic(tipo === 'ok' ? 'check' : 'info')) + `<span>${esc(msg)}</span>`;
+  ubicarToasts();
   $('#toasts').append(t);
   requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('vis')));
   setTimeout(() => { t.classList.remove('vis'); setTimeout(() => t.remove(), 300); }, 5000);
@@ -1408,18 +1602,14 @@ const ACC = {
   ver: el => ir('#/op/' + el.dataset.id),
   aprobar: el => modalAprobar(el.dataset.id),
   rechazar: el => modalRechazar(el.dataset.id),
+  revocar: el => modalRevocar(el.dataset.id),
+  historial: () => modalHistorial(S.opId),
   nada: () => {},
   'cerrar-modal': () => cerrarModal(),
-  'confirmar-aprobar': el => { if (ocupado) return; ocupar(el, 'Enviando a SAP…'); setTimeout(() => decidir(+el.dataset.id, 'Aprobada'), espera(1200)); },
+  'confirmar-aprobar': el => { if (ocupado) return; ocupar(el, 'Enviando a SAP…'); setTimeout(() => (falla('error-aprobar') ? falloAccion(el, 'No pudimos registrar la aprobación. Vuelve a intentarlo.') : decidir(+el.dataset.id, 'Aprobada')), espera(1200)); },
+  'confirmar-revocar': el => { if (ocupado) return; ocupar(el, 'Revocando…'); setTimeout(() => (falla('error-aprobar') ? falloAccion(el, 'No pudimos revocar el rechazo. Vuelve a intentarlo.') : decidir(+el.dataset.id, 'Pendiente')), espera(800)); },
   combo: () => (comboAbierto() ? cerrarCombo() : abrirCombo()),
   causal: el => elegirCausal(el.dataset.v),
-  tab: el => {
-    if (S.tab === el.dataset.v) return;
-    S.tab = el.dataset.v; S.pagD = 0; S.ordenD = { col:null, dir:null };
-    try { history.replaceState(null, '', `#/op/${S.opId}${S.tab === 'exc' ? '/excluidos' : ''}`); } catch (e) {}
-    document.querySelectorAll('.tab').forEach(t => { t.setAttribute('aria-selected', t.dataset.v === S.tab); t.tabIndex = t.dataset.v === S.tab ? 0 : -1; });
-    pintarTabla(true);
-  },
   ordenar: el => {
     const k = el.dataset.v, o = S.orden;
     S.orden = { col:k, dir: o.col === k && o.dir === 'asc' ? 'desc' : 'asc' }; S.pagB = 0;
@@ -1433,6 +1623,9 @@ const ACC = {
   'pb-pag': el => { S.pagB += +el.dataset.v; cargarBandeja(); render(false); enfocar(el.id); verTabla('#scroll-b'); },
   'pd-pag': el => { S.pagD += +el.dataset.v; pintarTabla(true); enfocar(el.id); verTabla('#panel-tx'); },
   filtros: () => modalFiltros(),
+  'filtros-det': () => modalFiltrosD(),
+  'quitar-filtro-det': el => { S.filtrosD[el.dataset.v] = ''; S.pagD = 0; pintarTabla(true); $('#btn-filtros-det')?.focus(); },
+  'limpiar-filtros-det': () => { S.filtrosD = { ...VACIO_D }; S.pagD = 0; pintarTabla(true); $('#btn-filtros-det')?.focus(); },
   'c-buscar': () => { C.buscado = { tipo:C.tipo, item:C.item }; C.pag = 0; C.orden = { col:'id', dir:'desc' }; C.filtros = { ...VACIO_C }; cargarC(); render(false); $('#c-buscar')?.focus({ preventScroll: true }); },
   'ordenar-c': el => { const k = el.dataset.v, o = C.orden; C.orden = { col:k, dir: o.col === k && o.dir === 'asc' ? 'desc' : 'asc' }; C.pag = 0; cargarC(); render(false); $('#ordc-' + k)?.focus({ preventScroll: true }); },
   'pc-pag': el => { C.pag += +el.dataset.v; cargarC(); render(false); enfocar(el.id); verTabla('#scroll-c'); },
@@ -1442,11 +1635,12 @@ const ACC = {
   'desc-arch': () => { cerrarMenu(true); toast('Su documento se esta descargando', 'info'); },
   'desc-mov': () => { cerrarMenu(true); toast('Se ha generado su documento exitosamente', 'ok'); },
   'desc-sap': () => { cerrarMenu(true); toast('Se ha generado su documento exitosamente', 'ok'); },
-  'quitar-filtro': el => { const k = el.dataset.v, f = S.filtros; if (k === 'op') f.op = ''; if (k === 'est') f.est = ''; if (k === 'per') f.per = ''; if (k === 'sol') f.sol = ''; if (k === 'fe') f.fe = ''; S.retener.clear(); S.pagB = 0; cargarBandeja(); render(false); $('#btn-filtros')?.focus(); },
+  'c-cargar': () => toast('Cargar archivo no está disponible en el prototipo', 'info'),
+  'quitar-filtro': el => { S.filtros[el.dataset.v] = ''; S.retener.clear(); S.pagB = 0; cargarBandeja(); render(false); $('#btn-filtros')?.focus(); },
   'limpiar-filtros': () => { S.filtros = { ...VACIO }; S.retener.clear(); S.pagB = 0; cargarBandeja(); render(false); $('#btn-filtros')?.focus(); },
   exportar: el => exportando(el, `Se descargó HistorialAprobaciones_06102026.xlsx (${filtradas().length} OPs, en el orden de la grilla)`),
   // En pantalla, una fila por asiento; el Excel lleva 2 filas por asiento (debe y haber), como va a SAP (Javier, 07/10)
-  'exportar-det': el => { const tx = transacciones(op(S.opId)), exc = S.tab === 'exc', n = (exc ? tx.exc : tx.val).length; exportando(el, `Se descargó Detalle_OP_${S.opId}.xlsx (${miles(n)} reembolsos ${exc ? 'excluidos' : 'validados'} en ${miles(n * 2)} filas: debe y haber)`); },
+  'exportar-det': el => { const n = filasD(op(S.opId)).length; exportando(el, `Se descargó Detalle_OP_${S.opId}.xlsx (${miles(n)} reembolsos en ${miles(n * 2)} filas: debe y haber)`); },
 };
 
 document.addEventListener('click', ev => {
@@ -1460,6 +1654,7 @@ document.addEventListener('click', ev => {
   if (f) f(el, ev);
 });
 document.addEventListener('change', ev => {
+  if (ev.target.id === 'sim') return simular(ev.target.value);
   const c = ev.target.dataset.c;
   if (c === 'pb-tam') { S.tamB = +ev.target.value; S.pagB = 0; cargarBandeja(); render(false); $('#pb-tam')?.focus(); }
   if (c === 'pc-tam') { C.tam = +ev.target.value; C.pag = 0; cargarC(); render(false); $('#pc-tam')?.focus(); }
@@ -1473,9 +1668,11 @@ document.addEventListener('input', ev => {
   if (ev.target.id === 'motivo') { R.motivo = ev.target.value; if (R.motivo.trim().length >= 10) R.tocado = true; validarRechazo(); }
   if (ev.target.id === 'f-op') { ev.target.value = ev.target.value.replace(/\D/g, ''); revisarFiltros(); }
   if (ev.target.id === 'fc-op') ev.target.value = ev.target.value.replace(/\D/g, '');
+  if (['fd-asiento', 'fd-banco', 'fd-cuenta'].includes(ev.target.id)) ev.target.value = ev.target.value.replace(/\D/g, '');
+  if (ev.target.closest?.('#f-filtros-d')) revisarFiltrosD();
   if (ev.target.closest?.('#f-filtros-c')) revisarFiltrosC();
 });
-// Tooltips de Centralizar: hover y foco de teclado
+// Tooltips (N° Operación en Centralizar y causal de la Rechazada en el historial): hover y foco de teclado
 document.addEventListener('mouseover', ev => { const el = ev.target.closest?.('[data-tip]'); if (el && !el.contains(ev.relatedTarget)) verTip(el); });
 document.addEventListener('mouseout', ev => { const el = ev.target.closest?.('[data-tip]'); if (el && !el.contains(ev.relatedTarget)) ocultarTip(); });
 document.addEventListener('focusin', ev => { if (ev.target.dataset?.tip) verTip(ev.target); });
@@ -1486,7 +1683,7 @@ document.addEventListener('submit', ev => {
   if (ev.target.id === 'f-rechazo') {
     const b = $('#m-confirmar'); if (b.disabled || ocupado) return;
     ocupar(b, 'Rechazando…');
-    setTimeout(() => decidir(+b.dataset.id, 'Rechazada', R.causal, R.causal === 'Otro' ? R.motivo.trim() : ''), espera(800));
+    setTimeout(() => (falla('error-rechazar') ? falloAccion(b, 'No pudimos registrar el rechazo. Vuelve a intentarlo.') : decidir(+b.dataset.id, 'Rechazada', R.causal, R.causal === 'Otro' ? R.motivo.trim() : '')), espera(800));
   }
   if (ev.target.id === 'f-filtros-c') {
     if ($('#fc-aplicar').disabled) return;
@@ -1494,6 +1691,13 @@ document.addEventListener('submit', ev => {
     cerrarModal($('#c-btn-filtros'));
     cargarC(); render(false);
     $('#c-btn-filtros')?.focus({ preventScroll: true });
+  }
+  if (ev.target.id === 'f-filtros-d') {
+    if ($('#fd-aplicar').disabled) return;
+    S.filtrosD = leerFiltrosD(); S.pagD = 0;
+    cerrarModal($('#btn-filtros-det'));
+    pintarTabla(true);
+    $('#btn-filtros-det')?.focus({ preventScroll: true });
   }
   if (ev.target.id === 'f-filtros') {
     if ($('#f-aplicar').disabled) return;
@@ -1512,13 +1716,6 @@ document.addEventListener('keydown', ev => {
     if (['Enter', ' ', 'ArrowDown'].includes(ev.key)) abrirCalendario(ev.target);
     if (['Delete', 'Backspace'].includes(ev.key) && ev.target.value) { ev.target.value = ''; if (ev.target.closest('#f-filtros')) { ajustarFechas(ev.target.id); revisarFiltros(); } else revisarFiltrosC(); }
     return;
-  }
-  // Pestañas: flechas, Inicio y Fin
-  if (ev.target.matches?.('[role=tab]') && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(ev.key)) {
-    ev.preventDefault();
-    const tabs = [...document.querySelectorAll('[role=tab]')], i = tabs.indexOf(ev.target);
-    const k = ev.key === 'Home' ? 0 : ev.key === 'End' ? tabs.length - 1 : (i + (ev.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
-    tabs[k].focus(); tabs[k].click(); return;
   }
   // Combo de causales
   if (ev.target.id === 'causal-btn') {
@@ -1590,7 +1787,7 @@ $('#btn-campana').addEventListener('click', () => ($('#pop').hidden ? abrirPop()
 $('#btn-salir').addEventListener('click', () => toast('Cerrar sesión no está disponible en el prototipo', 'info'));
 $('#btn-reiniciar').addEventListener('click', () => {
   reiniciar(); for (const k in cacheTx) delete cacheTx[k];
-  ocupado = false; cerrarModal(); ir('#/'); toast('Prototipo reiniciado', 'info');
+  SIM = ''; $('#sim').value = ''; ocupado = false; cerrarModal(); ir('#/'); toast('Prototipo reiniciado', 'info');
 });
 
 reiniciar();
