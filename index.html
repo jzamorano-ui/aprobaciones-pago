@@ -933,7 +933,7 @@ function pintarTabla(conCarga) {
   S.cargando = !!conCarga;
   panel.innerHTML = vTabla();
   sombraScroll();
-  if (conCarga) timerCarga = setTimeout(() => { if (SIM === 'error-carga') { modalErrorSistema(); return; } S.cargando = false; const x = $('#scroll-d')?.scrollLeft || 0, fid = panel.contains(document.activeElement) && document.activeElement.id; panel.innerHTML = vTabla(); if (fid) enfocar(fid); const sc = $('#scroll-d'); if (sc) sc.scrollLeft = x; sombraScroll(); }, espera(420));
+  if (conCarga) timerCarga = setTimeout(() => { if (S.vista !== 'detalle' || !panel.isConnected) { S.cargando = false; return; } if (SIM === 'error-carga') { modalErrorSistema(); return; } S.cargando = false; const x = $('#scroll-d')?.scrollLeft || 0, fid = panel.contains(document.activeElement) && document.activeElement.id; panel.innerHTML = vTabla(); if (fid) enfocar(fid); const sc = $('#scroll-d'); if (sc) sc.scrollLeft = x; sombraScroll(); }, espera(420));
 }
 
 /* ═══════════ Centralizar/Pagos (base as-is de CCP, relevada en cert 08/10) ═══════════ */
@@ -1116,11 +1116,12 @@ function ocultarTip() { const t = $('#tip'); t.classList.remove('vis'); t.hidden
 const SK_C = [55, 40, 80, 50, 70, 60, 60, 40];
 const filasSkC = n => Array.from({ length: n }, () => `<tr>${SK_C.map(w => `<td><span class="sk" style="width:${w}%"></span></td>`).join('')}<td class="col-acc"><span class="sk" style="width:24px;margin:0 auto"></span></td></tr>`).join('');
 let timerC;
-function cargarC() {
+// Filtros está deshabilitado mientras carga: si el foco se perdió al repintar, vuelve a destino al terminar
+function cargarC(destino) {
   clearTimeout(timerC); C.cargando = true;
   timerC = setTimeout(() => {
     C.cargando = false; if (S.vista !== 'centralizar') return;
-    const fid = document.activeElement?.id;
+    const fid = document.activeElement?.id || destino;
     render(false); if (fid) enfocar(fid); sombraScroll();
   }, espera(420));
 }
@@ -1258,6 +1259,8 @@ function cerrarPop() {
 
 /* ═══════════ Modales ═══════════ */
 let focoPrevio = null, ocupado = false, abiertoEn = 0;
+// Mientras el modal se desvanece no acepta confirmaciones ni recibe foco
+const modalVisible = () => $('#capa').classList.contains('vis');
 // El cuerpo pasa a scroll solo si el contenido supera el alto máximo (con una lista de causales abierta no se recalcula)
 const roModal = new ResizeObserver(es => es.forEach(({ target:b }) => b.querySelector('.combo-lista.vis') || b.classList.toggle('con-scroll', b.scrollHeight > b.clientHeight + 1)));
 function abrirModal(html, alMontar) {
@@ -1476,7 +1479,7 @@ function ajustarFechas(origen) {
   [sol, fe].forEach(i => {
     if (i.value && (i.value < ini || i.value > fin)) {
       i.value = '';
-      nota(i, per && origen === 'f-per' ? `Se quitó la fecha: no está en ${periodoTxt(per)}.` : `Elige una fecha entre ${corta(ini)} y ${corta(fin)}.`);
+      nota(i, per && origen === 'f-per' ? `Se quitó la fecha: no está en ${periodoTxt(per).toLowerCase()}.` : `Elige una fecha entre ${corta(ini)} y ${corta(fin)}.`);
     }
   });
   if (sol.value && fe.value && fe.value < sol.value) {
@@ -1511,13 +1514,13 @@ function decidir(id, est, causal = '', motivo = '') {
   o.ev.push({ est: est === 'Pendiente' ? 'Revocado' : est, por:USUARIO, fe:[...fe], causal, motivo });
   Object.assign(o, { est, fe, por:USUARIO, causal, motivo, anim:true, enSesion:true });
   if (est === 'Aprobada') setTimeout(() => respuestaSap(o), espera(10000));
-  ocupado = false;
   const barra = $('#barra-decision');
   const pintar = () => {
+    ocupado = false;
     const eraDetalle = S.vista === 'detalle';
     cerrarModal(eraDetalle ? $('h1') : null);
     render(false);
-    if (!eraDetalle) { const k = $('#acc-' + id); if (k) k.focus({ preventScroll: true }); }
+    if (!eraDetalle) { const k = $('#acc-' + id) || $('#btn-filtros'); if (k) k.focus({ preventScroll: true }); }
     // Desde el detalle se vuelve al inicio de la página para ver el estado actualizado junto al snackbar (Javier, 07/10)
     else { $('h1').setAttribute('tabindex', '-1'); $('h1').focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: reducido ? 'auto' : 'smooth' }); }
     toast(est === 'Aprobada' ? `La OP ${id} se aprobó y se envió a SAP` : est === 'Rechazada' ? `La OP ${id} se rechazó` : `La OP ${id} volvió a Pendiente`, 'ok');
@@ -1603,8 +1606,8 @@ const ACC = {
   historial: () => modalHistorial(S.opId),
   nada: () => {},
   'cerrar-modal': () => cerrarModal(),
-  'confirmar-aprobar': el => { if (ocupado) return; ocupar(el, 'Enviando a SAP…'); setTimeout(() => (falla('error-aprobar') ? falloAccion(el, 'No pudimos registrar la aprobación. Vuelve a intentarlo.') : decidir(+el.dataset.id, 'Aprobada')), espera(1200)); },
-  'confirmar-revocar': el => { if (ocupado) return; ocupar(el, 'Revocando…'); setTimeout(() => (falla('error-aprobar') ? falloAccion(el, 'No pudimos revocar el rechazo. Vuelve a intentarlo.') : decidir(+el.dataset.id, 'Pendiente')), espera(800)); },
+  'confirmar-aprobar': el => { if (ocupado || !modalVisible()) return; ocupar(el, 'Enviando a SAP…'); setTimeout(() => (falla('error-aprobar') ? falloAccion(el, 'No pudimos registrar la aprobación. Vuelve a intentarlo.') : decidir(+el.dataset.id, 'Aprobada')), espera(1200)); },
+  'confirmar-revocar': el => { if (ocupado || !modalVisible()) return; ocupar(el, 'Revocando…'); setTimeout(() => (falla('error-aprobar') ? falloAccion(el, 'No pudimos revocar el rechazo. Vuelve a intentarlo.') : decidir(+el.dataset.id, 'Pendiente')), espera(800)); },
   combo: () => (comboAbierto() ? cerrarCombo() : abrirCombo()),
   causal: el => elegirCausal(el.dataset.v),
   ordenar: el => {
@@ -1627,15 +1630,15 @@ const ACC = {
   'ordenar-c': el => { const k = el.dataset.v, o = C.orden; C.orden = { col:k, dir: o.col === k && o.dir === 'asc' ? 'desc' : 'asc' }; C.pag = 0; cargarC(); render(false); $('#ordc-' + k)?.focus({ preventScroll: true }); },
   'pc-pag': el => { C.pag += +el.dataset.v; cargarC(); render(false); enfocar(el.id); verTabla('#scroll-c'); },
   'c-filtros': () => modalFiltrosC(),
-  'c-quitar-filtro': el => { C.filtros[el.dataset.v] = ''; C.pag = 0; cargarC(); render(false); $('#c-btn-filtros')?.focus(); },
-  'c-limpiar-filtros': () => { C.filtros = { ...VACIO_C }; C.pag = 0; cargarC(); render(false); $('#c-btn-filtros')?.focus(); },
+  'c-quitar-filtro': el => { C.filtros[el.dataset.v] = ''; C.pag = 0; cargarC('c-btn-filtros'); render(false); },
+  'c-limpiar-filtros': () => { C.filtros = { ...VACIO_C }; C.pag = 0; cargarC('c-btn-filtros'); render(false); },
   'desc-arch': () => { cerrarMenu(true); toast('Su documento se esta descargando', 'info'); },
   'desc-mov': () => { cerrarMenu(true); toast('Se ha generado su documento exitosamente', 'ok'); },
   'desc-sap': () => { cerrarMenu(true); toast('Se ha generado su documento exitosamente', 'ok'); },
   'c-cargar': () => toast('Cargar archivo no está disponible en el prototipo', 'info'),
   'quitar-filtro': el => { S.filtros[el.dataset.v] = ''; S.retener.clear(); S.pagB = 0; cargarBandeja(); render(false); $('#btn-filtros')?.focus(); },
   'limpiar-filtros': () => { S.filtros = { ...VACIO }; S.retener.clear(); S.pagB = 0; cargarBandeja(); render(false); $('#btn-filtros')?.focus(); },
-  exportar: el => exportando(el, `Se descargó HistorialAprobaciones_06102026.xlsx (${filtradas().length} OPs, en el orden de la grilla)`),
+  exportar: el => { const n = filtradas().length; exportando(el, `Se descargó HistorialAprobaciones_06102026.xlsx (${miles(n)} ${n === 1 ? 'OP' : 'OPs'}, en el orden de la grilla)`); },
   // En pantalla, una fila por asiento; el Excel lleva 2 filas por asiento (debe y haber), como va a SAP (Javier, 07/10)
   'exportar-det': el => { const n = filasD(op(S.opId)).length; exportando(el, `Se descargó Detalle_OP_${S.opId}.xlsx (${miles(n)} reembolsos en ${miles(n * 2)} filas: debe y haber)`); },
 };
@@ -1678,16 +1681,16 @@ document.addEventListener('focusout', ev => { if (ev.target.id === 'motivo' && R
 document.addEventListener('submit', ev => {
   ev.preventDefault();
   if (ev.target.id === 'f-rechazo') {
-    const b = $('#m-confirmar'); if (b.disabled || ocupado) return;
+    const b = $('#m-confirmar'); if (b.disabled || ocupado || !modalVisible()) return;
     ocupar(b, 'Rechazando…');
-    setTimeout(() => (falla('error-rechazar') ? falloAccion(b, 'No pudimos registrar el rechazo. Vuelve a intentarlo.') : decidir(+b.dataset.id, 'Rechazada', R.causal, R.causal === 'Otro' ? R.motivo.trim() : '')), espera(800));
+    const causal = R.causal, motivo = R.causal === 'Otro' ? R.motivo.trim() : '';
+    setTimeout(() => (falla('error-rechazar') ? falloAccion(b, 'No pudimos registrar el rechazo. Vuelve a intentarlo.') : decidir(+b.dataset.id, 'Rechazada', causal, motivo)), espera(800));
   }
   if (ev.target.id === 'f-filtros-c') {
     if ($('#fc-aplicar').disabled) return;
     C.filtros = leerFiltrosC(); C.pag = 0;
     cerrarModal($('#c-btn-filtros'));
-    cargarC(); render(false);
-    $('#c-btn-filtros')?.focus({ preventScroll: true });
+    cargarC('c-btn-filtros'); render(false);
   }
   if (ev.target.id === 'f-filtros-d') {
     if ($('#fd-aplicar').disabled) return;
@@ -1730,7 +1733,7 @@ document.addEventListener('keydown', ev => {
     const i = items.indexOf(document.activeElement);
     if (ev.key === 'ArrowDown') { ev.preventDefault(); items[(i + 1) % items.length].focus(); return; }
     if (ev.key === 'ArrowUp') { ev.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); return; }
-    if (ev.key === 'Tab') { cerrarMenu(); return; }
+    if (ev.key === 'Tab') { ev.preventDefault(); cerrarMenu(true); return; }
   }
   if (ev.key === 'Escape') {
     if (!capa.hidden) { if (!ocupado) cerrarModal(); return; }
@@ -1739,10 +1742,11 @@ document.addEventListener('keydown', ev => {
     if ($('#lateral').classList.contains('abierto')) { lateral(false); $('#btn-hamb').focus(); return; }
   }
   // Trampa de foco del modal
-  if (ev.key === 'Tab' && !capa.hidden) {
+  if (ev.key === 'Tab' && !capa.hidden && modalVisible()) {
     const f = [...capa.querySelectorAll('button:not([disabled]),input,select,textarea:not([tabindex="-1"]),[tabindex="0"]')].filter(e => e.offsetParent !== null);
     if (!f.length) return;
     const first = f[0], last = f[f.length - 1];
+    if (!capa.contains(document.activeElement)) { ev.preventDefault(); (ev.shiftKey ? last : first).focus(); return; }
     if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
     else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
   }
