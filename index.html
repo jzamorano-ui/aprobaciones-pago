@@ -49,6 +49,7 @@ b,strong{font-weight:700}
 .proto .opc{display:inline}
 /* Simular: estados que no se dan en el flujo normal (sin operaciones y errores) */
 .proto .sim{margin-left:auto;display:flex;align-items:center;gap:8px}
+.proto .sim-2{margin-left:0}
 .proto select{appearance:none;-webkit-appearance:none;height:26px;padding:0 28px 0 10px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 9px center/12px;color:#fff;font-size:12px;line-height:16px;cursor:pointer}
 .proto select:hover{background-color:rgba(255,255,255,.1)}
 .proto option{color:var(--t1);background:#fff}
@@ -239,7 +240,7 @@ select.input:disabled{background-color:#E9EBEC;border-color:#E9EBEC;color:var(--
 .menu button{display:flex;align-items:center;width:100%;height:52px;padding:0 16px;text-align:left;font-size:16px;color:var(--t1);border-bottom:1px solid var(--g6);border-radius:0}
 .menu button:last-of-type{border-bottom:0}
 .menu button:hover:not([aria-disabled="true"]),.menu button:focus-visible:not([aria-disabled="true"]){background:var(--verde6);color:var(--verde4);box-shadow:none}
-.menu button[aria-disabled="true"]{color:var(--t-dis);cursor:not-allowed}
+.menu button[aria-disabled="true"]{color:#79858E;cursor:not-allowed}
 .menu button[aria-disabled="true"]:focus-visible{background:var(--fondo-tabla);box-shadow:none}
 
 /* paginador */
@@ -501,7 +502,13 @@ textarea.input{height:auto;min-height:102px;padding:12px 16px;resize:vertical;li
 
 <div class="proto" role="note">
   <b>Prototipo navegable v3</b><span class="sep">·</span><span>Vista aprobador</span><span class="opc"><span class="sep">·</span> Datos ficticios <span class="sep">·</span> Descargas simuladas</span>
-  <label class="sim" for="sim">Simular
+  <label class="sim" for="items">Items
+    <select id="items">
+      <option value="uno">Uno (fase 1)</option>
+      <option value="varios">Varios</option>
+    </select>
+  </label>
+  <label class="sim sim-2" for="sim">Simular
     <select id="sim">
       <option value="">Sin simulación</option>
       <option value="vacio">Historial sin operaciones</option>
@@ -641,6 +648,15 @@ const MAX_REEMB_OP = 495;
   const o74 = OPS0.find(o => o.id === 11674);
   if (o74?.est === 'Rechazada') Object.assign(o74, { causal:'Falta documentación', obs:'Faltan respaldos de 3 reembolsos. Adjuntarlos y volver a enviar la OP.' });
 })();
+// Item de operación (Figma, subsección "Item de operación"): en fase 1 solo Pago Reembolso; con más de uno, el historial abre sin item elegido
+const ITEMS = ['Pago Reembolso', 'Licencias médicas', 'Easy Cancha'];
+// OPs ficticias de Licencias médicas, como Figma IO3; Easy Cancha no tiene OPs (IO4)
+OPS0.push(
+  { id:11697, per:'01/10/26', sol:['06/10/26','09:12'], est:'Pendiente', fe:['06/10/26','09:12'], canal:'Sistema', val:1204, monto:389214560, item:ITEMS[1] },
+  { id:11694, per:'01/10/26', sol:['04/10/26','18:40'], est:'Pendiente', fe:['04/10/26','18:40'], canal:'Sistema', val:986,  monto:76776120,  item:ITEMS[1] },
+  { id:11690, per:'01/10/26', sol:['02/10/26','08:55'], est:'Aprobada',  fe:['02/10/26','12:20'], canal:'Sistema', val:1117, monto:86902340,  item:ITEMS[1], por:USUARIO },
+  { id:11681, per:'01/09/26', sol:['30/09/26','19:05'], est:'Aprobada',  fe:['01/10/26','10:02'], canal:'Sistema', val:1042, monto:81510880,  item:ITEMS[1], por:USUARIO },
+);
 const BANCOS = ['001', '012', '037', '016', '028', '039', '049', '051', '009'];
 const VACIO = { op:'', est:'', per:'', sol:'', fe:'', canal:'' };
 const VACIO_D = { asiento:'', cli:'', banco:'', cuenta:'', ben:'', cau:'', con:'' };
@@ -650,17 +666,25 @@ const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', '
 const PERIODOS = Array.from({ length: 46 }, (_, k) => { const n = 2026 * 12 + 9 - k, m = n % 12, a = Math.floor(n / 12); return { v: `${String(m + 1).padStart(2, '0')}/${String(a).slice(2)}`, t: `${MESES[m]} ${a}` }; });
 const periodoTxt = v => PERIODOS.find(p => p.v === v)?.t || v;
 
-let OPS, S, C;
+let OPS, S, C, VARIOS = false;
 const cacheTx = {};
 function reiniciar() {
   // ev = decisiones de la OP (aprobar, rechazar, revocar), para la alerta y el historial. Revocar no borra el rechazo
-  OPS = OPS0.map(o => ({ ...o, sol:[...o.sol], fe:[...o.fe], ev: o.est === 'Pendiente' ? [] : [{ est:o.est, por:o.por, fe:[...o.fe], causal:o.causal || '', obs:o.obs || '' }] }));
-  S = { vista:'bandeja', opId:null, pagB:0, tamB:10, pagD:0, tamD:10, filtros:{ ...VACIO }, filtrosD:{ ...VACIO_D }, orden:{ col:null, dir:null }, ordenD:{ col:null, dir:null }, cargando:false, retener:new Set() };
+  OPS = OPS0.map(o => ({ ...o, item:o.item || ITEMS[0], sol:[...o.sol], fe:[...o.fe], ev: o.est === 'Pendiente' ? [] : [{ est:o.est, por:o.por, fe:[...o.fe], causal:o.causal || '', obs:o.obs || '' }] }));
+  S = { vista:'bandeja', item: VARIOS ? '' : ITEMS[0], itemSel: VARIOS ? '' : ITEMS[0], opId:null, pagB:0, tamB:10, pagD:0, tamD:10, filtros:{ ...VACIO }, filtrosD:{ ...VACIO_D }, orden:{ col:null, dir:null }, ordenD:{ col:null, dir:null }, cargando:false, retener:new Set() };
   C = { tipo:'', item:'', buscado:null, pag:0, tam:10, orden:{ col:'id', dir:'desc' }, filtros:{ ...VACIO_C }, cargando:false };
 }
 // Simular (barra del prototipo): muestra estados que no ocurren en el flujo normal. Los errores se consumen al primer
 // intento, así el reintento funciona; "sin operaciones" y "error al cargar" quedan hasta cambiar la opción
 let SIM = '';
+// Items (barra del prototipo): "Uno (fase 1)" deja el selector y Buscar deshabilitados; "Varios" abre el historial sin item elegido
+const habilitada = o => VARIOS || o.item === ITEMS[0];
+function modoItems(v) {
+  VARIOS = v; S.item = S.itemSel = v ? '' : ITEMS[0];
+  S.filtros = { ...VACIO }; S.retener.clear(); S.pagB = 0;
+  ocupado = false; cerrarModal();
+  if (S.vista !== 'bandeja') ir('#/'); else render(true);
+}
 const falla = tipo => { if (SIM !== tipo) return false; SIM = ''; $('#sim').value = ''; return true; };
 function simular(v) {
   const antes = SIM; SIM = v;
@@ -729,13 +753,13 @@ function paginador(id, pag, tam, total, opciones) {
 /* ═══════════ Bandeja ═══════════ */
 function filtradas() {
   const f = S.filtros;
-  return OPS.filter(o => S.retener.has(o.id) ||
+  return OPS.filter(o => o.item === S.item && (S.retener.has(o.id) ||
     (!f.op || String(o.id).includes(f.op.trim())) &&
     (!f.est || o.est === f.est) &&
     (!f.per || o.per.slice(3) === f.per) &&
     (!f.sol || iso(o.sol[0]) === f.sol) &&
     (!f.fe || iso(o.fe[0]) === f.fe) &&
-    (!f.canal || o.canal === f.canal));
+    (!f.canal || o.canal === f.canal)));
 }
 // Columnas ordenables de la bandeja (todas menos Acciones). Salto de línea fijo como en Figma
 const COLS_B = [
@@ -776,25 +800,38 @@ function chipsFiltro() {
 // Rechazada lleva tooltip con la causal y la observación, como el CP-04 de Centralizar (Javier, 09/10)
 const chipEst = o => o.est === 'Rechazada'
   ? `<span class="con-tip chip-tip" tabindex="0" data-tip="causal" data-id="${o.id}" aria-describedby="tip">${chip(o.est, o.anim)}</span>` : chip(o.est, o.anim);
+// Card Item de operación: siempre sobre el historial. Buscar se habilita al elegir un item (solo con varios items)
+const cardItem = () => `
+  <section class="card card-buscar" aria-label="Item de operación">
+    <div class="fila-buscar">
+      <div class="campo"><label for="b-item">Item de operación</label><select class="input" id="b-item" data-c="b-item" ${VARIOS ? '' : 'disabled'}>
+        ${VARIOS ? '<option value="">Selecciona un item</option>' : ''}${(VARIOS ? ITEMS : [ITEMS[0]]).map(i => `<option ${S.itemSel === i ? 'selected' : ''}>${i}</option>`).join('')}</select></div>
+      <button class="btn btn-pri" type="button" id="b-buscar" data-a="b-buscar" ${VARIOS && S.itemSel ? '' : 'disabled'}>Buscar</button>
+    </div>
+  </section>`;
+const vacioOps = (t, p) => `<div class="vacio sin-ops"><div class="vacio-ic">${BULB}</div><h3>${t}</h3><p>${p}</p></div>`;
 function vBandeja() {
-  const sinOps = SIM === 'vacio', lista = sinOps ? [] : ordenadas(), chips = sinOps ? [] : chipsFiltro();
+  const sinItem = !S.item, sinOps = !sinItem && (SIM === 'vacio' || !OPS.some(o => o.item === S.item));
+  const lista = sinItem || sinOps ? [] : ordenadas(), chips = sinItem || sinOps ? [] : chipsFiltro();
   const maxPag = Math.max(0, Math.ceil(lista.length / S.tamB) - 1);
   if (S.pagB > maxPag) S.pagB = maxPag;
   const pagina = lista.slice(S.pagB * S.tamB, (S.pagB + 1) * S.tamB);
   return `
   <header class="cab-pag"><h1>Aprobaciones para solicitudes de pagos</h1>${migas(['Inicio', 'Aprobaciones de Pago'])}</header>
+  ${cardItem()}
   <section class="card" aria-labelledby="t-hist">
     <div class="tabla-cab">
       <div><h2 id="t-hist">Historial de aprobaciones</h2></div>
       <div class="acciones">
-        <button class="btn btn-sec" type="button" id="btn-filtros" data-a="filtros" ${sinOps ? 'disabled' : ''}>${ic('filtros')}Filtros</button>
+        <button class="btn btn-sec" type="button" id="btn-filtros" data-a="filtros" ${sinItem || sinOps ? 'disabled' : ''}>${ic('filtros')}Filtros</button>
         <button class="btn btn-sec" type="button" id="btn-exportar" data-a="exportar" ${lista.length ? '' : 'disabled'}>${ic('descarga')}Exportar</button>
       </div>
     </div>
     ${chips.length ? `<div class="filtros-aplicados"><span class="etq">Filtros aplicados</span>
       ${chips.map(([k, t]) => `<span class="chip-f">${esc(t)}<button type="button" data-a="quitar-filtro" data-v="${k}" aria-label="Quitar filtro ${esc(t)}">${ic('x')}</button></span>`).join('')}
       <button type="button" class="link" data-a="limpiar-filtros">Limpiar filtros</button></div>` : ''}
-    ${lista.length || S.cargandoB ? `
+    ${sinItem ? vacioOps('Elige un item de operación', 'Selecciona un item y presiona Buscar para ver sus OPs.')
+    : lista.length || S.cargandoB ? `
     <div class="tabla-scroll" id="scroll-b">
       <table class="tabla t-bandeja" aria-busy="${!!S.cargandoB}">
         <thead><tr>
@@ -808,12 +845,9 @@ function vBandeja() {
         </tr>`).join('')}</tbody>
       </table>
     </div>
-    ${lista.length ? paginador('pb', S.pagB, S.tamB, lista.length, [10, 20, 50]) : ''}` : sinOps ? `
-    <div class="vacio sin-ops">
-      <div class="vacio-ic">${BULB}</div>
-      <h3>Aún no hay operaciones</h3>
-      <p>Aquí verás las OPs que lleguen para aprobar.</p>
-    </div>` : `
+    ${lista.length ? paginador('pb', S.pagB, S.tamB, lista.length, [10, 20, 50]) : ''}` : sinOps ? (VARIOS
+      ? vacioOps(`Aún no hay operaciones de ${S.item}`, 'Aquí verás las OPs de este item que lleguen para aprobar.')
+      : vacioOps('Aún no hay operaciones', 'Aquí verás las OPs que lleguen para aprobar.')) : `
     <div class="vacio sin-res">
       <div class="vacio-ic">${ic('buscar')}</div>
       <h3>Sin resultados</h3>
@@ -864,7 +898,7 @@ function vDetalle() {
     <div class="monto"><div class="etq">Monto a pagar</div><div class="cifra">${pesos(o.monto)}</div><div class="sub">${miles(o.val)} casos</div></div>
     <dl class="meta">
       <div><dt>Estado aprobación</dt><dd id="d-estado">${chip(o.est, o.anim)}</dd></div>
-      <div><dt>Item de operación</dt><dd>Pago Reembolso</dd></div>
+      <div><dt>Item de operación</dt><dd>${o.item}</dd></div>
       <div><dt>Periodo contable</dt><dd>${f4(o.per)}</dd></div>
       <div><dt>Fecha solicitud centralizador</dt><dd>${f4(o.sol[0])} <span class="sep">·</span> ${o.sol[1]} hrs.</dd></div>
       <div><dt>Canal de origen</dt><dd>${o.canal}</dd></div>
@@ -888,7 +922,8 @@ function vDetalle() {
 // Filtros del detalle (Javier, 09/10, "de momento, los definimos nosotros"): N° asiento exacto; códigos y cuenta "contiene";
 // Tipo de beneficio, Causal de emisión y Concepto (HU de Mauro, 13/10) son selects de valor exacto.
 // Solo columnas que cambian entre filas: N° cuenta contable es igual en toda la OP y no se filtra (Javier, 13/10)
-const ETQ_D = { asiento:'N° asiento', cli:'Código cliente', banco:'Clave banco', cuenta:'Cuenta bancaria', ben:'Tipo de beneficio', cau:'Causal de emisión', con:'Concepto' };
+// Mismo orden que las columnas del detalle (OK de Javier, 13/10)
+const ETQ_D = { asiento:'N° asiento', ben:'Tipo de beneficio', cau:'Causal de emisión', con:'Concepto', cli:'Código cliente', banco:'Clave banco', cuenta:'Cuenta bancaria' };
 function filasD(o) {
   const f = S.filtrosD, tiene = (x, v) => x != null && String(x).toLowerCase().includes(v.toLowerCase());
   return transacciones(o).filter(t => (!f.asiento || t.asiento === +f.asiento) && (!f.cli || tiene(t.cli, f.cli))
@@ -902,7 +937,7 @@ function vTabla() {
   const nulo = v => v == null ? '<span class="vacio-celda">—</span>' : v;
   // Las 15 columnas de la HU (12.a), en su orden. Solo se ordenan las que cambian entre filas; las iguales en toda la OP no llevan caret
   const cols = [
-    ['N° de operación', () => o.id], ['Descripción proceso', () => 'Beneficios'], ['Descripción item proceso', () => 'Pago Reembolso'],
+    ['N° de operación', () => o.id], ['Descripción proceso', () => 'Beneficios'], ['Descripción item proceso', () => o.item],
     ['N° asiento', t => t.asiento, 'asiento'], ['Fecha <br>contable', t => f4(t.fecha), 'fecha'], ['Folio <br>documento', t => t.folio, 'folio'],
     ['Tipo de <br>beneficio', t => t.ben, 'ben'], ['Causal de <br>emisión', t => t.cau, 'cau'], ['Concepto', t => t.con, 'con'],
     ['N° cuenta contable', t => t.cc], ['Código cliente', t => t.cli, 'cli'], ['Código <br>proveedor', t => t.prov, 'prov'],
@@ -916,7 +951,7 @@ function vTabla() {
       <div><h2>Detalle de transacciones</h2></div>
       <div class="acciones">
         <button class="btn btn-sec" type="button" id="btn-filtros-det" data-a="filtros-det">${ic('filtros')}Filtros</button>
-        <button class="btn btn-sec" type="button" id="btn-exportar-det" data-a="exportar-det" ${filas.length ? '' : 'disabled'}>${ic('descarga')}Exportar detalle</button>
+        <button class="btn btn-sec" type="button" id="btn-exportar-det" data-a="exportar-det" ${filas.length ? '' : 'disabled'}>${ic('descarga')}Exportar</button>
       </div>
     </div>
     ${chips.length ? `<div class="filtros-aplicados"><span class="etq">Filtros aplicados</span>
@@ -1039,7 +1074,7 @@ function listaC() {
   if (!C.buscado || C.buscado.tipo !== 'SOLICITUD DE PAGO' || C.buscado.item !== 'PAGO REEMBOLSO') return [];
   const q = C.filtros, cmp = (a, b) => a < b ? -1 : a > b ? 1 : 0;
   // Periodo y N° operación exactos; nombre "contiene"; fechas día exacto (como cert)
-  const filas = OPS.map(filaC).filter(f =>
+  const filas = OPS.filter(o => o.item === ITEMS[0]).map(filaC).filter(f =>
     (!q.op || String(f.id) === q.op) && (!q.arch || f.archivo.toLowerCase().includes(q.arch.toLowerCase())) &&
     (!q.est || estFiltroC(f.est) === mayus(q.est)) && (!q.per || perC(f.per) === q.per) && (!q.sol || iso(f.sol[0]) === q.sol) && (!q.fe || iso(f.fe[0]) === q.fe));
   const base = (a, b) => b.id - a.id;
@@ -1149,17 +1184,18 @@ function cambioBusqueda(c, v) {
   else C.item = v;
   $('#c-buscar').disabled = !(C.tipo && C.item);
 }
-// Menú de CCP en su orden, deshabilitado lo que no aplica. Solo se oculta Solicitar Pago (HU 13/10): aprobar es facultad del aprobador.
-// Rechazar Solicitud se mantiene: es el rechazo después de SAP que hoy hace Beneficios
+// Menú de CCP con sus 7 acciones en su orden, deshabilitado lo que no aplica. Solicitar Pago y Rechazar Solicitud, siempre deshabilitadas:
+// aprobar o rechazar la OP es facultad del aprobador (Javier, 13/10). Centralización Diaria, deshabilitada en Solicitud de pago, como hoy en CCP
 function menuC(o) {
   const f = filaC(o), it = (a, t, ok) => `<button type="button" role="menuitem" data-a="${ok ? a : 'nada'}" data-id="${f.id}"${ok ? '' : ' aria-disabled="true"'}>${t}</button>`;
   // Descargar Archivo siempre habilitado, también en las OPs por sistema (Javier, 08/10)
   return it('desc-arch', 'Descargar Archivo', true)
     + it('desc-mov', 'Descargar Movimientos con error', /val(\.|idada) con error/i.test(f.est))
     + it('borrar-arch', 'Borrar Archivo', ['ARCHIVO CARGADO', 'ARCH. VAL. CON EXITO', 'ARCH. VAL. CON ERROR'].includes(estFiltroC(f.est)))
+    + it('nada', 'Solicitar Pago', false)
     + it('nada', 'Centralización Diaria', false)
     + it('desc-sap', 'Descargar asientos con error SAP', f.est === 'Procesado con errores')
-    + it('rechazar-sol', 'Rechazar Solicitud', ['Proceso con éxito', 'Procesado con errores'].includes(f.est));
+    + it('nada', 'Rechazar Solicitud', false);
 }
 function modalFiltrosC() {
   const q = C.filtros;
@@ -1202,7 +1238,7 @@ function render(anim = true) {
   if (S.vista === 'detalle') pintarTabla(anim);
   if (anim) { v.classList.remove('entra'); void v.offsetWidth; v.classList.add('entra'); }
   OPS.forEach(o => { o.anim = false; });
-  $('#punto').hidden = SIM === 'vacio' || !OPS.some(o => o.est === 'Pendiente');
+  $('#punto').hidden = SIM === 'vacio' || !OPS.some(o => o.est === 'Pendiente' && habilitada(o));
   sombraScroll();
   ubicarToasts();
 }
@@ -1262,7 +1298,7 @@ function cerrarMenu(devolverFoco) {
 
 /* ═══════════ Notificaciones ═══════════ */
 function abrirPop() {
-  const p = $('#pop'), pend = SIM === 'vacio' ? [] : OPS.filter(o => o.est === 'Pendiente');
+  const p = $('#pop'), pend = SIM === 'vacio' ? [] : OPS.filter(o => o.est === 'Pendiente' && habilitada(o)).sort((a, b) => b.id - a.id);
   p.innerHTML = `<h3 tabindex="-1">Notificaciones</h3>${pend.length ? `<ul>${pend.map(o => `<li><button type="button" data-a="ver" data-id="${o.id}"><b>OP ${o.id} espera tu aprobación</b><small>${miles(o.val)} casos <span class="sep">·</span> ${pesos(o.monto)} <span class="sep">·</span> ${f4(o.sol[0])} ${o.sol[1]} hrs.</small></button></li>`).join('')}</ul>` : '<p class="nada">No tienes OPs pendientes de aprobación.</p>'}`;
   p.hidden = false;
   const r = $('#btn-campana').getBoundingClientRect();
@@ -1309,7 +1345,7 @@ function cerrarModal(destinoFoco) {
 }
 function cuerpoResumen(o, sap) {
   return `<dl class="res-m">
-    <div><dt>Item de operación</dt><dd>Pago Reembolso</dd></div>
+    <div><dt>Item de operación</dt><dd>${o.item}</dd></div>
     <div><dt>Monto a pagar</dt><dd>${pesos(o.monto)}</dd></div>
     <div><dt>Total de casos${sap ? ' <span class="sep">·</span> se envían a SAP' : ''}</dt><dd>${miles(o.val)}</dd></div>
     <div><dt>Canal de origen</dt><dd>${o.canal}</dd></div>
@@ -1460,10 +1496,10 @@ function modalFiltrosD() {
     <div class="modal-cab"><h2 id="m-tit">Filtros</h2><p>Filtra las transacciones de la OP ${S.opId}.</p></div>
     <div class="modal-cuerpo"><div class="grid-f">
       <div class="campo"><label for="fd-asiento">N° asiento</label><input class="input" id="fd-asiento" inputmode="numeric" maxlength="3" autocomplete="off" placeholder="Ej: 25" value="${esc(f.asiento)}"></div>
+      ${selNegocio(f)}
       <div class="campo"><label for="fd-cli">Código cliente</label><input class="input" id="fd-cli" maxlength="12" autocomplete="off" placeholder="Ej: I15521774K" value="${esc(f.cli)}"></div>
       <div class="campo"><label for="fd-banco">Clave banco</label><input class="input" id="fd-banco" inputmode="numeric" maxlength="3" autocomplete="off" placeholder="Ej: 037" value="${esc(f.banco)}"></div>
       <div class="campo"><label for="fd-cuenta">Cuenta bancaria</label><input class="input" id="fd-cuenta" inputmode="numeric" maxlength="12" autocomplete="off" placeholder="Ej: 57974882" value="${esc(f.cuenta)}"></div>
-      ${selNegocio(f)}
     </div></div>
     <div class="modal-pie">
       <button class="btn btn-sec" type="button" id="fd-cancelar" data-a="cerrar-modal">Cancelar</button>
@@ -1665,6 +1701,7 @@ const ACC = {
   'filtros-det': () => modalFiltrosD(),
   'quitar-filtro-det': el => { S.filtrosD[el.dataset.v] = ''; S.pagD = 0; pintarTabla(true); $('#btn-filtros-det')?.focus(); },
   'limpiar-filtros-det': () => { S.filtrosD = { ...VACIO_D }; S.pagD = 0; pintarTabla(true); $('#btn-filtros-det')?.focus(); },
+  'b-buscar': () => { S.item = S.itemSel; S.filtros = { ...VACIO }; S.retener.clear(); S.pagB = 0; cargarBandeja(); render(false); $('#b-buscar')?.focus({ preventScroll: true }); },
   'c-buscar': () => { C.buscado = { tipo:C.tipo, item:C.item }; C.pag = 0; C.orden = { col:'id', dir:'desc' }; C.filtros = { ...VACIO_C }; cargarC(); render(false); $('#c-buscar')?.focus({ preventScroll: true }); },
   'ordenar-c': el => { const k = el.dataset.v, o = C.orden; C.orden = { col:k, dir: o.col === k && o.dir === 'asc' ? 'desc' : 'asc' }; C.pag = 0; cargarC(); render(false); $('#ordc-' + k)?.focus({ preventScroll: true }); },
   'pc-pag': el => { C.pag += +el.dataset.v; cargarC(); render(false); enfocar(el.id); verTabla('#scroll-c'); },
@@ -1673,7 +1710,6 @@ const ACC = {
   'c-limpiar-filtros': () => { C.filtros = { ...VACIO_C }; C.pag = 0; cargarC('c-btn-filtros'); render(false); },
   'desc-arch': () => { cerrarMenu(true); toast('Su documento se esta descargando', 'info'); },
   'borrar-arch': () => { cerrarMenu(true); toast('Borrar Archivo no está disponible en el prototipo', 'info'); },
-  'rechazar-sol': () => { cerrarMenu(true); toast('Rechazar Solicitud no está disponible en el prototipo', 'info'); },
   'desc-mov': () => { cerrarMenu(true); toast('Se ha generado su documento exitosamente', 'ok'); },
   'desc-sap': () => { cerrarMenu(true); toast('Se ha generado su documento exitosamente', 'ok'); },
   'c-cargar': () => toast('Cargar archivo no está disponible en el prototipo', 'info'),
@@ -1696,10 +1732,12 @@ document.addEventListener('click', ev => {
 });
 document.addEventListener('change', ev => {
   if (ev.target.id === 'sim') return simular(ev.target.value);
+  if (ev.target.id === 'items') return modoItems(ev.target.value === 'varios');
   const c = ev.target.dataset.c;
   if (c === 'pb-tam') { S.tamB = +ev.target.value; S.pagB = 0; cargarBandeja(); render(false); $('#pb-tam')?.focus(); }
   if (c === 'pc-tam') { C.tam = +ev.target.value; C.pag = 0; cargarC(); render(false); $('#pc-tam')?.focus(); }
   if (c === 'c-tipo' || c === 'c-item') cambioBusqueda(c, ev.target.value);
+  if (c === 'b-item') { S.itemSel = ev.target.value; $('#b-buscar').disabled = !S.itemSel; }
   if (ev.target.closest?.('#f-filtros-c')) revisarFiltrosC();
   if (c === 'pd-tam') { S.tamD = +ev.target.value; S.pagD = 0; pintarTabla(true); $('#pd-tam')?.focus(); }
   if (['f-per', 'f-sol', 'f-fe'].includes(ev.target.id)) ajustarFechas(ev.target.id);
@@ -1833,6 +1871,7 @@ $('#btn-escritorio').addEventListener('click', () => {
 $('#btn-campana').addEventListener('click', () => ($('#pop').hidden ? abrirPop() : cerrarPop()));
 $('#btn-salir').addEventListener('click', () => toast('Cerrar sesión no está disponible en el prototipo', 'info'));
 $('#btn-reiniciar').addEventListener('click', () => {
+  VARIOS = false; $('#items').value = 'uno';
   reiniciar(); for (const k in cacheTx) delete cacheTx[k];
   SIM = ''; $('#sim').value = ''; ocupado = false; cerrarModal(); ir('#/'); toast('Prototipo reiniciado', 'info');
 });
