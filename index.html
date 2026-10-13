@@ -221,10 +221,9 @@ select.input:disabled{background-color:#E9EBEC;border-color:#E9EBEC;color:var(--
 .tip.op dt{color:var(--t3)}
 .tip.op dd{margin:0;font-weight:700;color:var(--t1);text-align:right;overflow-wrap:anywhere}
 .tip.op .pend{font-weight:400;color:var(--t4)}
-/* Tooltip de causal en el chip Rechazada (componente Aprobación / Tooltip causal): a la derecha del chip, con punta; con "Otro", el comentario en máx. 2 líneas */
-.tip.causal{max-width:320px;background:var(--t2);color:#fff;border-radius:8px;padding:12px 16px;font-size:14px;line-height:24px}
+/* Tooltip de causal en el chip Rechazada (componente Aprobación / Tooltip causal): a la derecha del chip, con punta; con "Otro", el comentario completo (hasta 80 caracteres, en 2 líneas) */
+.tip.causal{max-width:384px;background:var(--t2);color:#fff;border-radius:8px;padding:12px 16px;font-size:14px;line-height:24px;overflow-wrap:anywhere}
 .tip.causal::before{content:"";position:absolute;left:-7px;top:50%;transform:translateY(-50%);border-style:solid;border-width:7px 7px 7px 0;border-color:transparent var(--t2) transparent transparent}
-.tip.causal span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .con-tip.chip-tip{display:inline-flex;border-radius:14px}
 
 /* chips de estado (sin punto indicador) */
@@ -414,8 +413,8 @@ textarea.input{height:auto;min-height:102px;padding:12px 16px;resize:vertical;li
 .grid-f .campo>label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* ── Snackbar / toasts ── */
-.toasts{position:fixed;right:24px;bottom:24px;z-index:90;display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none}
-.toast{display:flex;align-items:center;gap:10px;max-width:420px;min-height:40px;padding:7px 16px 7px 12px;border-radius:var(--r);border:1px solid;font-size:12px;line-height:16px;font-weight:500;opacity:0;transform:translateY(calc(100% + 24px));transition:opacity .25s var(--ease),transform .25s var(--ease);pointer-events:auto}
+.toasts{position:fixed;right:24px;top:96px;z-index:90;display:flex;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;max-width:420px;min-height:40px;padding:7px 16px 7px 12px;border-radius:var(--r);border:1px solid;font-size:12px;line-height:16px;font-weight:500;opacity:0;transform:translateY(calc(-100% - 24px));transition:opacity .25s var(--ease),transform .25s var(--ease);pointer-events:auto}
 .toast.vis{opacity:1;transform:none}
 .toast.ok{background:var(--ok-bg);border-color:var(--ok);color:var(--t1)}
 .toast.ok .ic{color:var(--ok-dk)}
@@ -492,7 +491,7 @@ textarea.input{height:auto;min-height:102px;padding:12px 16px;resize:vertical;li
   .modal-pie{flex-direction:column-reverse;padding:16px 20px}
   .modal-pie .btn-sec,.modal-pie .btn-pri{width:100%;min-width:0}
   .grid-f{grid-template-columns:1fr}
-  .toasts{left:16px;right:16px;bottom:16px;align-items:stretch}
+  .toasts{left:16px;right:16px;align-items:stretch}
   .toast{max-width:none}
 }
 @media (max-width:400px){
@@ -592,7 +591,9 @@ const miles = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 const pesos = n => '$' + miles(n);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 const iso = d => { const [dd, mm, aa] = d.split('/'); return `20${aa}-${mm}-${dd}`; };
-const corta = i => { const [y, m, d] = i.split('-'); return `${d}/${m}/${y.slice(2)}`; };
+const corta = i => { const [y, m, d] = i.split('-'); return `${d}/${m}/${y}`; };
+// En pantalla las fechas van con año de 4 dígitos; los datos internos siguen en DD/MM/AA
+const f4 = d => d.length === 8 ? `${d.slice(0, 6)}20${d.slice(6)}` : d;
 const rng = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 const dv = rut => { let s = 0, m = 2; for (const c of String(rut).split('').reverse()) { s += +c * m; m = m === 7 ? 2 : m + 1; } const d = 11 - (s % 11); return d === 11 ? '0' : d === 10 ? 'K' : String(d); };
 const reducido = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -691,7 +692,7 @@ function transacciones(o) {
 
 /* ═══════════ Piezas comunes ═══════════ */
 const chip = (est, nueva) => `<span class="chip ${est}${nueva ? ' nueva' : ''}">${est}</span>`;
-const fh = ([d, h]) => `<span class="fh">${d}<small>${h} hrs.</small></span>`;
+const fh = ([d, h]) => `<span class="fh">${f4(d)}<small>${h} hrs.</small></span>`;
 const migas = items => `<nav class="migas" aria-label="Migas de pan">${items.map((it, i) => i < items.length - 1
   ? `<a href="#/" data-a="ir-bandeja">${it}</a>${ic('chevR')}`
   : `<span aria-current="page">${it}</span>`).join('')}</nav>`;
@@ -786,7 +787,7 @@ function vBandeja() {
           <th scope="col" class="col-acc">Acciones</th>
         </tr></thead>
         <tbody>${S.cargandoB ? filasSk(pagina.length || 5) : pagina.map(o => `<tr>
-          <td>${o.per}</td><td>${o.id}</td><td>${o.canal}</td><td>${fh(o.sol)}</td><td>${chipEst(o)}</td><td>${fh(o.fe)}</td>
+          <td>${f4(o.per)}</td><td>${o.id}</td><td>${o.canal}</td><td>${fh(o.sol)}</td><td>${chipEst(o)}</td><td>${fh(o.fe)}</td>
           <td>${miles(o.val)}</td><td>${pesos(o.monto)}</td>
           <td class="col-acc"><button type="button" class="kebab" id="acc-${o.id}" data-a="menu" data-id="${o.id}" aria-haspopup="menu" aria-expanded="false" aria-controls="menu" aria-label="Acciones de la OP ${o.id}">${KEBAB}</button></td>
         </tr>`).join('')}</tbody>
@@ -833,7 +834,7 @@ function alerta(o) {
   if (!u) return '';
   const [d, h] = u.fe, nueva = o.anim ? ' nueva' : '', causal = u.est === 'Rechazada' ? esc(causalTxt(u)) : '';
   return `<div class="alerta${nueva}" role="status"><div class="alerta-m"><span class="alerta-ic">${ic('info')}</span><div class="alerta-t">
-      <p><b>${accionTxt(u)}</b> por <b>${esc(u.por)}</b> el ${d} a las ${h} hrs.</p>
+      <p><b>${accionTxt(u)}</b> por <b>${esc(u.por)}</b> el ${f4(d)} a las ${h} hrs.</p>
       ${causal ? `<p>Causal: <b>${causal}</b></p>` : ''}
     </div></div>
     ${o.ev.length > 1 ? '<button type="button" class="ver" id="ver-historial" data-a="historial">Ver historial</button>' : ''}</div>`;
@@ -849,8 +850,8 @@ function vDetalle() {
     <dl class="meta">
       <div><dt>Estado aprobación</dt><dd id="d-estado">${chip(o.est, o.anim)}</dd></div>
       <div><dt>Item de operación</dt><dd>Pago Reembolso</dd></div>
-      <div><dt>Periodo contable</dt><dd>${o.per}</dd></div>
-      <div><dt>Fecha solicitud centralizador</dt><dd>${o.sol[0]} <span class="sep">·</span> ${o.sol[1]} hrs.</dd></div>
+      <div><dt>Periodo contable</dt><dd>${f4(o.per)}</dd></div>
+      <div><dt>Fecha solicitud centralizador</dt><dd>${f4(o.sol[0])} <span class="sep">·</span> ${o.sol[1]} hrs.</dd></div>
       <div><dt>Canal de origen</dt><dd>${o.canal}</dd></div>
     </dl>
     </div>
@@ -880,13 +881,13 @@ const chipsFiltroD = () => Object.keys(ETQ_D).filter(k => S.filtrosD[k]).map(k =
 function vTabla() {
   // Filtrar no cambia lo que se aprueba: la tarjeta resumen y la barra siguen con la OP completa
   const o = op(S.opId), filas = ordenadasD(filasD(o)), chips = chipsFiltroD();
-  const sap = () => o.est === 'Aprobada' && !o.enSesion ? o.fe[0] : null;
+  const sap = () => o.est === 'Aprobada' && !o.enSesion ? f4(o.fe[0]) : null;
   const nulo = v => v == null ? '<span class="vacio-celda">—</span>' : v;
   // Solo se ordenan las columnas que cambian entre reembolsos; las que son iguales en toda la OP no llevan caret
   const cols = [
     ['N° de operación', () => o.id], ['ID proceso', () => 'BEN'], ['Descripción proceso', () => 'Beneficios'],
     ['Item de proceso', () => 'PRE'], ['Descripción item proceso', () => 'Pago Reembolso'], ['N° asiento', t => t.asiento, 'asiento'],
-    ['Fecha <br>contable', t => t.fecha, 'fecha'], ['Sociedad FI', () => 'CL07'], ['N° cuenta contable', t => nulo(t.cc)],
+    ['Fecha <br>contable', t => f4(t.fecha), 'fecha'], ['Sociedad FI', () => 'CL07'], ['N° cuenta contable', t => nulo(t.cc)],
     ['Importe <br>documento', t => pesos(t.imp), 'imp'], ['Código cliente', t => t.cli, 'cli'], ['Clave <br>banco', t => t.banco, 'banco'],
     ['Cuenta <br>bancaria', t => nulo(t.cuenta), 'cuenta'], ['Fecha registro en SAP', () => nulo(sap())],
   ];
@@ -1242,7 +1243,7 @@ function cerrarMenu(devolverFoco) {
 /* ═══════════ Notificaciones ═══════════ */
 function abrirPop() {
   const p = $('#pop'), pend = SIM === 'vacio' ? [] : OPS.filter(o => o.est === 'Pendiente');
-  p.innerHTML = `<h3 tabindex="-1">Notificaciones</h3>${pend.length ? `<ul>${pend.map(o => `<li><button type="button" data-a="ver" data-id="${o.id}"><b>OP ${o.id} espera tu aprobación</b><small>${miles(o.val)} reembolsos <span class="sep">·</span> ${pesos(o.monto)} <span class="sep">·</span> ${o.sol[0]} ${o.sol[1]} hrs.</small></button></li>`).join('')}</ul>` : '<p class="nada">No tienes OPs pendientes de aprobación.</p>'}`;
+  p.innerHTML = `<h3 tabindex="-1">Notificaciones</h3>${pend.length ? `<ul>${pend.map(o => `<li><button type="button" data-a="ver" data-id="${o.id}"><b>OP ${o.id} espera tu aprobación</b><small>${miles(o.val)} reembolsos <span class="sep">·</span> ${pesos(o.monto)} <span class="sep">·</span> ${f4(o.sol[0])} ${o.sol[1]} hrs.</small></button></li>`).join('')}</ul>` : '<p class="nada">No tienes OPs pendientes de aprobación.</p>'}`;
   p.hidden = false;
   const r = $('#btn-campana').getBoundingClientRect();
   if (innerWidth > 820) p.style.right = Math.max(16, innerWidth - r.right - 40) + 'px'; else p.style.right = '';
@@ -1403,7 +1404,7 @@ function modalRevocar(id) {
     <div class="modal-cab"><h2 id="m-tit">Revocar rechazo OP ${o.id}</h2><p id="m-sub">La OP vuelve a Pendiente. Queda registrado con tu usuario, fecha y hora.</p></div>
     <div class="modal-cuerpo"><dl class="res-m">
       <div><dt>Rechazada por</dt><dd>${esc(u.por)}</dd></div>
-      <div><dt>Fecha de rechazo</dt><dd>${u.fe[0]} <span class="sep">·</span> ${u.fe[1]} hrs.</dd></div>
+      <div><dt>Fecha de rechazo</dt><dd>${f4(u.fe[0])} <span class="sep">·</span> ${u.fe[1]} hrs.</dd></div>
       <div class="full"><dt>Causal</dt><dd>${esc(causalTxt(o))}</dd></div>
     </dl></div>
     <div class="modal-pie">
@@ -1413,7 +1414,7 @@ function modalRevocar(id) {
 }
 // Historial de decisiones (Javier, 09/10): la más reciente arriba y "Llegó para aprobación" al final. Se cierra con la X, sin botones
 function modalHistorial(id) {
-  const o = op(id), quien = (p, [d, h]) => `${esc(p)} <span class="sep">·</span> ${d} <span class="sep">·</span> ${h} hrs.`;
+  const o = op(id), quien = (p, [d, h]) => `${esc(p)} <span class="sep">·</span> ${f4(d)} <span class="sep">·</span> ${h} hrs.`;
   const pasos = [...o.ev].reverse().map(e => ({ hito: e.est === 'Revocado' ? 'Pendiente' : e.est, acc: accionTxt(e), quien: quien(e.por, e.fe), causal: e.est === 'Rechazada' ? causalTxt(e) : '' }))
     .concat({ hito:'Pendiente', acc:'Llegó para aprobación', quien: quien(o.canal, o.sol), causal:'' });
   abrirModal(`<div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-tit">
@@ -1575,11 +1576,12 @@ function exportando(btn, msg) {
 }
 
 /* ═══════════ Toasts ═══════════ */
-// Con barra de decisión visible, los avisos salen sobre ella para no tapar los botones
+// Arriba a la derecha, 24 px bajo el header (la barra del prototipo se va con el scroll)
 function ubicarToasts() {
-  const b = $('.barra-decision'), r = b && b.getBoundingClientRect();
-  $('#toasts').style.bottom = r && r.top > 0 && r.top < innerHeight ? (innerHeight - r.top + 12) + 'px' : '';
+  const c = $('.cabecera');
+  $('#toasts').style.top = (c ? Math.max(c.getBoundingClientRect().bottom, 0) : 0) + 24 + 'px';
 }
+addEventListener('scroll', () => { if ($('#toasts').childElementCount) ubicarToasts(); }, { passive: true });
 function toast(msg, tipo = 'ok') {
   const t = document.createElement('div');
   t.className = 'toast ' + tipo;
@@ -1644,9 +1646,9 @@ const ACC = {
   'c-cargar': () => toast('Cargar archivo no está disponible en el prototipo', 'info'),
   'quitar-filtro': el => { S.filtros[el.dataset.v] = ''; S.retener.clear(); S.pagB = 0; cargarBandeja(); render(false); $('#btn-filtros')?.focus(); },
   'limpiar-filtros': () => { S.filtros = { ...VACIO }; S.retener.clear(); S.pagB = 0; cargarBandeja(); render(false); $('#btn-filtros')?.focus(); },
-  exportar: el => { const n = filtradas().length; exportando(el, `Se descargó HistorialAprobaciones_06102026.xlsx (${miles(n)} ${n === 1 ? 'OP' : 'OPs'}, en el orden de la grilla)`); },
+  exportar: el => exportando(el, 'Se descargó HistorialAprobaciones_06102026.xlsx'),
   // En pantalla, una fila por asiento; el Excel lleva 2 filas por asiento (debe y haber), como va a SAP (Javier, 07/10)
-  'exportar-det': el => { const n = filasD(op(S.opId)).length; exportando(el, `Se descargó Detalle_OP_${S.opId}.xlsx (${miles(n)} reembolsos en ${miles(n * 2)} filas: debe y haber)`); },
+  'exportar-det': el => exportando(el, `Se descargó Detalle_OP_${S.opId}.xlsx`),
 };
 
 document.addEventListener('click', ev => {
