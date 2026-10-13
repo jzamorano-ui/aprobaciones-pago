@@ -640,7 +640,7 @@ const MAX_REEMB_OP = 495;
   }
 })();
 const BANCOS = ['001', '012', '037', '016', '028', '039', '049', '051', '009'];
-const VACIO = { op:'', est:'', per:'', sol:'', fe:'', canal:'', ben:'', cau:'', con:'' };
+const VACIO = { op:'', est:'', per:'', sol:'', fe:'', canal:'' };
 const VACIO_D = { asiento:'', cli:'', banco:'', cuenta:'', ben:'', cau:'', con:'' };
 const VACIO_C = { op:'', arch:'', est:'', per:'', sol:'', fe:'' };
 // Periodo Contable es mensual: el filtro ofrece desde enero de 2023 hasta el mes en curso (valor MM/AA)
@@ -681,27 +681,10 @@ const CONCEPTOS = [
 ];
 const BENEFICIOS = ['Médico', 'Dental', 'Óptico'], CAUSALES_EM = ['Pago normal', 'Reliquidación'];
 const hashTx = (id, a) => { let x = Math.imul(id, 73856093) ^ Math.imul(a, 19349663); x = Math.imul(x ^ (x >>> 16), 0x45d9f3b); x = Math.imul(x ^ (x >>> 16), 0x45d9f3b); return (x ^ (x >>> 16)) >>> 0; };
-// Cada OP trae su propia mezcla de conceptos (% de OPs que traen cada uno) y solo 1 de cada 4 trae reliquidaciones:
-// así los filtros del historial separan OPs. La semilla -81 deja la OP 11696 con los 5 conceptos, igual que en Figma
-const PROB_CON = [70, 60, 50, 35, 30];
-function mezclaOP(id) {
-  const h = hashTx(id, -81), inc = PROB_CON.map((p, k) => ((h >>> (k * 6)) & 63) * 100 / 64 < p);
-  if (!inc.some(Boolean)) inc[0] = true;
-  return { inc, reliq: ((h >>> 30) & 3) === 0 };
-}
 function negocio(id, a) {
-  const m = mezclaOP(id), h = hashTx(id, a), tot = CONCEPTOS.reduce((s, c, k) => s + (m.inc[k] ? c[2] : 0), 0);
-  let p = h % tot, k = 0;
-  while (!m.inc[k] || p >= CONCEPTOS[k][2]) { if (m.inc[k]) p -= CONCEPTOS[k][2]; k++; }
-  return { folio: String(2000000 + (id - 8000) * 500 + a), ben: CONCEPTOS[k][1], con: CONCEPTOS[k][0], cau: m.reliq && (h >>> 8) % 25 === 0 ? 'Reliquidación' : 'Pago normal' };
-}
-// Filtro del historial por un dato de transacción: muestra las OPs que tienen al menos una transacción con ese valor
-const cacheNeg = {};
-function valoresOP(o) {
-  if (cacheNeg[o.id]) return cacheNeg[o.id];
-  const v = { ben:new Set(), cau:new Set(), con:new Set() };
-  for (let a = 1; a <= o.val; a++) { const n = negocio(o.id, a); v.ben.add(n.ben); v.cau.add(n.cau); v.con.add(n.con); }
-  return (cacheNeg[o.id] = v);
+  const h = hashTx(id, a); let p = h % 100, k = 0;
+  while (p >= CONCEPTOS[k][2]) { p -= CONCEPTOS[k][2]; k++; }
+  return { folio: String(2000000 + (id - 8000) * 500 + a), ben: CONCEPTOS[k][1], con: CONCEPTOS[k][0], cau: (h >>> 8) % 25 === 0 ? 'Reliquidación' : 'Pago normal' };
 }
 
 /* Transacciones de cada OP (registros tipo Debe): generados con semilla fija para que siempre sean los mismos. Sin excluidos: todos se envían a SAP */
@@ -748,8 +731,7 @@ function filtradas() {
     (!f.per || o.per.slice(3) === f.per) &&
     (!f.sol || iso(o.sol[0]) === f.sol) &&
     (!f.fe || iso(o.fe[0]) === f.fe) &&
-    (!f.canal || o.canal === f.canal) &&
-    (!f.ben || valoresOP(o).ben.has(f.ben)) && (!f.cau || valoresOP(o).cau.has(f.cau)) && (!f.con || valoresOP(o).con.has(f.con)));
+    (!f.canal || o.canal === f.canal));
 }
 // Columnas ordenables de la bandeja (todas menos Acciones). Salto de línea fijo como en Figma
 const COLS_B = [
@@ -784,9 +766,6 @@ function chipsFiltro() {
   if (f.sol) c.push(['sol', `Fecha solicitud: ${corta(f.sol)}`]);
   if (f.fe) c.push(['fe', `Fecha estado: ${corta(f.fe)}`]);
   if (f.canal) c.push(['canal', `Canal de origen: ${f.canal}`]);
-  if (f.ben) c.push(['ben', `Tipo de beneficio: ${f.ben}`]);
-  if (f.cau) c.push(['cau', `Causal de emisión: ${f.cau}`]);
-  if (f.con) c.push(['con', `Concepto: ${f.con}`]);
   return c;
 }
 // Rechazada lleva tooltip con la causal (con "Otro", el comentario), como el CP-04 de Centralizar (Javier, 09/10)
@@ -1462,9 +1441,9 @@ function modalHistorial(id) {
       <div class="paso-c"><b>${p.acc}</b><span>${p.quien}</span>${p.causal ? `<div class="caja-causal">Causal: <b>${esc(p.causal)}</b></div>` : ''}</div></li>`).join('')}</ol>
   </div>`, () => $('#m-cerrar').focus());
 }
-// Selects de los datos de negocio, iguales en el historial (prefijo f) y en el detalle (prefijo fd)
-const selNegocio = (px, f) => [['ben', 'Tipo de beneficio', BENEFICIOS], ['cau', 'Causal de emisión', CAUSALES_EM], ['con', 'Concepto', CONCEPTOS.map(c => c[0])]]
-  .map(([k, etq, ops]) => `<div class="campo"><label for="${px}-${k}">${etq}</label><select class="input" id="${px}-${k}">
+// Selects de los datos de negocio del detalle (no van en el historial: son datos de cada transacción, no de la OP)
+const selNegocio = f => [['ben', 'Tipo de beneficio', BENEFICIOS], ['cau', 'Causal de emisión', CAUSALES_EM], ['con', 'Concepto', CONCEPTOS.map(c => c[0])]]
+  .map(([k, etq, ops]) => `<div class="campo"><label for="fd-${k}">${etq}</label><select class="input" id="fd-${k}">
         <option value="">Selecciona</option>${ops.map(v => `<option ${f[k] === v ? 'selected' : ''}>${v}</option>`).join('')}</select></div>`).join('\n      ');
 // Filtros del detalle: mismo patrón que la bandeja (Aplicar se habilita solo si hay cambios)
 function modalFiltrosD() {
@@ -1476,7 +1455,7 @@ function modalFiltrosD() {
       <div class="campo"><label for="fd-cli">Código cliente</label><input class="input" id="fd-cli" maxlength="12" autocomplete="off" placeholder="Ej: I15521774K" value="${esc(f.cli)}"></div>
       <div class="campo"><label for="fd-banco">Clave banco</label><input class="input" id="fd-banco" inputmode="numeric" maxlength="3" autocomplete="off" placeholder="Ej: 037" value="${esc(f.banco)}"></div>
       <div class="campo"><label for="fd-cuenta">Cuenta bancaria</label><input class="input" id="fd-cuenta" inputmode="numeric" maxlength="12" autocomplete="off" placeholder="Ej: 57974882" value="${esc(f.cuenta)}"></div>
-      ${selNegocio('fd', f)}
+      ${selNegocio(f)}
     </div></div>
     <div class="modal-pie">
       <button class="btn btn-sec" type="button" id="fd-cancelar" data-a="cerrar-modal">Cancelar</button>
@@ -1502,7 +1481,6 @@ function modalFiltros() {
       <div class="campo"><label for="f-fe">Fecha estado</label><input class="input" type="date" id="f-fe" value="${f.fe}" aria-describedby="f-fe-nota" data-cal><p class="campo-nota" id="f-fe-nota" aria-live="polite"></p></div>
       <div class="campo"><label for="f-canal">Canal de origen</label><select class="input" id="f-canal">
         <option value="">Selecciona</option>${['Sistema', 'Manual'].map(c => `<option ${f.canal === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
-      ${selNegocio('f', f)}
     </div></div>
     <div class="modal-pie">
       <button class="btn btn-sec" type="button" id="f-cancelar" data-a="cerrar-modal">Cancelar</button>
@@ -1510,7 +1488,7 @@ function modalFiltros() {
     </div></form>`, () => { ajustarFechas(); revisarFiltros(); $('#f-op').focus(); });
 }
 // Aplicar filtros se habilita solo si el formulario cambia respecto de los filtros aplicados (Figma F2/F3)
-const leerFiltros = () => { const v = id => $('#' + id).value; return { op:v('f-op').trim(), est:v('f-est'), per:v('f-per'), sol:v('f-sol'), fe:v('f-fe'), canal:v('f-canal'), ben:v('f-ben'), cau:v('f-cau'), con:v('f-con') }; };
+const leerFiltros = () => { const v = id => $('#' + id).value; return { op:v('f-op').trim(), est:v('f-est'), per:v('f-per'), sol:v('f-sol'), fe:v('f-fe'), canal:v('f-canal') }; };
 function revisarFiltros() {
   const b = $('#f-aplicar'); if (!b) return;
   const nf = leerFiltros(); b.disabled = Object.keys(nf).every(k => nf[k] === (S.filtros[k] || ''));
