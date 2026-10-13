@@ -216,7 +216,7 @@ select.input:disabled{background-color:#E9EBEC;border-color:#E9EBEC;color:var(--
 .tip.op dt{color:var(--t3)}
 .tip.op dd{margin:0;font-weight:700;color:var(--t1);text-align:right;overflow-wrap:anywhere}
 .tip.op .pend{font-weight:400;color:var(--t4)}
-/* Tooltip de causal en el chip Rechazada (componente Aprobación / Tooltip causal): a la derecha del chip, con punta; causal en negrita y la observación debajo */
+/* Tooltip de causal en el chip Rechazada (componente Aprobación / Tooltip causal): a la derecha del chip, con punta; la causal en negrita o, con "Otro", su observación */
 .tip.causal{max-width:384px;background:var(--t2);color:#fff;border-radius:8px;padding:12px 16px;font-size:14px;line-height:24px;overflow-wrap:anywhere}
 .tip.causal b,.tip.causal span{display:block}
 .tip.causal::before{content:"";position:absolute;left:-7px;top:50%;transform:translateY(-50%);border-style:solid;border-width:7px 7px 7px 0;border-color:transparent var(--t2) transparent transparent}
@@ -401,11 +401,6 @@ textarea.input{height:auto;min-height:102px;padding:12px 16px;resize:vertical;li
 .combo-lista li.activa{background:var(--verde6);color:var(--verde4)}
 .combo-lista li[aria-selected="true"]{font-weight:700;color:var(--verde4)}
 .combo-lista li .ic{width:18px;height:18px;stroke-width:2.2}
-/* Causal y Otra causal en la misma fila (Figma 12): Otra causal aparece solo con "Otro" y la causal pasa a media fila */
-.fila-causal{display:flex;gap:24px;align-items:flex-start;margin-top:20px}
-.fila-causal>.campo{flex:1;min-width:0}
-.fila-causal>.campo[hidden]{display:none}
-.modal-cuerpo .fila-causal .campo{margin-top:0}
 .grid-f{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
 .grid-f .full{grid-column:1/-1}
 .grid-f .campo{margin-top:0}
@@ -608,8 +603,6 @@ const HOY = '06/10/26';
 const USUARIO = 'Camila Rojas Fuentes';
 // Causales por ahora (Javier, 09/10): 3 + Otro; la lista final la define el equipo
 const CAUSALES = ['Monto no cuadra', 'Error en detalle', 'Duplicado', 'Otro'];
-// Observación de los rechazos del historial ficticio, una por causal
-const OBS_EJ = { 'Monto no cuadra':'El monto total no coincide con la nómina enviada.', 'Error en detalle':'Hay reembolsos con la cuenta bancaria mal informada.', 'Duplicado':'La nómina ya se envió en otra OP.' };
 // Sin excluidos (refinamiento 09/10): al aprobador solo llegan OPs validadas sin errores; val = total de casos de la OP (reembolsos o LM, uno por fila del detalle).
 // Canal de origen: Sistema o Manual (OP cargada por Excel), como en Figma v3
 const OPS0 = [
@@ -640,13 +633,13 @@ const MAX_REEMB_OP = 495;
       // Mismo orden de sorteos que v2 para conservar el historial; el sorteo del monto excluido se descarta
       const solH = hora(), feH = hora(), val = rec - exc, monto = Math.round(val * prom() / 10) * 10; prom();
       OPS0.push({ id, per:`01/${sol.slice(3)}`, sol:[sol, solH], est: rech ? 'Rechazada' : 'Aprobada', fe:[fmt(fe), feH],
-        canal: id >= 11674 ? 'Sistema' : 'Manual', val, monto, por:USUARIO, ...(rech ? (c => ({ causal:c, obs:OBS_EJ[c] }))(CAUSALES[Math.floor(r() * 3)]) : {}) });
+        canal: id >= 11674 ? 'Sistema' : 'Manual', val, monto, por:USUARIO, ...(rech ? { causal:CAUSALES[Math.floor(r() * 3)] } : {}) });
       id -= 1 + Math.floor(r() * 3);
     }
   }
-  // Rechazo de ejemplo con "Otro" (Otra causal escrita por el aprobador), como Figma 13b y RV2
+  // Rechazo de ejemplo con "Otro" y su observación, como Figma 13b y RV2; las 3 causales de la lista no llevan observación
   const o74 = OPS0.find(o => o.id === 11674);
-  if (o74?.est === 'Rechazada') Object.assign(o74, { causal:'Falta documentación', obs:'Faltan respaldos de 3 reembolsos. Adjuntarlos y volver a enviar la OP.' });
+  if (o74?.est === 'Rechazada') Object.assign(o74, { causal:'Otro', obs:'Faltan respaldos de 3 reembolsos. Adjuntarlos y volver a enviar la OP.' });
 })();
 // Item de operación (Figma, subsección "Item de operación"): en fase 1 solo Pago Reembolso; con más de uno, el historial abre sin item elegido
 const ITEMS = ['Pago Reembolso', 'Licencias médicas', 'Easy Cancha'];
@@ -1145,11 +1138,12 @@ function tipOp(f) {
 }
 function verTip(el) {
   const t = $('#tip');
-  // Causal de la Rechazada en la bandeja: a la derecha del chip, centrado, con punta a la izquierda
+  // Causal de la Rechazada en el historial: a la derecha del chip, centrado, con punta a la izquierda.
+  // Con "Otro" muestra solo la observación (Figma 13b); con las otras causales, la causal
   if (el.dataset.tip === 'causal') {
     const o = op(el.dataset.id);
     t.className = 'tip causal';
-    t.innerHTML = `<b>${esc(o.causal)}</b>${o.obs ? `<span>${esc(o.obs)}</span>` : ''}`;
+    t.innerHTML = o.obs ? `<span>${esc(o.obs)}</span>` : `<b>${esc(o.causal)}</b>`;
     t.hidden = false;
     const r = el.getBoundingClientRect();
     t.style.top = (r.top + r.height / 2 - t.offsetHeight / 2) + 'px';
@@ -1319,7 +1313,7 @@ let focoPrevio = null, ocupado = false, abiertoEn = 0;
 // Mientras el modal se desvanece no acepta confirmaciones ni recibe foco
 const modalVisible = () => $('#capa').classList.contains('vis');
 // El cuerpo pasa a scroll solo si el contenido supera el alto máximo (con una lista de causales abierta no se recalcula).
-// Se observan también sus hijos: con el cuerpo ya en su alto máximo, su caja no cambia cuando el contenido crece (al aparecer "Otra causal")
+// Se observan también sus hijos: con el cuerpo ya en su alto máximo, su caja no cambia cuando el contenido crece (al aparecer Observación)
 function ajustarScrollModal() {
   const b = $('#capa .modal>.modal-cuerpo, #capa .modal>.linea');
   if (b && !b.querySelector('.combo-lista.vis')) b.classList.toggle('con-scroll', b.scrollHeight > b.clientHeight + 1);
@@ -1369,35 +1363,28 @@ function modalErrorSistema() {
     <div class="modal-pie"><button class="btn btn-pri" type="button" id="m-entendido" data-a="cerrar-modal">Entendido</button></div>
   </div>`, () => $('#m-entendido').focus());
 }
-// Rechazo (HU 12.c): causal obligatoria; con "Otro", Otra causal obligatoria (hasta 50). Observación obligatoria, de 10 a 255 caracteres
-let R = { causal:'', otra:'', obs:'', tocado:false, tocadoOtra:false };
+// Rechazo (HU 12.c): causal obligatoria. Observación solo con "Otro" y es su detalle: obligatoria, de 10 a 80 caracteres (Javier, 13/10)
+let R = { causal:'', obs:'', tocado:false };
 function modalRechazar(id) {
   const o = op(id);
-  R = { causal:'', otra:'', obs:'', tocado:false, tocadoOtra:false };
+  R = { causal:'', obs:'', tocado:false };
   abrirModal(`<form class="modal" role="dialog" aria-modal="true" aria-labelledby="m-tit" aria-describedby="m-sub" id="f-rechazo" novalidate>
     <div class="modal-cab"><h2 id="m-tit">Rechazar OP ${o.id}</h2><p id="m-sub">Queda registrada con tu usuario, fecha y hora.</p></div>
     <div class="modal-cuerpo">
       ${cuerpoResumen(o, false)}
-      <div class="fila-causal">
-        <div class="campo">
-          <label id="lbl-causal" for="causal-btn">Causal de rechazo</label>
-          <div class="combo" id="combo">
-            <button type="button" class="combo-btn" id="causal-btn" data-a="combo" aria-haspopup="listbox" aria-expanded="false" aria-controls="causal-lista" aria-labelledby="lbl-causal causal-btn"><span class="ph" id="causal-txt">Selecciona una causal</span>${ic('chevD')}</button>
-            <ul class="combo-lista" id="causal-lista" role="listbox" aria-labelledby="lbl-causal" hidden>
-              ${CAUSALES.map((c, i) => `<li role="option" id="op-c${i}" data-a="causal" data-v="${c}" aria-selected="false">${c}</li>`).join('')}
-            </ul>
-          </div>
-        </div>
-        <div class="campo" id="campo-otra" hidden>
-          <label for="otra">Otra causal</label>
-          <input class="input" id="otra" maxlength="50" autocomplete="off" placeholder="Escribe la causal" aria-describedby="otra-msj">
-          <div class="campo-pie"><span id="otra-msj" aria-live="polite"></span></div>
+      <div class="campo">
+        <label id="lbl-causal" for="causal-btn">Causal de rechazo</label>
+        <div class="combo" id="combo">
+          <button type="button" class="combo-btn" id="causal-btn" data-a="combo" aria-haspopup="listbox" aria-expanded="false" aria-controls="causal-lista" aria-labelledby="lbl-causal causal-btn"><span class="ph" id="causal-txt">Selecciona una causal</span>${ic('chevD')}</button>
+          <ul class="combo-lista" id="causal-lista" role="listbox" aria-labelledby="lbl-causal" hidden>
+            ${CAUSALES.map((c, i) => `<li role="option" id="op-c${i}" data-a="causal" data-v="${c}" aria-selected="false">${c}</li>`).join('')}
+          </ul>
         </div>
       </div>
-      <div class="campo">
+      <div class="campo" id="campo-obs" hidden>
         <label for="obs">Observación</label>
-        <textarea class="input" id="obs" rows="3" maxlength="255" placeholder="Explica qué debe corregir el solicitante" aria-describedby="obs-msj obs-cont"></textarea>
-        <div class="campo-pie"><span id="obs-msj" aria-live="polite">Mínimo 10 caracteres</span><span id="obs-cont">0/255</span></div>
+        <textarea class="input" id="obs" rows="3" maxlength="80" placeholder="Describe el motivo del rechazo" aria-describedby="obs-msj obs-cont"></textarea>
+        <div class="campo-pie"><span id="obs-msj" aria-live="polite">Mínimo 10 caracteres</span><span id="obs-cont">0/80</span></div>
       </div>
     </div>
     <div class="modal-pie">
@@ -1441,21 +1428,20 @@ function elegirCausal(v) {
     li.innerHTML = esc(li.dataset.v) + (sel ? ic('tick') : '');
   });
   cerrarCombo();
-  // Con "Otro" aparece Otra causal al lado y recibe el foco; con otra causal se oculta y se sigue a Observación
+  // Con "Otro" aparece Observación debajo y recibe el foco; con las otras causales se oculta y el foco vuelve a la causal
   const otro = v === 'Otro';
-  $('#campo-otra').hidden = !otro;
-  (otro ? $('#otra') : $('#obs')).focus();
+  $('#campo-obs').hidden = !otro;
+  (otro ? $('#obs') : $('#causal-btn')).focus();
   validarRechazo();
 }
 // Los errores se muestran al salir del campo con algo escrito, o al llegar al mínimo; los espacios al inicio y al final no cuentan
 function validarRechazo() {
-  const otra = R.otra.trim(), obs = R.obs.trim(), otro = R.causal === 'Otro';
-  $('#m-confirmar').disabled = !(R.causal && (!otro || otra) && obs.length >= 10);
-  const errOtra = otro && R.tocadoOtra && !otra, errObs = R.tocado && obs.length < 10;
-  const marcar = (i, m, err, txt) => { m.textContent = txt; m.classList.toggle('err', err); i.classList.toggle('invalido', err); i.setAttribute('aria-invalid', err); };
-  marcar($('#otra'), $('#otra-msj'), errOtra, errOtra ? 'Escribe la causal.' : '');
-  marcar($('#obs'), $('#obs-msj'), errObs, errObs ? 'Escribe al menos 10 caracteres.' : 'Mínimo 10 caracteres');
-  $('#obs-cont').textContent = obs.length + '/255';
+  const obs = R.obs.trim(), otro = R.causal === 'Otro';
+  $('#m-confirmar').disabled = !(R.causal && (!otro || obs.length >= 10));
+  const err = otro && R.tocado && obs.length < 10, i = $('#obs'), m = $('#obs-msj');
+  m.textContent = err ? 'Escribe al menos 10 caracteres.' : 'Mínimo 10 caracteres';
+  m.classList.toggle('err', err); i.classList.toggle('invalido', err); i.setAttribute('aria-invalid', err);
+  $('#obs-cont').textContent = obs.length + '/80';
 }
 // Revocar rechazo (Javier, 09/10): sin motivo; la OP vuelve a Pendiente y queda el registro de quién y cuándo
 function modalRevocar(id) {
@@ -1746,7 +1732,6 @@ document.addEventListener('change', ev => {
 });
 document.addEventListener('input', ev => {
   if (ev.target.id === 'obs') { R.obs = ev.target.value; if (R.obs.trim().length >= 10) R.tocado = true; validarRechazo(); }
-  if (ev.target.id === 'otra') { R.otra = ev.target.value; if (R.otra.trim()) R.tocadoOtra = true; validarRechazo(); }
   if (ev.target.id === 'f-op') { ev.target.value = ev.target.value.replace(/\D/g, ''); revisarFiltros(); }
   if (ev.target.id === 'fc-op') ev.target.value = ev.target.value.replace(/\D/g, '');
   if (['fd-asiento', 'fd-cc', 'fd-banco', 'fd-cuenta'].includes(ev.target.id)) ev.target.value = ev.target.value.replace(/\D/g, '');
@@ -1760,15 +1745,14 @@ document.addEventListener('focusin', ev => { if (ev.target.dataset?.tip) verTip(
 document.addEventListener('focusout', ev => { if (ev.target.dataset?.tip) ocultarTip(); });
 document.addEventListener('focusout', ev => {
   if (ev.target.id === 'obs' && R.obs.length) { R.tocado = true; validarRechazo(); }
-  if (ev.target.id === 'otra' && R.otra.length) { R.tocadoOtra = true; validarRechazo(); }
 });
 document.addEventListener('submit', ev => {
   ev.preventDefault();
   if (ev.target.id === 'f-rechazo') {
     const b = $('#m-confirmar'); if (b.disabled || ocupado || !modalVisible()) return;
     ocupar(b, 'Rechazando…');
-    // Con "Otro", lo que se registra como causal es lo escrito en Otra causal
-    const causal = R.causal === 'Otro' ? R.otra.trim() : R.causal, obs = R.obs.trim();
+    // Se registra la causal elegida; con "Otro", también su observación
+    const causal = R.causal, obs = R.causal === 'Otro' ? R.obs.trim() : '';
     setTimeout(() => (falla('error-rechazar') ? falloAccion(b, 'No pudimos registrar el rechazo. Vuelve a intentarlo.') : decidir(+b.dataset.id, 'Rechazada', causal, obs)), espera(800));
   }
   if (ev.target.id === 'f-filtros-c') {
