@@ -1261,14 +1261,19 @@ function cerrarPop() {
 let focoPrevio = null, ocupado = false, abiertoEn = 0;
 // Mientras el modal se desvanece no acepta confirmaciones ni recibe foco
 const modalVisible = () => $('#capa').classList.contains('vis');
-// El cuerpo pasa a scroll solo si el contenido supera el alto máximo (con una lista de causales abierta no se recalcula)
-const roModal = new ResizeObserver(es => es.forEach(({ target:b }) => b.querySelector('.combo-lista.vis') || b.classList.toggle('con-scroll', b.scrollHeight > b.clientHeight + 1)));
+// El cuerpo pasa a scroll solo si el contenido supera el alto máximo (con una lista de causales abierta no se recalcula).
+// Se observan también sus hijos: con el cuerpo ya en su alto máximo, su caja no cambia cuando el contenido crece (al desplegar "Describe el motivo")
+function ajustarScrollModal() {
+  const b = $('#capa .modal>.modal-cuerpo, #capa .modal>.linea');
+  if (b && !b.querySelector('.combo-lista.vis')) b.classList.toggle('con-scroll', b.scrollHeight > b.clientHeight + 1);
+}
+const roModal = new ResizeObserver(ajustarScrollModal);
 function abrirModal(html, alMontar) {
   focoPrevio = document.activeElement && document.activeElement.closest('#menu') ? menuBtn : document.activeElement;
   cerrarMenu(); cerrarPop();
   const c = $('#capa');
   c.innerHTML = html; c.hidden = false; abiertoEn = performance.now();
-  roModal.disconnect(); const cuerpo = c.querySelector('.modal>.modal-cuerpo, .modal>.linea'); cuerpo && roModal.observe(cuerpo);
+  roModal.disconnect(); const cuerpo = c.querySelector('.modal>.modal-cuerpo, .modal>.linea'); cuerpo && [cuerpo, ...cuerpo.children].forEach(n => roModal.observe(n));
   document.body.style.overflow = 'hidden';
   requestAnimationFrame(() => c.classList.add('vis'));
   alMontar && alMontar();
@@ -1354,6 +1359,7 @@ function cerrarCombo() {
   const l = $('#causal-lista'), b = $('#causal-btn'); if (!l || l.hidden) return;
   l.classList.remove('vis'); l.hidden = true;
   b.setAttribute('aria-expanded', 'false'); b.removeAttribute('aria-activedescendant');
+  ajustarScrollModal();
 }
 function marcarActiva(i) {
   activa = (i + CAUSALES.length) % CAUSALES.length;
