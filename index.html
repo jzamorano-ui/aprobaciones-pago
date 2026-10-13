@@ -604,7 +604,7 @@ const HOY = '06/10/26';
 const USUARIO = 'Camila Rojas Fuentes';
 // Causales por ahora (Javier, 09/10): 3 + Otro; la lista final la define el equipo
 const CAUSALES = ['Monto no cuadra', 'Error en detalle', 'Duplicado', 'Otro'];
-// Sin excluidos (refinamiento 09/10): al aprobador solo llegan OPs validadas sin errores; val = reembolsos de la OP.
+// Sin excluidos (refinamiento 09/10): al aprobador solo llegan OPs validadas sin errores; val = transacciones de la OP (registros tipo Debe, las filas del detalle).
 // Canal de origen: Sistema o Manual (OP cargada por Excel), como en Figma v3
 const OPS0 = [
   { id:11696, per:'01/10/26', sol:['05/10/26','15:40'], est:'Pendiente', fe:['05/10/26','15:40'], canal:'Sistema', val:314, monto:67670420 },
@@ -640,8 +640,8 @@ const MAX_REEMB_OP = 495;
   }
 })();
 const BANCOS = ['001', '012', '037', '016', '028', '039', '049', '051', '009'];
-const VACIO = { op:'', est:'', per:'', sol:'', fe:'', canal:'' };
-const VACIO_D = { asiento:'', cli:'', banco:'', cuenta:'' };
+const VACIO = { op:'', est:'', per:'', sol:'', fe:'', canal:'', ben:'', cau:'', con:'' };
+const VACIO_D = { asiento:'', cli:'', banco:'', cuenta:'', ben:'', cau:'', con:'' };
 const VACIO_C = { op:'', arch:'', est:'', per:'', sol:'', fe:'' };
 // Periodo Contable es mensual: el filtro ofrece desde enero de 2023 hasta el mes en curso (valor MM/AA)
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -673,7 +673,38 @@ const op = id => OPS.find(o => o.id === +id);
 // Con "Otro", la causal se muestra como el comentario solo (tooltip, modal revocar, alerta e historial)
 const causalTxt = o => o.causal === 'Otro' && o.motivo ? o.motivo : o.causal;
 
-/* Reembolsos de cada OP: generados con semilla fija para que siempre sean los mismos. Sin excluidos: todos se envían a SAP */
+/* Datos de negocio de cada transacción (HU de Mauro, 13/10): Folio documento, Tipo de beneficio, Causal de emisión
+   y Concepto. Deterministas por OP y N° asiento, sin usar la semilla del resto de los campos */
+const CONCEPTOS = [
+  ['Consulta médica', 'Médico', 30], ['Exámenes de laboratorio', 'Médico', 20], ['Medicamentos', 'Médico', 20],
+  ['Atención dental', 'Dental', 18], ['Lentes ópticos', 'Óptico', 12],
+];
+const BENEFICIOS = ['Médico', 'Dental', 'Óptico'], CAUSALES_EM = ['Pago normal', 'Reliquidación'];
+const hashTx = (id, a) => { let x = Math.imul(id, 73856093) ^ Math.imul(a, 19349663); x = Math.imul(x ^ (x >>> 16), 0x45d9f3b); x = Math.imul(x ^ (x >>> 16), 0x45d9f3b); return (x ^ (x >>> 16)) >>> 0; };
+// Cada OP trae su propia mezcla de conceptos (% de OPs que traen cada uno) y solo 1 de cada 4 trae reliquidaciones:
+// así los filtros del historial separan OPs. La semilla -81 deja la OP 11696 con los 5 conceptos, igual que en Figma
+const PROB_CON = [70, 60, 50, 35, 30];
+function mezclaOP(id) {
+  const h = hashTx(id, -81), inc = PROB_CON.map((p, k) => ((h >>> (k * 6)) & 63) * 100 / 64 < p);
+  if (!inc.some(Boolean)) inc[0] = true;
+  return { inc, reliq: ((h >>> 30) & 3) === 0 };
+}
+function negocio(id, a) {
+  const m = mezclaOP(id), h = hashTx(id, a), tot = CONCEPTOS.reduce((s, c, k) => s + (m.inc[k] ? c[2] : 0), 0);
+  let p = h % tot, k = 0;
+  while (!m.inc[k] || p >= CONCEPTOS[k][2]) { if (m.inc[k]) p -= CONCEPTOS[k][2]; k++; }
+  return { folio: String(2000000 + (id - 8000) * 500 + a), ben: CONCEPTOS[k][1], con: CONCEPTOS[k][0], cau: m.reliq && (h >>> 8) % 25 === 0 ? 'Reliquidación' : 'Pago normal' };
+}
+// Filtro del historial por un dato de transacción: muestra las OPs que tienen al menos una transacción con ese valor
+const cacheNeg = {};
+function valoresOP(o) {
+  if (cacheNeg[o.id]) return cacheNeg[o.id];
+  const v = { ben:new Set(), cau:new Set(), con:new Set() };
+  for (let a = 1; a <= o.val; a++) { const n = negocio(o.id, a); v.ben.add(n.ben); v.cau.add(n.cau); v.con.add(n.con); }
+  return (cacheNeg[o.id] = v);
+}
+
+/* Transacciones de cada OP (registros tipo Debe): generados con semilla fija para que siempre sean los mismos. Sin excluidos: todos se envían a SAP */
 function transacciones(o) {
   if (cacheTx[o.id]) return cacheTx[o.id];
   const R = rng(o.id), filas = [];
@@ -681,7 +712,7 @@ function transacciones(o) {
     const rut = Math.floor(6000000 + R() * 18000000);
     const L = 8 + Math.floor(R() * 5);
     let cuenta = String(1 + Math.floor(R() * 9)); while (cuenta.length < L) cuenta += Math.floor(R() * 10);
-    const t = { asiento:a, fecha:o.sol[0], cc:'21201010', rut, cli:'I' + rut + dv(rut), banco:BANCOS[Math.floor(R() * BANCOS.length)], cuenta, w:Math.exp(R() * 2.4) };
+    const t = { asiento:a, fecha:o.sol[0], cc:'21201010', rut, cli:'I' + rut + dv(rut), banco:BANCOS[Math.floor(R() * BANCOS.length)], cuenta, w:Math.exp(R() * 2.4), ...negocio(o.id, a) };
     filas.push(t);
   }
   // Importes escalados para que sumen el monto de la OP
@@ -717,13 +748,14 @@ function filtradas() {
     (!f.per || o.per.slice(3) === f.per) &&
     (!f.sol || iso(o.sol[0]) === f.sol) &&
     (!f.fe || iso(o.fe[0]) === f.fe) &&
-    (!f.canal || o.canal === f.canal));
+    (!f.canal || o.canal === f.canal) &&
+    (!f.ben || valoresOP(o).ben.has(f.ben)) && (!f.cau || valoresOP(o).cau.has(f.cau)) && (!f.con || valoresOP(o).con.has(f.con)));
 }
 // Columnas ordenables de la bandeja (todas menos Acciones). Salto de línea fijo como en Figma
 const COLS_B = [
   ['per', 'Periodo <br>contable', o => iso(o.per)], ['id', 'N° <br>operación', o => o.id], ['canal', 'Canal de <br>origen', o => o.canal],
   ['sol', 'Fecha solicitud <br>centralizador', o => iso(o.sol[0]) + o.sol[1]], ['est', 'Estado <br>aprobación', o => ORDEN_EST[o.est]],
-  ['fe', 'Fecha <br>estado', o => iso(o.fe[0]) + o.fe[1]], ['val', 'Reembolsos', o => o.val], ['monto', 'Monto <br>a pagar', o => o.monto],
+  ['fe', 'Fecha <br>estado', o => iso(o.fe[0]) + o.fe[1]], ['val', 'Transacciones', o => o.val], ['monto', 'Monto <br>a pagar', o => o.monto],
 ];
 const ORDEN_EST = { Pendiente:0, Aprobada:1, Rechazada:2 };
 const CARET = '<svg class="caret" viewBox="0 0 8 5" aria-hidden="true"><path d="M0 0h8L4 5z"/></svg>';
@@ -737,7 +769,7 @@ function ordenadas() {
   return filtradas().sort((a, b) => d * cmp(v(a), v(b)) || base(a, b));
 }
 // Detalle: por defecto, por N° Asiento; los vacíos (—) quedan al final en ambos sentidos
-const CLAVES_D = { asiento:t => t.asiento, fecha:t => iso(t.fecha), imp:t => t.imp, cli:t => t.cli, banco:t => t.banco, cuenta:t => t.cuenta };
+const CLAVES_D = { asiento:t => t.asiento, fecha:t => iso(t.fecha), folio:t => t.folio, ben:t => t.ben, cau:t => t.cau, con:t => t.con, imp:t => t.imp, cli:t => t.cli, banco:t => t.banco, cuenta:t => t.cuenta };
 function ordenadasD(filas) {
   if (!S.ordenD.col) return filas;
   const v = CLAVES_D[S.ordenD.col], d = S.ordenD.dir === 'asc' ? 1 : -1;
@@ -752,6 +784,9 @@ function chipsFiltro() {
   if (f.sol) c.push(['sol', `Fecha solicitud: ${corta(f.sol)}`]);
   if (f.fe) c.push(['fe', `Fecha estado: ${corta(f.fe)}`]);
   if (f.canal) c.push(['canal', `Canal de origen: ${f.canal}`]);
+  if (f.ben) c.push(['ben', `Tipo de beneficio: ${f.ben}`]);
+  if (f.cau) c.push(['cau', `Causal de emisión: ${f.cau}`]);
+  if (f.con) c.push(['con', `Concepto: ${f.con}`]);
   return c;
 }
 // Rechazada lleva tooltip con la causal (con "Otro", el comentario), como el CP-04 de Centralizar (Javier, 09/10)
@@ -846,7 +881,7 @@ function vDetalle() {
   <div id="zona-alerta">${alerta(o)}</div>
   <section class="card resumen" aria-label="Resumen de la OP">
     <div class="resumen-in">
-    <div class="monto"><div class="etq">Monto a pagar</div><div class="cifra">${pesos(o.monto)}</div><div class="sub">${miles(o.val)} reembolsos</div></div>
+    <div class="monto"><div class="etq">Monto a pagar</div><div class="cifra">${pesos(o.monto)}</div><div class="sub">${miles(o.val)} transacciones</div></div>
     <dl class="meta">
       <div><dt>Estado aprobación</dt><dd id="d-estado">${chip(o.est, o.anim)}</dd></div>
       <div><dt>Item de operación</dt><dd>Pago Reembolso</dd></div>
@@ -856,10 +891,10 @@ function vDetalle() {
     </dl>
     </div>
   </section>
-  <section class="card" id="panel-tx" aria-label="Detalle reembolsos"></section>
+  <section class="card" id="panel-tx" aria-label="Detalle de transacciones"></section>
   ${o.est === 'Pendiente' ? `
   <div class="barra-decision" id="barra-decision">
-    <p>Al aprobar, se envían a SAP <b>${miles(o.val)} reembolsos</b> por <b>${pesos(o.monto)}</b>.</p>
+    <p>Al aprobar, se envían a SAP <b>${miles(o.val)} transacciones</b> por <b>${pesos(o.monto)}</b>.</p>
     <div class="botones">
       <button class="btn btn-sec btn-140" type="button" id="det-rechazar" data-a="rechazar" data-id="${o.id}">Rechazar</button>
       <button class="btn btn-pri btn-140" type="button" id="det-aprobar" data-a="aprobar" data-id="${o.id}">Aprobar</button>
@@ -870,12 +905,14 @@ function vDetalle() {
     <div class="botones una"><button class="btn btn-pri" type="button" id="det-revocar" data-a="revocar" data-id="${o.id}">Revocar rechazo</button></div>
   </div>` : ''}`;
 }
-// Filtros del detalle (Javier, 09/10, "de momento, los definimos nosotros"): N° asiento exacto; el resto "contiene"
-const ETQ_D = { asiento:'N° asiento', cli:'Código cliente', banco:'Clave banco', cuenta:'Cuenta bancaria' };
+// Filtros del detalle (Javier, 09/10, "de momento, los definimos nosotros"): N° asiento exacto; códigos y cuenta "contiene";
+// Tipo de beneficio, Causal de emisión y Concepto (HU de Mauro, 13/10) son selects de valor exacto
+const ETQ_D = { asiento:'N° asiento', cli:'Código cliente', banco:'Clave banco', cuenta:'Cuenta bancaria', ben:'Tipo de beneficio', cau:'Causal de emisión', con:'Concepto' };
 function filasD(o) {
   const f = S.filtrosD, tiene = (x, v) => x != null && String(x).toLowerCase().includes(v.toLowerCase());
   return transacciones(o).filter(t => (!f.asiento || t.asiento === +f.asiento) && (!f.cli || tiene(t.cli, f.cli))
-    && (!f.banco || tiene(t.banco, f.banco)) && (!f.cuenta || tiene(t.cuenta, f.cuenta)));
+    && (!f.banco || tiene(t.banco, f.banco)) && (!f.cuenta || tiene(t.cuenta, f.cuenta))
+    && (!f.ben || t.ben === f.ben) && (!f.cau || t.cau === f.cau) && (!f.con || t.con === f.con));
 }
 const chipsFiltroD = () => Object.keys(ETQ_D).filter(k => S.filtrosD[k]).map(k => [k, `${ETQ_D[k]}: ${S.filtrosD[k]}`]);
 function vTabla() {
@@ -883,20 +920,21 @@ function vTabla() {
   const o = op(S.opId), filas = ordenadasD(filasD(o)), chips = chipsFiltroD();
   const sap = () => o.est === 'Aprobada' && !o.enSesion ? f4(o.fe[0]) : null;
   const nulo = v => v == null ? '<span class="vacio-celda">—</span>' : v;
-  // Solo se ordenan las columnas que cambian entre reembolsos; las que son iguales en toda la OP no llevan caret
+  // Solo se ordenan las columnas que cambian entre transacciones; las que son iguales en toda la OP no llevan caret
   const cols = [
     ['N° de operación', () => o.id], ['ID proceso', () => 'BEN'], ['Descripción proceso', () => 'Beneficios'],
     ['Item de proceso', () => 'PRE'], ['Descripción item proceso', () => 'Pago Reembolso'], ['N° asiento', t => t.asiento, 'asiento'],
-    ['Fecha <br>contable', t => f4(t.fecha), 'fecha'], ['Sociedad FI', () => 'CL07'], ['N° cuenta contable', t => nulo(t.cc)],
-    ['Importe <br>documento', t => pesos(t.imp), 'imp'], ['Código cliente', t => t.cli, 'cli'], ['Clave <br>banco', t => t.banco, 'banco'],
+    ['Fecha <br>contable', t => f4(t.fecha), 'fecha'], ['Folio <br>documento', t => t.folio, 'folio'], ['Tipo de <br>beneficio', t => t.ben, 'ben'],
+    ['Causal de <br>emisión', t => t.cau, 'cau'], ['Concepto', t => t.con, 'con'], ['N° cuenta contable', t => nulo(t.cc)],
+    ['Código cliente', t => t.cli, 'cli'], ['Importe <br>documento', t => pesos(t.imp), 'imp'], ['Clave <br>banco', t => t.banco, 'banco'],
     ['Cuenta <br>bancaria', t => nulo(t.cuenta), 'cuenta'], ['Fecha registro en SAP', () => nulo(sap())],
   ];
   // Anchos fijos de cada columna, iguales a Figma (frame 06); los títulos largos pasan a 2 líneas
-  const ANCHOS_D = [140, 112, 160, 128, 200, 120, 136, 120, 168, 168, 152, 116, 152, 168];
+  const ANCHOS_D = [140, 112, 160, 128, 200, 120, 136, 136, 128, 136, 200, 168, 152, 168, 116, 152, 168];
   const ancho = i => ` style="width:${ANCHOS_D[i]}px;min-width:${ANCHOS_D[i]}px"`;
   const thOrd = (k, t, i) => { const a = S.ordenD.col === k; return `<th scope="col" class="ord${a ? ' activa' : ''}"${ancho(i)}${a ? ` aria-sort="${S.ordenD.dir === 'asc' ? 'ascending' : 'descending'}"` : ''}><button type="button" class="orden" id="ordd-${k}" data-a="ordenar-det" data-v="${k}">${t}${CARET}</button></th>`; };
   const cab = `<div class="tabla-cab">
-      <div><h2>Detalle reembolsos</h2></div>
+      <div><h2>Detalle de transacciones</h2></div>
       <div class="acciones">
         <button class="btn btn-sec" type="button" id="btn-filtros-det" data-a="filtros-det">${ic('filtros')}Filtros</button>
         <button class="btn btn-sec" type="button" id="btn-exportar-det" data-a="exportar-det" ${filas.length ? '' : 'disabled'}>${ic('descarga')}Exportar detalle</button>
@@ -1243,7 +1281,7 @@ function cerrarMenu(devolverFoco) {
 /* ═══════════ Notificaciones ═══════════ */
 function abrirPop() {
   const p = $('#pop'), pend = SIM === 'vacio' ? [] : OPS.filter(o => o.est === 'Pendiente');
-  p.innerHTML = `<h3 tabindex="-1">Notificaciones</h3>${pend.length ? `<ul>${pend.map(o => `<li><button type="button" data-a="ver" data-id="${o.id}"><b>OP ${o.id} espera tu aprobación</b><small>${miles(o.val)} reembolsos <span class="sep">·</span> ${pesos(o.monto)} <span class="sep">·</span> ${f4(o.sol[0])} ${o.sol[1]} hrs.</small></button></li>`).join('')}</ul>` : '<p class="nada">No tienes OPs pendientes de aprobación.</p>'}`;
+  p.innerHTML = `<h3 tabindex="-1">Notificaciones</h3>${pend.length ? `<ul>${pend.map(o => `<li><button type="button" data-a="ver" data-id="${o.id}"><b>OP ${o.id} espera tu aprobación</b><small>${miles(o.val)} transacciones <span class="sep">·</span> ${pesos(o.monto)} <span class="sep">·</span> ${f4(o.sol[0])} ${o.sol[1]} hrs.</small></button></li>`).join('')}</ul>` : '<p class="nada">No tienes OPs pendientes de aprobación.</p>'}`;
   p.hidden = false;
   const r = $('#btn-campana').getBoundingClientRect();
   if (innerWidth > 820) p.style.right = Math.max(16, innerWidth - r.right - 40) + 'px'; else p.style.right = '';
@@ -1291,7 +1329,7 @@ function cuerpoResumen(o, sap) {
   return `<dl class="res-m">
     <div><dt>Item de operación</dt><dd>Pago Reembolso</dd></div>
     <div><dt>Monto a pagar</dt><dd>${pesos(o.monto)}</dd></div>
-    <div><dt>Reembolsos${sap ? ' <span class="sep">·</span> se envían a SAP' : ''}</dt><dd>${miles(o.val)}</dd></div>
+    <div><dt>Transacciones${sap ? ' <span class="sep">·</span> se envían a SAP' : ''}</dt><dd>${miles(o.val)}</dd></div>
     <div><dt>Canal de origen</dt><dd>${o.canal}</dd></div>
   </dl>`;
 }
@@ -1424,23 +1462,28 @@ function modalHistorial(id) {
       <div class="paso-c"><b>${p.acc}</b><span>${p.quien}</span>${p.causal ? `<div class="caja-causal">Causal: <b>${esc(p.causal)}</b></div>` : ''}</div></li>`).join('')}</ol>
   </div>`, () => $('#m-cerrar').focus());
 }
+// Selects de los datos de negocio, iguales en el historial (prefijo f) y en el detalle (prefijo fd)
+const selNegocio = (px, f) => [['ben', 'Tipo de beneficio', BENEFICIOS], ['cau', 'Causal de emisión', CAUSALES_EM], ['con', 'Concepto', CONCEPTOS.map(c => c[0])]]
+  .map(([k, etq, ops]) => `<div class="campo"><label for="${px}-${k}">${etq}</label><select class="input" id="${px}-${k}">
+        <option value="">Selecciona</option>${ops.map(v => `<option ${f[k] === v ? 'selected' : ''}>${v}</option>`).join('')}</select></div>`).join('\n      ');
 // Filtros del detalle: mismo patrón que la bandeja (Aplicar se habilita solo si hay cambios)
 function modalFiltrosD() {
   const f = S.filtrosD;
   abrirModal(`<form class="modal" role="dialog" aria-modal="true" aria-labelledby="m-tit" id="f-filtros-d" novalidate style="width:720px">
-    <div class="modal-cab"><h2 id="m-tit">Filtros</h2><p>Filtra los reembolsos de la OP ${S.opId}.</p></div>
+    <div class="modal-cab"><h2 id="m-tit">Filtros</h2><p>Filtra las transacciones de la OP ${S.opId}.</p></div>
     <div class="modal-cuerpo"><div class="grid-f">
       <div class="campo"><label for="fd-asiento">N° asiento</label><input class="input" id="fd-asiento" inputmode="numeric" maxlength="3" autocomplete="off" placeholder="Ej: 25" value="${esc(f.asiento)}"></div>
       <div class="campo"><label for="fd-cli">Código cliente</label><input class="input" id="fd-cli" maxlength="12" autocomplete="off" placeholder="Ej: I15521774K" value="${esc(f.cli)}"></div>
       <div class="campo"><label for="fd-banco">Clave banco</label><input class="input" id="fd-banco" inputmode="numeric" maxlength="3" autocomplete="off" placeholder="Ej: 037" value="${esc(f.banco)}"></div>
       <div class="campo"><label for="fd-cuenta">Cuenta bancaria</label><input class="input" id="fd-cuenta" inputmode="numeric" maxlength="12" autocomplete="off" placeholder="Ej: 57974882" value="${esc(f.cuenta)}"></div>
+      ${selNegocio('fd', f)}
     </div></div>
     <div class="modal-pie">
       <button class="btn btn-sec" type="button" id="fd-cancelar" data-a="cerrar-modal">Cancelar</button>
       <button class="btn btn-pri" type="submit" id="fd-aplicar" disabled>Aplicar filtros</button>
     </div></form>`, () => $('#fd-asiento').focus());
 }
-const leerFiltrosD = () => { const v = id => $('#fd-' + id).value.trim(); return { asiento:v('asiento'), cli:v('cli'), banco:v('banco'), cuenta:v('cuenta') }; };
+const leerFiltrosD = () => { const v = id => $('#fd-' + id).value.trim(); return { asiento:v('asiento'), cli:v('cli'), banco:v('banco'), cuenta:v('cuenta'), ben:v('ben'), cau:v('cau'), con:v('con') }; };
 function revisarFiltrosD() {
   const b = $('#fd-aplicar'); if (!b) return;
   const nf = leerFiltrosD(); b.disabled = Object.keys(nf).every(k => nf[k] === S.filtrosD[k]);
@@ -1459,6 +1502,7 @@ function modalFiltros() {
       <div class="campo"><label for="f-fe">Fecha estado</label><input class="input" type="date" id="f-fe" value="${f.fe}" aria-describedby="f-fe-nota" data-cal><p class="campo-nota" id="f-fe-nota" aria-live="polite"></p></div>
       <div class="campo"><label for="f-canal">Canal de origen</label><select class="input" id="f-canal">
         <option value="">Selecciona</option>${['Sistema', 'Manual'].map(c => `<option ${f.canal === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+      ${selNegocio('f', f)}
     </div></div>
     <div class="modal-pie">
       <button class="btn btn-sec" type="button" id="f-cancelar" data-a="cerrar-modal">Cancelar</button>
@@ -1466,7 +1510,7 @@ function modalFiltros() {
     </div></form>`, () => { ajustarFechas(); revisarFiltros(); $('#f-op').focus(); });
 }
 // Aplicar filtros se habilita solo si el formulario cambia respecto de los filtros aplicados (Figma F2/F3)
-const leerFiltros = () => { const v = id => $('#' + id).value; return { op:v('f-op').trim(), est:v('f-est'), per:v('f-per'), sol:v('f-sol'), fe:v('f-fe'), canal:v('f-canal') }; };
+const leerFiltros = () => { const v = id => $('#' + id).value; return { op:v('f-op').trim(), est:v('f-est'), per:v('f-per'), sol:v('f-sol'), fe:v('f-fe'), canal:v('f-canal'), ben:v('f-ben'), cau:v('f-cau'), con:v('f-con') }; };
 function revisarFiltros() {
   const b = $('#f-aplicar'); if (!b) return;
   const nf = leerFiltros(); b.disabled = Object.keys(nf).every(k => nf[k] === (S.filtros[k] || ''));
