@@ -326,18 +326,24 @@ select.input:disabled{background-color:#E9EBEC;border-color:#E9EBEC;color:var(--
 /* Alto máx. del modal: 720 px o la ventana − 48 px. Cabecera y pie quedan fijos; si el contenido no cabe, solo el cuerpo hace scroll (Javier, 09/10) */
 .modal>*{flex:none}
 .modal>.modal-cuerpo,.modal>.linea{flex:0 1 auto;min-height:0}
-.modal>.con-scroll{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--t4) transparent}
+.modal>.con-scroll{overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding-right:16px}
+/* Barra siempre visible, como "barra de scroll" de Figma (RV8b): 4 px, #BCC2C6, a 8 px del borde. Avisa que hay más contenido aunque el sistema oculte las barras.
+   Ocupa 16 px y el padding derecho baja a 16: el contenido mantiene su ancho */
+.modal>.con-scroll::-webkit-scrollbar{width:16px}
+.modal>.con-scroll::-webkit-scrollbar-track{margin:8px 0;background:transparent}
+.modal>.con-scroll::-webkit-scrollbar-thumb{border:solid transparent;border-width:0 8px 0 4px;border-radius:999px;background:#BCC2C6 padding-box}
+@supports not selector(::-webkit-scrollbar){.modal>.con-scroll{padding-right:24px;scrollbar-width:thin;scrollbar-color:#BCC2C6 transparent}}
 .modal-cab{padding:32px 32px 24px;text-align:center;border-bottom:1px solid var(--g6)}
 .modal-cab h2{margin:0;font-size:24px;line-height:28px;font-weight:700}
 .modal-cab p{margin:8px 0 0;color:var(--t3)}
 .modal-cuerpo{padding:24px 32px}
 .modal-cuerpo .campo{margin-top:20px}
-.modal-pie{display:flex;justify-content:space-between;gap:16px;padding:24px 32px 28px;border-top:1px solid var(--g6)}
+.modal-pie{display:flex;justify-content:space-between;gap:16px;padding:24px 32px 32px;border-top:1px solid var(--g6)}
 /* Ambos botones del pie con el mismo ancho fijo, como Figma (Javier, 07/10) */
 .modal-pie .btn-sec,.modal-pie .btn-pri{width:211px;min-width:0}
-.res-m{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px;margin:0}
-.res-m dt{font-size:14px;line-height:20px;color:var(--t2)}
-.res-m dd{margin:4px 0 0;font-weight:700;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.res-m{display:grid;grid-template-columns:1fr 1fr;gap:16px 32px;margin:0}
+.res-m dt{font-size:14px;line-height:24px;color:var(--t2)}
+.res-m dd{margin:2px 0 0;font-weight:700;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
 .res-m .full{grid-column:1/-1}
 /* Modal historial (componente Aprobación / Modal historial · v3): línea de tiempo descendente, se cierra solo con la X */
 .hist-cab{display:flex;align-items:flex-start;gap:16px;padding:32px 24px 24px 32px;border-bottom:1px solid var(--g6)}
@@ -373,7 +379,7 @@ select.input:disabled{background-color:#E9EBEC;border-color:#E9EBEC;color:var(--
 .ic-err{flex:none;width:24px;height:24px;border-radius:50%;background:radial-gradient(circle,#fff 9.5px,transparent 10px);color:#B71C1C}
 .ic-err svg{display:block;width:24px;height:24px}
 .campo{margin-top:24px}
-.campo>label,.campo legend{display:block;font-size:16px;color:var(--t2);margin-bottom:8px;padding:0}
+.campo>label,.campo legend{display:block;font-size:16px;line-height:20px;color:var(--t2);margin-bottom:6px;padding:0}
 fieldset.campo{border:0;padding:0;margin-inline:0;min-width:0}
 .input,.combo-btn{width:100%;height:50px;padding:0 16px;border:1px solid #BCC2C6;border-radius:8px;background:#fff;color:var(--t1);transition:border-color .15s,box-shadow .15s}
 .input:hover,.combo-btn:hover{border-color:var(--t4)}
@@ -395,10 +401,11 @@ textarea.input{height:auto;min-height:102px;padding:12px 16px;resize:vertical;li
 .combo-btn[aria-expanded="true"] .ph{color:transparent}
 .combo-btn .ic{transition:transform .2s var(--ease);color:var(--t1)}
 .combo-btn[aria-expanded="true"] .ic{transform:rotate(180deg)}
-.combo-lista{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;margin:0;padding:0;list-style:none;background:#fff;border:1px solid var(--g6);border-radius:4px;box-shadow:var(--sombra-elevada);opacity:0;transform:translateY(-4px);transition:opacity .14s var(--ease),transform .14s var(--ease)}
+/* Fija a la ventana (posición en abrirCombo): si el cuerpo del modal hace scroll, no la recorta y queda sobre el pie, como el frame 11 */
+.combo-lista{position:fixed;z-index:5;margin:0;padding:0;list-style:none;background:#fff;border:1px solid var(--g6);border-radius:4px;box-shadow:var(--sombra-elevada);opacity:0;transform:translateY(-4px);transition:opacity .14s var(--ease),transform .14s var(--ease)}
 /* Las 4 causales (3 + Otro, Javier 09/10) caben sin scroll */
 .combo-lista{max-height:314px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--t4) transparent}
-.combo-lista.arriba{top:auto;bottom:calc(100% + 4px);transform:translateY(4px)}
+.combo-lista.arriba{transform:translateY(4px)}
 .combo-lista.vis{opacity:1;transform:none}
 .combo-lista li{display:flex;align-items:center;justify-content:space-between;height:52px;padding:0 16px;cursor:pointer}
 .combo-lista li.activa{background:var(--verde6);color:var(--verde4)}
@@ -407,8 +414,9 @@ textarea.input{height:auto;min-height:102px;padding:12px 16px;resize:vertical;li
 /* "Describe el motivo" se despliega al elegir "Otro" */
 .plegable{display:grid;grid-template-rows:0fr;transition:grid-template-rows .25s var(--ease)}
 .plegable.abierto{grid-template-rows:1fr}
-.plegable>div{overflow:hidden;padding:0 3px 3px;margin:0 -3px}
-.grid-f{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+/* Los 3 px de abajo dan lugar al anillo de foco; el margen negativo los descuenta del alto, así cerrado no suma y abierto termina donde Figma */
+.plegable>div{overflow:hidden;padding:0 3px 3px;margin:0 -3px -3px}
+.grid-f{display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;align-items:start}
 .grid-f .full{grid-column:1/-1}
 .grid-f .campo{margin-top:0}
 .grid-f .campo>label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -488,6 +496,7 @@ textarea.input{height:auto;min-height:102px;padding:12px 16px;resize:vertical;li
   .linea{padding:20px}
   .modal-cab h2{font-size:20px;line-height:26px}
   .modal-cuerpo{padding:20px}
+  .modal>.con-scroll{padding-right:4px}
   .modal-pie{flex-direction:column-reverse;padding:16px 20px}
   .modal-pie .btn-sec,.modal-pie .btn-pri{width:100%;min-width:0}
   .grid-f{grid-template-columns:1fr}
@@ -1352,9 +1361,13 @@ let focoPrevio = null, ocupado = false, abiertoEn = 0;
 const modalVisible = () => $('#capa').classList.contains('vis');
 // El cuerpo pasa a scroll solo si el contenido supera el alto máximo (con una lista de causales abierta no se recalcula).
 // Se observan también sus hijos: con el cuerpo ya en su alto máximo, su caja no cambia cuando el contenido crece (al desplegar "Describe el motivo")
+// Se mide con el cuerpo como contenedor de scroll: si no, scrollHeight no suma el padding inferior y, cuando solo ese padding no cabe,
+// el último campo queda pegado al pie y sin scroll (Javier, 14/10)
 function ajustarScrollModal() {
   const b = $('#capa .modal>.modal-cuerpo, #capa .modal>.linea');
-  if (b && !b.querySelector('.combo-lista.vis')) b.classList.toggle('con-scroll', b.scrollHeight > b.clientHeight + 1);
+  if (!b || b.querySelector('.combo-lista.vis')) return;
+  b.classList.add('con-scroll');
+  b.classList.toggle('con-scroll', b.scrollHeight > b.clientHeight + 1);
 }
 const roModal = new ResizeObserver(ajustarScrollModal);
 function abrirModal(html, alMontar) {
@@ -1441,6 +1454,9 @@ function abrirCombo() {
   const subir = abajo < 160 && arriba > abajo;
   l.classList.toggle('arriba', subir);
   l.style.maxHeight = Math.max(120, Math.min(314, subir ? arriba : abajo)) + 'px';
+  Object.assign(l.style, { left: r.left + 'px', width: r.width + 'px', top: subir ? 'auto' : r.bottom + 4 + 'px', bottom: subir ? innerHeight - r.top + 4 + 'px' : 'auto' });
+  // Si el cuerpo hace scroll, el campo se mueve y la lista no: se cierra
+  l.closest('.modal-cuerpo').addEventListener('scroll', cerrarCombo, { once: true, passive: true });
   l.hidden = false; b.setAttribute('aria-expanded', 'true');
   requestAnimationFrame(() => l.classList.add('vis'));
   marcarActiva(Math.max(0, CAUSALES.indexOf(R.causal)));
@@ -1648,7 +1664,7 @@ function falloAccion(btn, msg) {
   liberar(btn);
   const cuerpo = $('#capa .modal-cuerpo');
   cuerpo.insertAdjacentHTML('beforeend', `<div class="alerta error nueva" id="aviso-error" role="alert"><div class="alerta-m"><span class="ic-err">${XCIRC}</span><div class="alerta-t"><p>${msg}</p></div></div></div>`);
-  cuerpo.classList.toggle('con-scroll', cuerpo.scrollHeight > cuerpo.clientHeight + 1);
+  ajustarScrollModal();
   cuerpo.scrollTo({ top: cuerpo.scrollHeight, behavior: reducido ? 'auto' : 'smooth' });
   btn.focus({ preventScroll: true });
 }
@@ -1862,7 +1878,7 @@ document.addEventListener('keydown', ev => {
   }
 });
 
-window.addEventListener('resize', () => { cerrarMenu(); cerrarPop(); sombraScroll(); if (!movil()) { $('#lateral').classList.remove('abierto'); $('#lat-scrim').classList.remove('vis'); } $('#lateral').inert = movil() && !$('#lateral').classList.contains('abierto'); });
+window.addEventListener('resize', () => { cerrarMenu(); cerrarPop(); cerrarCombo(); sombraScroll(); if (!movil()) { $('#lateral').classList.remove('abierto'); $('#lat-scrim').classList.remove('vis'); } $('#lateral').inert = movil() && !$('#lateral').classList.contains('abierto'); });
 window.addEventListener('scroll', () => { cerrarMenu(); }, { passive: true });
 document.addEventListener('scroll', ev => { ocultarTip(); if (ev.target.classList && ev.target.classList.contains('tabla-scroll')) { cerrarMenu(); sombraScroll(); } }, true);
 
