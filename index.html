@@ -1536,7 +1536,7 @@ const selNegocio = (f, n) => [['ben', 'Tipo de beneficio', n.ben], ['cau', 'Caus
 function modalFiltrosD() {
   const f = S.filtrosD;
   abrirModal(`<form class="modal" role="dialog" aria-modal="true" aria-labelledby="m-tit" id="f-filtros-d" novalidate style="width:720px">
-    <div class="modal-cab"><h2 id="m-tit">Filtros</h2><p>Filtra las transacciones de la OP ${S.opId}.</p></div>
+    <div class="modal-cab"><h2 id="m-tit">Selección de filtros</h2><p>Filtra las transacciones de la OP ${S.opId}.</p></div>
     <div class="modal-cuerpo"><div class="grid-f">
       <div class="campo"><label for="fd-asiento">N° asiento</label><input class="input" id="fd-asiento" inputmode="numeric" maxlength="3" autocomplete="off" placeholder="Ej: 25" value="${esc(f.asiento)}"></div>
       ${selNegocio(f, negocioDe(op(S.opId).item))}
@@ -1558,7 +1558,7 @@ function revisarFiltrosD() {
 function modalFiltros() {
   const f = S.filtros;
   abrirModal(`<form class="modal" role="dialog" aria-modal="true" aria-labelledby="m-tit" id="f-filtros" novalidate style="width:720px">
-    <div class="modal-cab"><h2 id="m-tit">Filtros</h2><p>Filtra el historial de aprobaciones.</p></div>
+    <div class="modal-cab"><h2 id="m-tit">Selección de filtros</h2><p>Filtra el historial de aprobaciones.</p></div>
     <div class="modal-cuerpo"><div class="grid-f">
       <!-- Solo columnas del historial, en su mismo orden (Javier, 13/10) -->
       <div class="campo"><label for="f-per">Periodo contable</label><select class="input" id="f-per">
