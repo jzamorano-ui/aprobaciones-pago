@@ -1,8 +1,8 @@
 # Aprobaciones de Pago · prototipos HTML
 
-Versión: v1.0 · Fecha: 14/10/2026
+Versión: v1.1 · Fecha: 14/10/2026
 
-Estos siete prototipos muestran funcionando la vista del aprobador en CCP: el **Historial de aprobaciones** con el detalle de cada OP, y lo que la aprobación cambia en **Centralizar/Pagos**. Siguen el handoff de Figma.
+Estos siete prototipos muestran funcionando la vista del aprobador en CCP: el **Historial de aprobaciones** con el detalle de cada OP, y los ajustes de **Centralizar/Pagos**: el tag del canal de origen y el menú sin las acciones del aprobador. Siguen el handoff de Figma.
 
 ## Qué es y qué no es
 
@@ -14,9 +14,9 @@ Estos siete prototipos muestran funcionando la vista del aprobador en CCP: el **
 
 | Prototipo | Objetivo | Link |
 |---|---|---|
-| Principal | Recorrer el flujo completo cuando todo sale bien: aprobar, rechazar, revocar un rechazo, filtrar, ordenar, exportar y ver el resultado en Centralizar/Pagos | [happy-path-aprobaciones.html](https://jzamorano-ui.github.io/aprobaciones-pago/happy-path-aprobaciones.html) |
+| Principal | Recorrer el flujo completo cuando todo sale bien: aprobar, rechazar, revocar un rechazo, filtrar, ordenar y exportar. En Centralizar/Pagos, ver el tag de canal de origen y el menú sin las acciones del aprobador | [happy-path-aprobaciones.html](https://jzamorano-ui.github.io/aprobaciones-pago/happy-path-aprobaciones.html) |
 | Historial sin operaciones | Ver la pantalla cuando no hay OPs para aprobar | [sin-operaciones.html](https://jzamorano-ui.github.io/aprobaciones-pago/sin-operaciones.html) |
-| Error al cargar | Ver qué pasa cuando el sistema no responde al cargar el historial o el detalle | [error-cargar.html](https://jzamorano-ui.github.io/aprobaciones-pago/error-cargar.html) |
+| Error al cargar | Ver qué pasa cuando el sistema no responde al cargar el historial | [error-cargar.html](https://jzamorano-ui.github.io/aprobaciones-pago/error-cargar.html) |
 | Error al aprobar o revocar | Ver qué pasa cuando no se logra registrar una aprobación o la revocación de un rechazo | [error-aprobar.html](https://jzamorano-ui.github.io/aprobaciones-pago/error-aprobar.html) |
 | Error al rechazar | Ver qué pasa cuando no se logra registrar un rechazo | [error-rechazar.html](https://jzamorano-ui.github.io/aprobaciones-pago/error-rechazar.html) |
 | Error al exportar | Ver qué pasa cuando falla la descarga del archivo | [error-exportar.html](https://jzamorano-ui.github.io/aprobaciones-pago/error-exportar.html) |
@@ -28,17 +28,16 @@ Todos abren en el Historial de aprobaciones, con la sesión de «Camila Rojas Fu
 
 ### Principal
 
-Corresponde a las secciones «Módulo aprobador» y «Centralizar/Pagos» de la página «Happy path» del handoff. También a «Validación del rechazo» y «Acciones según estado», en la página «Errores / casuísticas».
+Corresponde a las secciones «Módulo aprobador / Reembolso» y «Centralizar/Pagos» de la página «Happy path» del handoff. También a «Validación del rechazo», «Acciones según estado» y «Contenido largo y anchos de escritorio», en la página «Errores / casuísticas».
 
-1. Abrir el menú ⋮ de la OP 11696, elegir **Aprobar** y confirmar.
-2. Abrir el menú ⋮ de la OP 11695 y elegir **Rechazar**. Elegir la causal «Otro» y escribir menos de 10 caracteres; después, un motivo de 10 o más. Confirmar.
+1. Abrir el menú ⋮ de la OP 11696, elegir **Aprobar** y presionar **Enviar a SAP**.
+2. Abrir el menú ⋮ de la OP 11695 y elegir **Rechazar**. Elegir la causal «Otro» y escribir menos de 10 caracteres; después, un motivo de 10 o más. Presionar **Rechazar OP**.
 3. Pasar el cursor sobre el estado «Rechazada» de la OP 11695.
-4. En la misma OP, abrir el menú ⋮ y elegir **Revocar rechazo**.
+4. En la misma OP, abrir el menú ⋮, elegir **Revocar rechazo** y presionar **Revocar**.
 5. Abrir los menús ⋮ de una OP Pendiente, una Aprobada y una Rechazada, y comparar sus acciones.
 6. Entrar a **Ver detalle** de la OP 11695. Presionar **Ver historial** en la alerta. Aprobar o rechazar desde el detalle.
 7. En el historial y en el detalle: aplicar y limpiar filtros, ordenar una columna, cambiar de página y presionar **Exportar**.
-8. Abrir la campana de notificaciones y elegir una OP.
-9. Ir a **Centralizar/Pagos** en el menú lateral. Elegir el tipo «SOLICITUD DE PAGO» y el item «PAGO REEMBOLSO», y presionar **Buscar**. Esperar unos segundos.
+8. Ir a **Centralizar/Pagos** en el menú lateral. Elegir el tipo «SOLICITUD DE PAGO» y el item «PAGO REEMBOLSO», presionar **Buscar** y abrir el menú ⋮ de una fila.
 
 Qué observar:
 
@@ -46,43 +45,34 @@ Qué observar:
   - Pendiente: Ver detalle, Aprobar y Rechazar.
   - Aprobada: Aprobar y Rechazar aparecen deshabilitados.
   - Rechazada: Aprobar aparece deshabilitado y Revocar rechazo reemplaza a Rechazar.
-- **Rechazo:** la causal es obligatoria. Con «Otro» se despliega «Describe el motivo», de 10 a 80 caracteres, y lo escrito se muestra como la causal (en la alerta, en el tooltip, en el historial de decisiones y en Centralizar/Pagos).
+- **Rechazo:** la causal es obligatoria. Con «Otro» se despliega «Describe el motivo», de 10 a 80 caracteres, y lo escrito se muestra como la causal (en la alerta, en el tooltip y en el historial de decisiones).
 - **Revocar un rechazo** no pide motivo: la OP vuelve a Pendiente. Cada decisión queda registrada. La alerta del detalle muestra la última (quién y cuándo; la causal, si fue rechazo) y, cuando hay más de una, suma «Ver historial».
 - **Centralizar/Pagos:**
-  - Cada fila muestra el canal de origen («Por sistema» o «Manual»).
-  - La OP aprobada aparece «En proceso». A los 10 segundos de aprobarla llega la respuesta simulada de SAP: la primera OP aprobada en la sesión sale con éxito, la segunda con errores, y así alternando.
-  - El resultado de SAP se ve solo aquí, no en Aprobaciones de Pago.
+  - Cada fila lleva, en la segunda línea del nombre del archivo, el tag del canal de origen: «Por sistema» o «Manual».
+  - El menú ⋮ ya no muestra Solicitar Pago ni Rechazar Solicitud: aprobar o rechazar la OP le corresponde al aprobador.
 
 ### Historial sin operaciones
 
 Corresponde a «Sin operaciones» en la página «Errores / casuísticas».
 
 1. Abrir el prototipo.
-2. Abrir la campana de notificaciones.
 
-Qué observar:
-
-- El historial muestra el estado vacío «Aún no hay operaciones», sin tabla.
-- La campana no muestra el punto, y el panel dice «No tienes OPs pendientes de aprobación.»
+Qué observar: el historial muestra el estado vacío «Aún no hay operaciones», sin tabla.
 
 ### Error al cargar
 
-Corresponde a «Errores · Error al cargar».
+Corresponde a «Errores · Error al cargar el historial».
 
 1. Abrir el prototipo y presionar **Entendido** en el modal.
-2. Abrir la campana de notificaciones y elegir una OP.
 
-Qué observar:
-
-- La tabla queda en carga y se abre el modal «Tuvimos un problema», con el texto «El sistema no responde. Vuelve a intentarlo en unos minutos.» y un solo botón: «Entendido».
-- Al entrar al detalle de una OP pasa lo mismo.
+Qué observar: la tabla queda en carga y se abre el modal «Tuvimos un problema», con el texto «El sistema no responde. Vuelve a intentarlo en unos minutos.» y un solo botón: «Entendido».
 
 ### Error al aprobar o revocar
 
 Corresponde a «Errores · Error al aprobar», que también cubre revocar.
 
-1. Abrir el menú ⋮ de la OP 11696, elegir **Aprobar** y confirmar. Cuando aparezca el aviso, presionar **Aprobar** otra vez.
-2. Rechazar una OP (eso funciona normal) y después elegir **Revocar rechazo**. Confirmar dos veces.
+1. Abrir el menú ⋮ de la OP 11696, elegir **Aprobar** y presionar **Enviar a SAP**. Cuando aparezca el aviso, presionar **Enviar a SAP** otra vez.
+2. Rechazar una OP (eso funciona normal), elegir **Revocar rechazo** y presionar **Revocar**. Cuando aparezca el aviso, presionar **Revocar** otra vez.
 3. Repetir desde **Ver detalle** de otra OP Pendiente.
 
 Qué observar:
@@ -94,8 +84,8 @@ Qué observar:
 
 Corresponde a «Errores · Error al rechazar».
 
-1. Abrir el menú ⋮ de la OP 11695 y elegir **Rechazar**. Elegir una causal y confirmar.
-2. Cuando aparezca el aviso, presionar **Rechazar** otra vez.
+1. Abrir el menú ⋮ de la OP 11695 y elegir **Rechazar**. Elegir una causal y presionar **Rechazar OP**.
+2. Cuando aparezca el aviso, presionar **Rechazar OP** otra vez.
 
 Qué observar:
 
@@ -126,22 +116,23 @@ Corresponde a la sección «Módulo aprobador / escalabilidad (futura)» de la p
 Qué observar:
 
 - Sin item elegido, el historial dice «Elige un item de operación» y «Selecciona un item y presiona Buscar para ver sus OPs.»
-- Licencias médicas muestra las OPs 11697, 11694, 11690 y 11681. En su detalle, la columna «Causal de emisión» trae valores y se suma su filtro (en Pago Reembolso la columna va con «-» y no se filtra).
+- Licencias médicas muestra las OPs 11697, 11694, 11690 y 11681. En su detalle, la columna «Causal de emisión» trae valores: se filtra y se ordena (en Pago Reembolso va con «-», sin filtro ni orden).
 - Easy Cancha no tiene OPs, así que muestra «Aún no hay operaciones de Easy Cancha». En Figma, este estado usa Licencias médicas como ejemplo.
 - En la fase 1 el aprobador tiene un solo item. Por eso, en los otros seis prototipos el selector y Buscar están deshabilitados.
 
 ## Dónde está lo demás
 
 - **Pantallas, medidas y notas de cada estado:** en el handoff de Figma.
-  - [Happy path · Módulo aprobador](https://www.figma.com/design/0k5aH2hbfsvgHUSgOR64ik/CCP-Handoff-Solicitud-pagos?node-id=7001-74128)
+  - [Happy path · Módulo aprobador / Reembolso](https://www.figma.com/design/0k5aH2hbfsvgHUSgOR64ik/CCP-Handoff-Solicitud-pagos?node-id=7001-74128)
   - [Happy path · Módulo aprobador / escalabilidad (futura)](https://www.figma.com/design/0k5aH2hbfsvgHUSgOR64ik/CCP-Handoff-Solicitud-pagos?node-id=7003-171273)
   - [Happy path · Centralizar/Pagos](https://www.figma.com/design/0k5aH2hbfsvgHUSgOR64ik/CCP-Handoff-Solicitud-pagos?node-id=7004-183264)
-  - [Errores / casuísticas](https://www.figma.com/design/0k5aH2hbfsvgHUSgOR64ik/CCP-Handoff-Solicitud-pagos?node-id=7005-185467)
+  - [Errores / casuísticas · Módulo aprobador / Reembolso](https://www.figma.com/design/0k5aH2hbfsvgHUSgOR64ik/CCP-Handoff-Solicitud-pagos?node-id=7005-185467)
 - **Racionales y reglas del módulo:** en el [Read me del handoff](https://www.figma.com/design/0k5aH2hbfsvgHUSgOR64ik/CCP-Handoff-Solicitud-pagos?node-id=7003-181438). Aquí no se repiten, para que exista una sola versión.
 
 ## Sobre los datos
 
 - Los nombres, RUT, cuentas y montos son de ejemplo. El total de casos y el monto de cada OP cuadran con las transacciones de su detalle, así que se puede seguir una misma OP de una pantalla a otra.
+- Las opciones de los filtros y de Item de operación las carga el back en la implementación. Las de Tipo de beneficio, Causal de emisión y Concepto, y los items distintos de Pago Reembolso, son de ejemplo.
 - El prototipo trabaja con la fecha 06/10/2026. Las decisiones quedan registradas con esa fecha y la hora real.
 - Cada prototipo cambia solo lo que dice su nombre. Por ejemplo, en «Historial sin operaciones» Centralizar/Pagos muestra los mismos datos que el principal.
 

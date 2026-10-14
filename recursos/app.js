@@ -562,7 +562,6 @@ function render(anim = true) {
   if (S.vista === 'detalle') pintarTabla(anim);
   if (anim) { v.classList.remove('entra'); void v.offsetWidth; v.classList.add('entra'); }
   OPS.forEach(o => { o.anim = false; });
-  $('#punto').hidden = CFG.vacio || !OPS.some(o => o.est === 'Pendiente' && habilitada(o));
   sombraScroll();
   ubicarToasts();
 }
@@ -589,7 +588,7 @@ window.addEventListener('popstate', () => { leerHash(); S.pagD = 0; S.ordenD = {
 /* ═══════════ Menú de acciones ═══════════ */
 let menuBtn = null;
 function abrirMenu(btn) {
-  cerrarMenu(); cerrarPop();
+  cerrarMenu();
   const o = op(btn.dataset.id), pend = o.est === 'Pendiente', rech = o.est === 'Rechazada';
   const m = $('#menu');
   m.classList.toggle('ancho', btn.dataset.m === 'c');
@@ -620,24 +619,6 @@ function cerrarMenu(devolverFoco) {
   menuBtn = null;
 }
 
-/* ═══════════ Notificaciones ═══════════ */
-function abrirPop() {
-  const p = $('#pop'), pend = CFG.vacio ? [] : OPS.filter(o => o.est === 'Pendiente' && habilitada(o)).sort((a, b) => b.id - a.id);
-  p.innerHTML = `<h3 tabindex="-1">Notificaciones</h3>${pend.length ? `<ul>${pend.map(o => `<li><button type="button" data-a="ver" data-id="${o.id}"><b>OP ${o.id} espera tu aprobación</b><small>${miles(o.val)} casos <span class="sep">·</span> ${pesos(o.monto)} <span class="sep">·</span> ${f4(o.sol[0])} ${o.sol[1]} hrs.</small></button></li>`).join('')}</ul>` : '<p class="nada">No tienes OPs pendientes de aprobación.</p>'}`;
-  p.hidden = false;
-  const r = $('#btn-campana').getBoundingClientRect();
-  if (innerWidth > 820) p.style.right = Math.max(16, innerWidth - r.right - 40) + 'px'; else p.style.right = '';
-  p.style.top = (r.bottom + 4) + 'px';
-  requestAnimationFrame(() => p.classList.add('vis'));
-  $('#btn-campana').setAttribute('aria-expanded', 'true');
-  ($('#pop button') || $('#pop h3')).focus({ preventScroll: true });
-}
-function cerrarPop() {
-  const p = $('#pop'); if (p.hidden) return;
-  p.classList.remove('vis'); setTimeout(() => { if (!p.classList.contains('vis')) p.hidden = true; }, 170);
-  $('#btn-campana').setAttribute('aria-expanded', 'false');
-}
-
 /* ═══════════ Modales ═══════════ */
 let focoPrevio = null, ocupado = false, abiertoEn = 0;
 // Mientras el modal se desvanece no acepta confirmaciones ni recibe foco
@@ -655,7 +636,7 @@ function ajustarScrollModal() {
 const roModal = new ResizeObserver(ajustarScrollModal);
 function abrirModal(html, alMontar) {
   focoPrevio = document.activeElement && document.activeElement.closest('#menu') ? menuBtn : document.activeElement;
-  cerrarMenu(); cerrarPop();
+  cerrarMenu();
   const c = $('#capa');
   c.innerHTML = html; c.hidden = false; abiertoEn = performance.now();
   roModal.disconnect(); const cuerpo = c.querySelector('.modal>.modal-cuerpo, .modal>.linea'); cuerpo && [cuerpo, ...cuerpo.children].forEach(n => roModal.observe(n));
@@ -995,7 +976,7 @@ function lateral(abrir) {
   $('#btn-hamb').setAttribute('aria-expanded', abrir);
   if (abrir) $('#btn-lat').focus();
 }
-function cerrarTodo() { cerrarMenu(); cerrarPop(); if (movil()) lateral(false); }
+function cerrarTodo() { cerrarMenu(); if (movil()) lateral(false); }
 
 /* ═══════════ Acciones ═══════════ */
 const ACC = {
@@ -1050,7 +1031,6 @@ const ACC = {
 document.addEventListener('click', ev => {
   const el = ev.target.closest('[data-a]');
   if (!ev.target.closest('#menu') && !(el && el.dataset.a === 'menu')) cerrarMenu();
-  if (!ev.target.closest('#pop') && !ev.target.closest('#btn-campana')) cerrarPop();
   if (comboAbierto() && !ev.target.closest('#combo')) cerrarCombo();
   if (ev.target.id === 'capa') { if (!ocupado && ev.detail < 2 && performance.now() - abiertoEn > 400) cerrarModal(); return; }
   if (!el) return;
@@ -1145,7 +1125,6 @@ document.addEventListener('keydown', ev => {
   if (ev.key === 'Escape') {
     if (!capa.hidden) { if (!ocupado) cerrarModal(); return; }
     if (!$('#menu').hidden) { cerrarMenu(true); return; }
-    if (!$('#pop').hidden) { cerrarPop(); $('#btn-campana').focus(); return; }
     if ($('#lateral').classList.contains('abierto')) { lateral(false); $('#btn-hamb').focus(); return; }
   }
   // Trampa de foco del modal
@@ -1159,13 +1138,13 @@ document.addEventListener('keydown', ev => {
   }
 });
 
-window.addEventListener('resize', () => { cerrarMenu(); cerrarPop(); cerrarCombo(); sombraScroll(); if (!movil()) { $('#lateral').classList.remove('abierto'); $('#lat-scrim').classList.remove('vis'); } $('#lateral').inert = movil() && !$('#lateral').classList.contains('abierto'); });
+window.addEventListener('resize', () => { cerrarMenu(); cerrarCombo(); sombraScroll(); if (!movil()) { $('#lateral').classList.remove('abierto'); $('#lat-scrim').classList.remove('vis'); } $('#lateral').inert = movil() && !$('#lateral').classList.contains('abierto'); });
 window.addEventListener('scroll', () => { cerrarMenu(); }, { passive: true });
 document.addEventListener('scroll', ev => { ocultarTip(); if (ev.target.classList && ev.target.classList.contains('tabla-scroll')) { cerrarMenu(); sombraScroll(); } }, true);
 
 /* ═══════════ Shell ═══════════ */
 $('#btn-hamb').innerHTML = ic('hamb');
-$('#btn-campana').insertAdjacentHTML('afterbegin', ic('campana'));
+$('#campana').insertAdjacentHTML('afterbegin', ic('campana'));
 $('#btn-salir').insertAdjacentHTML('beforeend', ic('salir'));
 $('#btn-lat').innerHTML = ic('atras');
 $('#btn-escritorio').innerHTML = ic('chevD') + '<span>Escritorio de Trabajo</span>';
@@ -1191,7 +1170,6 @@ $('#btn-escritorio').addEventListener('click', () => {
   b.setAttribute('aria-expanded', !abierto);
   $('#lat-sub').classList.toggle('cerrado', abierto);
 });
-$('#btn-campana').addEventListener('click', () => ($('#pop').hidden ? abrirPop() : cerrarPop()));
 $('#btn-salir').addEventListener('click', () => toast('Cerrar sesión no está disponible en el prototipo', 'info'));
 
 reiniciar();
