@@ -121,7 +121,7 @@ function chipsFiltro() {
   if (f.fe) c.push(['fe', `Fecha estado: ${corta(f.fe)}`]);
   return c;
 }
-// Rechazada lleva tooltip con la causal (con "Otro", el motivo escrito), como el CP-04 de Centralizar (Javier, 09/10)
+// Rechazada lleva tooltip con la causal (con "Otro", el motivo escrito) (Javier, 09/10)
 const chipEst = o => o.est === 'Rechazada'
   ? `<span class="con-tip chip-tip" tabindex="0" data-tip="causal" data-id="${o.id}" aria-describedby="tip">${chip(o.est, o.anim)}</span>` : chip(o.est, o.anim);
 // Card Item de operación: siempre sobre el historial. Buscar se habilita al elegir un item (solo con varios items)
@@ -344,8 +344,6 @@ const SAP0 = { 11692:{ est:'En proceso' }, 11689:{ est:'Procesado con errores', 
 const SIS0 = new Set(OPS0.filter(o => o.canal === 'Sistema').map(o => o.id));
 // Usuarios ficticios que cargan o solicitan (tooltip de N° Operación)
 const USUARIOS_C = ['psoto@ejemplo.cl', 'mdiaz@ejemplo.cl', 'afuentes@ejemplo.cl'];
-// Rechazos después de SAP: hoy los hace Beneficios (solicitante) con texto libre; causales genéricas como las de cert
-const CAUSALES_SOL = ['Errores SAP', 'Procesar en otro periodo', 'Siniestros duplicados', 'Ya procesado'];
 const sumaHabiles = (dmy, n) => {
   const [d, m, a] = dmy.split('/').map(Number), x = new Date(2000 + a, m - 1, d), dd = v => String(v).padStart(2, '0');
   for (let k = 0; k < n;) { x.setDate(x.getDate() + 1); if (x.getDay() % 6) k++; }
@@ -370,11 +368,11 @@ function filaC(o) {
   const archivo = sistema ? `REEMBOLSO20${o.per.slice(6)}${o.per.slice(3, 5)}-${o.id}`
     : `${iso(d).replace(/-/g, '')}-${h.replace(':', '')}${ss}-Pago-Reembolso-${String(1 + o.id % 3).padStart(3, '0')}-${o.id}.xlsx`;
   // Fecha Solicitud Centralizacion = cuando la OP llegó al sistema (la misma de la bandeja), en todas las filas (Javier, 08/10)
-  const f = { id:o.id, per:o.per, sol:o.sol, fe:o.fe, archivo, sistema, monto:o.monto, real:0, val:o.val, sap:false, causal:'', usuario:USUARIOS_C[o.id % 3] };
+  const f = { id:o.id, per:o.per, sol:o.sol, fe:o.fe, archivo, sistema, monto:o.monto, real:0, val:o.val, sap:false, usuario:USUARIOS_C[o.id % 3] };
   if (o.est === 'Pendiente') return { ...f, est: sistema ? 'Sol. validada con éxito' : 'Arch. val. con éxito' };
-  if (o.est === 'Rechazada') return { ...f, est:'Rechazada', causal: causalTxt(o) };
+  if (o.est === 'Rechazada') return { ...f, est:'Rechazada' };
   const parcial = () => Math.round(o.monto * (.9 + r() * .08) / 10) * 10, hora = () => `${String(9 + Math.floor(r() * 9)).padStart(2, '0')}:${String(Math.floor(r() * 60)).padStart(2, '0')}`;
-  let s = o.sapSim || (o.enSesion ? { est:'En proceso' } : SAP0[o.id]);
+  let s = o.enSesion ? { est:'En proceso' } : SAP0[o.id];
   if (!s) { const h0 = estadoSapHist(r, 2000 + +o.fe[0].slice(6)); s = { est:h0.est, fe: h0.dias ? [sumaHabiles(o.fe[0], h0.dias), hora()] : null }; }
   const e = s.est, x = r();
   if (e === 'Procesado con errores' && !s.err) s.err = x < .4 ? o.val : 1 + Math.floor(r() * 5);
@@ -384,8 +382,7 @@ function filaC(o) {
     : e === 'En proceso' ? (x < .25 ? 0 : parcial())
     : e === 'Rechazada' ? (x < .55 ? 0 : x < .75 ? o.monto : parcial())
     : x < .85 ? o.monto : parcial());
-  const causal = e === 'Rechazada' ? CAUSALES_SOL[Math.floor(r() * CAUSALES_SOL.length)] : '';
-  return { ...f, est:e, causal, err:s.err || 0, sap: e !== 'En proceso', real, fe: s.fe || o.fe };
+  return { ...f, est:e, err:s.err || 0, sap: e !== 'En proceso', real, fe: s.fe || o.fe };
 }
 // Columnas y anchos de CCP (cert, 08/10); salto de línea fijo en la cabecera, como la grilla de Aprobaciones
 const COLS_C = [
@@ -460,12 +457,13 @@ function vCentralizar() {
     : vacio('No se encontraron resultados', chips.length ? 'Selecciona otro rango de filtrado para encontrar archivos' : 'Intenta cambiar el tipo o ítem de operación')}
   </section>`;
 }
-// Tooltip de N° Operación, como CCP: 8 filas; lo que aún no existe dice "Pendiente"
+// Tooltip de N° Operación, como CCP pero sin la fila de la causal: la causal la registra el aprobador y se ve en el
+// Historial de aprobaciones. Lo que aún no existe dice "Pendiente"
 function tipOp(f) {
   const pend = '<span class="pend">Pendiente</span>';
   const filas = [['Num. Operación', f.id], ['Total asientos procesados', miles(f.val)], ['Total Mov. Contables', miles(f.val * 2)],
     ['Total asientos correctos (SAP)', f.sap ? miles(f.val - f.err) : pend], ['Total asientos con Error (SAP)', f.sap ? miles(f.err) : pend],
-    ['Usuario', f.usuario], ['Canal Origen', f.sistema ? 'AUTOMATICO' : 'MANUAL'], ['Causal Rechazo', f.causal ? esc(f.causal) : pend]];
+    ['Usuario', f.usuario], ['Canal Origen', f.sistema ? 'AUTOMATICO' : 'MANUAL']];
   return `<dl>${filas.map(([t, v]) => `<div><dt>${t}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
 }
 function verTip(el) {
@@ -877,25 +875,12 @@ document.addEventListener('mousedown', ev => { if (ev.target.matches?.('[data-ca
 
 /* ═══════════ Decisiones ═══════════ */
 function horaAhora() { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
-// Respuesta simulada de SAP (Javier, 08/10): a los 10 s la OP aprobada sale de En proceso.
-// Se alternan los resultados para mostrar ambos: la 1.ª aprobada de la sesión con éxito, la 2.ª con errores, y así
-function respuestaSap(o) {
-  if (op(o.id) !== o || o.est !== 'Aprobada') return;
-  const n = OPS.filter(x => x.sapSim).length, fe = [HOY, horaAhora()];
-  o.sapSim = n % 2 ? { est:'Procesado con errores', err:1 + o.id % 4, fe } : { est:'Proceso con éxito', fe };
-  if (S.vista === 'centralizar' && !C.cargando && $('#capa').hidden && $('#menu').hidden) {
-    const x = $('#scroll-c')?.scrollLeft || 0, fid = document.activeElement?.id;
-    render(false);
-    const sc = $('#scroll-c'); if (sc) sc.scrollLeft = x; sombraScroll(); if (fid) $('#' + fid)?.focus({ preventScroll: true });
-  }
-}
 // est = 'Pendiente' es revocar un rechazo. Cada decisión queda como evento; Fecha estado = la de la última decisión (Javier, 09/10)
 function decidir(id, est, causal = '', motivo = '') {
   const o = op(id), fe = [HOY, horaAhora()];
   if (filtradas().includes(o)) S.retener.add(o.id);
   o.ev.push({ est: est === 'Pendiente' ? 'Revocado' : est, por:USUARIO, fe:[...fe], causal, motivo });
   Object.assign(o, { est, fe, por:USUARIO, causal, motivo, anim:true, enSesion:true });
-  if (est === 'Aprobada') setTimeout(() => respuestaSap(o), espera(10000));
   const barra = $('#barra-decision');
   const pintar = () => {
     ocupado = false;

@@ -77,7 +77,7 @@ Corresponde a «Errores · Error al aprobar», que también cubre revocar.
 
 Qué observar:
 
-- El primer intento con cada OP falla. El modal sigue abierto y muestra un aviso: «No pudimos registrar la aprobación. Vuelve a intentarlo.» (al revocar: «No pudimos revocar el rechazo. Vuelve a intentarlo.»).
+- El primer intento con cada OP falla: la OP sigue Pendiente, o Rechazada al revocar. El modal sigue abierto y muestra un aviso: «No pudimos registrar la aprobación. Vuelve a intentarlo.» (al revocar: «No pudimos revocar el rechazo. Vuelve a intentarlo.»).
 - El botón principal reintenta, y el segundo intento funciona.
 
 ### Error al rechazar
@@ -89,7 +89,7 @@ Corresponde a «Errores · Error al rechazar».
 
 Qué observar:
 
-- El primer intento con cada OP falla. El modal sigue abierto, conserva la causal y el motivo, y muestra el aviso «No pudimos registrar el rechazo. Vuelve a intentarlo.»
+- El primer intento con cada OP falla: la OP sigue Pendiente. El modal sigue abierto, conserva la causal y el motivo, y muestra el aviso «No pudimos registrar el rechazo. Vuelve a intentarlo.»
 - El reintento registra el rechazo.
 
 ### Error al exportar
