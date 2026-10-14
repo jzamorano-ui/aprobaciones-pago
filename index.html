@@ -1456,7 +1456,7 @@ function validarRechazo() {
 function modalRevocar(id) {
   const o = op(id), u = o.ev[o.ev.length - 1];
   abrirModal(`<div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-tit" aria-describedby="m-sub">
-    <div class="modal-cab"><h2 id="m-tit">Revocar rechazo OP ${o.id}</h2><p id="m-sub">La OP vuelve a Pendiente. Queda registrado con tu usuario, fecha y hora.</p></div>
+    <div class="modal-cab"><h2 id="m-tit">Revocar rechazo OP ${o.id}</h2><p id="m-sub">La OP vuelve a Pendiente. Queda registrada con tu usuario, fecha y hora.</p></div>
     <div class="modal-cuerpo"><dl class="res-m">
       <div><dt>Rechazada por</dt><dd>${esc(u.por)}</dd></div>
       <div><dt>Fecha de rechazo</dt><dd>${f4(u.fe[0])} <span class="sep">·</span> ${u.fe[1]} hrs.</dd></div>
@@ -1464,7 +1464,7 @@ function modalRevocar(id) {
     </dl></div>
     <div class="modal-pie">
       <button class="btn btn-sec" type="button" id="m-cancelar" data-a="cerrar-modal">Cancelar</button>
-      <button class="btn btn-pri" type="button" id="m-confirmar" data-a="confirmar-revocar" data-id="${o.id}">Confirmar</button>
+      <button class="btn btn-pri" type="button" id="m-confirmar" data-a="confirmar-revocar" data-id="${o.id}">Revocar</button>
     </div></div>`, () => $('#m-cancelar').focus());
 }
 // Historial de decisiones (Javier, 09/10): la más reciente arriba y "Llegó para aprobación" al final. Se cierra con la X, sin botones
