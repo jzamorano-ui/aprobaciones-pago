@@ -168,13 +168,11 @@ table.tabla{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;
 /* Columnas de la grilla en una línea: la tabla se desplaza a lo ancho, como el detalle de la 3659 */
 .t-consulta th,.t-consulta td{white-space:nowrap}
 .t-consulta td{height:56px}
-.t-consulta .num{text-align:right}
 /* Ordenar columnas (patrón de la 3659): caret gris en reposo; la columna activa en verde, ▲ ascendente y ▼ descendente */
 .tabla th.ord{padding:0}
 .tabla th.activa{background:#CCEDEB}
 .orden{display:flex;align-items:center;gap:8px;width:100%;min-height:72px;padding:12px;text-align:left;font-weight:700;color:var(--t2);border-radius:0;white-space:nowrap}
 .tabla th.ord:last-child .orden{padding-right:24px}
-.tabla th.num .orden{justify-content:flex-end;text-align:right}
 .orden:hover:not(:disabled){color:var(--t1)} .orden:hover:not(:disabled) .caret{fill:var(--t1)}
 .orden:disabled{cursor:default}
 .orden:focus-visible{box-shadow:inset var(--foco);border-radius:0}

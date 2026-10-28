@@ -121,7 +121,6 @@ const COLS = [
   ['Folio vale<br> vista', 'fvv'], ['Estado vale<br> vista', 'evv'],
 ];
 const SK = [60, 70, 80, 60, 70, 80, 70, 60, 75, 70, 70, 60, 70, 60, 60];
-const MONTO = COLS.findIndex(c => c[1] === 'monto');
 const CARET = '<svg class="caret" viewBox="0 0 8 5" aria-hidden="true"><path d="M0 0h8L4 5z"/></svg>';
 const CHIP = { [SOL]:'sol', [PRO]:'proc', [PAG]:'pag', [PVV]:'pag' };
 const chip = e => `<span class="chip ${CHIP[e]}">${e}</span>`;
@@ -130,10 +129,9 @@ const celdas = p => ['Beneficios', p.tx, rutNombre(p.rut), p.folio, p.fs, chip(p
 
 // Mientras busca, los títulos no ordenan
 const titulo = ([t, k], i, bloqueado) => {
-  const num = i === MONTO ? ' num' : '';
-  if (!k) return `<th scope="col"${num ? ' class="num"' : ''}>${t}</th>`;
+  if (!k) return `<th scope="col">${t}</th>`;
   const a = S.orden.col === k;
-  return `<th scope="col" class="ord${num}${a ? ' activa' : ''}"${a ? ` aria-sort="${S.orden.dir === 'asc' ? 'ascending' : 'descending'}"` : ''}><button type="button" class="orden" id="ord-${k}" data-a="ordenar" data-v="${k}"${bloqueado ? ' disabled' : ''}>${t}${CARET}</button></th>`;
+  return `<th scope="col" class="ord${a ? ' activa' : ''}"${a ? ` aria-sort="${S.orden.dir === 'asc' ? 'ascending' : 'descending'}"` : ''}><button type="button" class="orden" id="ord-${k}" data-a="ordenar" data-v="${k}"${bloqueado ? ' disabled' : ''}>${t}${CARET}</button></th>`;
 };
 const tabla = (cuerpo, bloqueado) => `<div class="tabla-scroll" tabindex="0" role="region" aria-label="Historial de solicitudes de pago (desplazable a lo ancho)">
   <table class="tabla t-consulta">
@@ -179,7 +177,7 @@ function pintar() {
     const pag = Math.min(S.pag, Math.ceil(lista.length / S.tam) - 1); S.pag = pag;
     const pagina = lista.slice(pag * S.tam, (pag + 1) * S.tam);
     // Al ordenar, la página 1 carga en esqueleto
-    const filas = S.ordenando ? esqueleto(pagina.length) : pagina.map(p => `<tr>${celdas(p).map((c, i) => `<td${i === MONTO ? ' class="num"' : ''}>${c}</td>`).join('')}</tr>`).join('');
+    const filas = S.ordenando ? esqueleto(pagina.length) : pagina.map(p => `<tr>${celdas(p).map((c, i) => `<td>${c}</td>`).join('')}</tr>`).join('');
     cuerpo = tabla(filas) + paginador(pag, S.tam, lista.length);
   }
   $('#res').innerHTML = `
@@ -224,8 +222,8 @@ function modalFiltros() {
     <div class="modal-cuerpo"><div class="grid-f">
       <div class="campo"><label id="f-tx-lbl" for="f-tx">Transacción</label>${combo('f-tx', f.tx)}</div>
       <div class="campo"><label id="f-est-lbl" for="f-est">Estado de pago</label>${combo('f-est', f.est)}</div>
-      <div class="campo"><label for="f-desde">Fecha solicitud de pago desde</label><input class="input" type="date" id="f-desde" value="${f.desde}" max="${f.hasta || HOY_ISO}"></div>
-      <div class="campo"><label for="f-hasta">Fecha solicitud de pago hasta</label><input class="input" type="date" id="f-hasta" value="${f.hasta}" min="${f.desde}" max="${HOY_ISO}" aria-describedby="f-hasta-nota"><p class="campo-nota" id="f-hasta-nota" aria-live="polite"></p></div>
+      <div class="campo"><label for="f-desde">Fecha solicitud de pago desde</label><input class="input" type="date" id="f-desde" value="${f.desde}" max="${f.hasta || HOY_ISO}" data-cal></div>
+      <div class="campo"><label for="f-hasta">Fecha solicitud de pago hasta</label><input class="input" type="date" id="f-hasta" value="${f.hasta}" min="${f.desde}" max="${HOY_ISO}" aria-describedby="f-hasta-nota" data-cal><p class="campo-nota" id="f-hasta-nota" aria-live="polite"></p></div>
     </div></div>
     <div class="modal-pie">
       <button class="btn btn-sec" type="button" data-a="cerrar-modal">Cancelar</button>
@@ -246,6 +244,9 @@ function ajustarFechas(origen) {
   if (origen === 'f-desde') nota.textContent = '';
   if (d.value && h.value && h.value < d.value) { h.value = ''; d.max = HOY_ISO; nota.textContent = 'Se quitó la fecha hasta: era anterior a la fecha desde.'; }
 }
+// Las fechas se eligen solo con el calendario, como en la 3659
+function abrirCalendario(i) { try { i.showPicker(); } catch (e) {} }
+document.addEventListener('mousedown', ev => { if (ev.target.matches?.('[data-cal]')) { ev.preventDefault(); ev.target.focus(); abrirCalendario(ev.target); } });
 function aplicarFiltros(nf) {
   S.filtros = nf; S.pag = 0;
   pintar();
@@ -409,6 +410,13 @@ document.addEventListener('submit', ev => {
   aplicarFiltros(nf); cerrarModal('#btn-filtros');
 });
 document.addEventListener('keydown', ev => {
+  // Fechas del filtro: Enter/Espacio/↓ abren el calendario y Supr/Retroceso la borra; no se escriben
+  if (ev.target.matches?.('[data-cal]') && !['Tab', 'Escape'].includes(ev.key)) {
+    ev.preventDefault();
+    if (['Enter', ' ', 'ArrowDown'].includes(ev.key)) abrirCalendario(ev.target);
+    if (['Delete', 'Backspace'].includes(ev.key) && ev.target.value) { ev.target.value = ''; ev.target.dispatchEvent(new Event('change', { bubbles: true })); }
+    return;
+  }
   // Menú desplegable
   if (ev.target.matches?.('.combo-btn')) {
     const id = ev.target.id, ab = abierto === id;

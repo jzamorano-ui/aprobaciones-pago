@@ -1,6 +1,6 @@
 # Consulta de Pagos · prototipos HTML
 
-Versión: v1.0 · Fecha: 28/10/2026
+Versión: v1.1 · Fecha: 28/10/2026
 
 Estos tres prototipos muestran funcionando la **Consulta de Pagos** de CCP (HU ESENCIALS-3661). En esta pantalla, el back office busca por RUT o por folio en qué estado está el pago de un cliente y exporta el resultado.
 
@@ -43,7 +43,7 @@ Los ejemplos de los campos sirven para buscar: el RUT 12.345.678-5 y el folio 38
 1. Escribir el RUT 12.345.678-5 y presionar **Buscar**.
 2. Presionar el título de una columna, por ejemplo **Monto solicitado a pago**, y después presionarlo otra vez.
 3. Presionar **Filtros**, elegir Estado de pago «Pagado» y presionar **Aplicar filtros**. Después, quitar el filtro desde su chip o con **Limpiar filtros**.
-4. Cambiar de página y presionar **Exportar**.
+4. Cambiar de página y presionar **Exportar**. Repetirlo después de buscar solo por folio y por RUT y folio, para revisar el nombre del archivo.
 5. Desplazar la tabla hacia la derecha hasta la última columna.
 6. Repetir la búsqueda con los otros datos de la tabla de arriba.
 
@@ -60,8 +60,15 @@ Qué observar:
   - El RUT y el nombre del destinatario aparecen bajo el título de la tabla y en la columna RUT a pagar. Al buscar solo por folio, se toman de la solicitud encontrada.
   - Una celda sin dato muestra «—», por ejemplo en las solicitudes pagadas con vale vista.
 - **Ordenar:** se ordenan todas las columnas menos Proceso y RUT a pagar. El primer clic ordena de forma ascendente y el segundo, descendente. Cada orden vuelve a la página 1.
-- **Filtros:** Transacción, Estado de pago y Fecha solicitud de pago desde–hasta. Los aplicados quedan como chips sobre la tabla.
-- **Exportar:** muestra el aviso «Se descargó DetalleSolicitudPago_#RUT_#Folio.xlsx», con el RUT y el folio de la búsqueda. Si falta uno, queda su palabra fija.
+- **Filtros:** Transacción, Estado de pago y Fecha solicitud de pago desde–hasta. Las fechas se eligen con el calendario y no se escriben: Enter, Espacio o ↓ lo abren, y Supr o Retroceso borran la fecha. Los filtros aplicados quedan como chips sobre la tabla.
+- **Exportar:** muestra el aviso «Se descargó…» con el nombre del archivo, que depende de la búsqueda. Si falta el RUT o el folio, queda su palabra fija:
+
+  | Búsqueda | Archivo |
+  |---|---|
+  | Solo RUT | `DetalleSolicitudPago_12345678-5_#Folio.xlsx` |
+  | Solo folio | `DetalleSolicitudPago_#RUT_3848015.xlsx` |
+  | RUT y folio | `DetalleSolicitudPago_12345678-5_3848015.xlsx` |
+
 - **Estados vacíos:**
   - Antes de buscar: «Ingresa un RUT o un folio».
   - Si la búsqueda no encuentra solicitudes: «No encontramos solicitudes de pago».
