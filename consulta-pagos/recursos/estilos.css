@@ -142,7 +142,6 @@ main{min-width:0;padding:24px 32px 56px}
 .tabla-cab p{margin:8px 0 0;font-size:14px;line-height:24px;color:var(--t2)}
 .tabla-cab .lila{color:var(--lila);font-weight:700}
 .tabla-cab .acciones{display:flex;gap:16px;flex-wrap:wrap}
-.tabla-cab .c-acc{width:150px}
 .tabla-cab .c-acc:disabled{background:#fff;border-color:#BCC2C6;color:#79858E}
 .filtros-aplicados{display:flex;align-items:center;flex-wrap:wrap;gap:10px 12px;padding:0 24px 20px}
 .filtros-aplicados .etq{font-size:14px;color:var(--t3)}
@@ -180,8 +179,9 @@ table.tabla{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;
 .activa .caret{fill:var(--verde4)}
 .activa[aria-sort="ascending"] .caret{transform:rotate(180deg)}
 /* RUT a pagar con el nombre del destinatario como segunda línea */
-.dos-lineas{display:flex;flex-direction:column;line-height:20px}
-.dos-lineas small{font-size:12px;line-height:16px;color:var(--t3)}
+.dos-lineas{display:flex;flex-direction:column;gap:2px;line-height:24px}
+.dos-lineas small{font-size:14px;line-height:24px;color:#79858E}
+.t-consulta td:has(.dos-lineas){padding-block:10px 11px}
 .vacio-celda{color:var(--t4)}
 
 /* Chips de estado de pago (sin punto indicador, como la 3659) */
