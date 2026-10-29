@@ -143,6 +143,8 @@ main{min-width:0;padding:24px 32px 56px}
 .tabla-cab .lila{color:var(--lila);font-weight:700}
 .tabla-cab .acciones{display:flex;gap:16px;flex-wrap:wrap}
 .tabla-cab .c-acc:disabled{background:#fff;border-color:#BCC2C6;color:#79858E}
+.tabla-cab #btn-filtros{padding:0 16px}
+.tabla-cab #btn-exportar{padding:0 22px}
 .filtros-aplicados{display:flex;align-items:center;flex-wrap:wrap;gap:10px 12px;padding:0 24px 20px}
 .filtros-aplicados .etq{font-size:14px;color:var(--t3)}
 .chip-f{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 6px 0 14px;border-radius:17px;background:var(--lila-bg);border:1px solid #CBC7F2;color:var(--lila-dk);font-size:14px;animation:entra .2s var(--ease)}
@@ -274,7 +276,7 @@ table.tabla{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;
   .card-buscar{padding:16px}
   .tabla-cab{flex-direction:column;align-items:stretch;padding:16px}
   .tabla-cab .acciones{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .tabla-cab .c-acc{width:100%;padding:0 12px}
+  .tabla-cab .c-acc,.tabla-cab #btn-filtros,.tabla-cab #btn-exportar{width:100%;padding:0 12px}
   .filtros-aplicados{padding:0 16px 16px}
   .tabla th:first-child,.tabla td:first-child{padding-left:16px}
   .tabla th:last-child,.tabla td:last-child{padding-right:16px}
