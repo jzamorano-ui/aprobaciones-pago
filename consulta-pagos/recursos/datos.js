@@ -9,7 +9,7 @@ const CTA = {
   V:{ bdest:'', cta:'', tcta:'' },
 };
 const RE = 'Reembolso', LM = 'Licencia médica', DEP = 'Depósito', VV = 'Vale vista', BCH = 'Banco de Chile';
-const SOL = 'Solicitado', PRO = 'En proceso de pago', PAG = 'Pagado', PVV = 'Pagado con vale vista';
+const SOL = 'Solicitado', PRO = 'En proceso de pago', PAG = 'Pagado a cuenta bancaria', PVV = 'Pagado con vale vista';
 const ESTADOS = [SOL, PRO, PAG, PVV];
 const fila = (folio, rut, tx, fs, est, fe, mod, cta, monto, bpag, fvv = '', evv = '') => ({ folio, rut, tx, fs, est, fe, mod, ...CTA[cta], monto, bpag, fvv, evv });
 const PAGOS = [

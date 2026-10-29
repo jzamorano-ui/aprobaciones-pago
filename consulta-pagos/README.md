@@ -1,6 +1,6 @@
 # Consulta de Pagos · prototipos HTML
 
-Versión: v1.1 · Fecha: 28/10/2026
+Versión: v1.2 · Fecha: 29/10/2026
 
 Estos tres prototipos muestran funcionando la **Consulta de Pagos** de CCP (HU ESENCIALS-3661). En esta pantalla, el back office busca por RUT o por folio en qué estado está el pago de un cliente y exporta el resultado.
 
@@ -42,7 +42,7 @@ Los ejemplos de los campos sirven para buscar: el RUT 12.345.678-5 y el folio 38
 
 1. Escribir el RUT 12.345.678-5 y presionar **Buscar**.
 2. Presionar el título de una columna, por ejemplo **Monto solicitado a pago**, y después presionarlo otra vez.
-3. Presionar **Filtros**, elegir Estado de pago «Pagado» y presionar **Aplicar filtros**. Después, quitar el filtro desde su chip o con **Limpiar filtros**.
+3. Presionar **Filtros**, elegir Estado de pago «Pagado a cuenta bancaria» y presionar **Aplicar filtros**. Después, quitar el filtro desde su chip o con **Limpiar filtros**.
 4. Cambiar de página y presionar **Exportar**. Repetirlo después de buscar solo por folio y por RUT y folio, para revisar el nombre del archivo.
 5. Desplazar la tabla hacia la derecha hasta la última columna.
 6. Repetir la búsqueda con los otros datos de la tabla de arriba.
