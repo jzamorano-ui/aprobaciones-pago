@@ -1,6 +1,6 @@
 # Consulta de Pagos · prototipos HTML
 
-Versión: v1.2 · Fecha: 29/10/2026
+Versión: v1.3 · Fecha: 30/10/2026
 
 Estos tres prototipos muestran funcionando la **Consulta de Pagos** de CCP (HU ESENCIALS-3661). En esta pantalla, el back office busca por RUT o por folio en qué estado está el pago de un cliente y exporta el resultado.
 
@@ -10,7 +10,7 @@ Es un proyecto independiente de los prototipos de Aprobaciones de Pago que está
 
 - **Es una referencia** de comportamiento, textos y estados. Sirve para revisar cómo responde la pantalla: qué carga, qué cambia y qué dice.
 - **No es código de producción.** Usa datos de ejemplo y no se conecta a ningún servicio. Al recargar la página, todo vuelve al inicio. Exportar no genera un archivo; solo muestra el aviso.
-- **El diseño manda.** Si el prototipo y el Figma no coinciden, vale Figma.
+- **El diseño manda.** Si el prototipo y el Figma no coinciden, vale [Figma](https://www.figma.com/design/zgwJhPRxx6rP1WXYnxwAZ9/CCP-Handoff-Buscador-pagos).
 
 ## Los tres prototipos
 
@@ -58,7 +58,9 @@ Qué observar:
 - **Resultados:**
   - Van de la solicitud más reciente a la más antigua.
   - El RUT y el nombre del destinatario aparecen bajo el título de la tabla y en la columna RUT a pagar. Al buscar solo por folio, se toman de la solicitud encontrada.
+  - «Pagado a cuenta bancaria» cubre transferencia, cuenta RUT y demás depósitos.
   - Una celda sin dato muestra «—», por ejemplo en las solicitudes pagadas con vale vista.
+  - El paginador ofrece 10, 20 o 50 filas por página.
 - **Ordenar:** se ordenan todas las columnas menos Proceso y RUT a pagar. El primer clic ordena de forma ascendente y el segundo, descendente. Cada orden vuelve a la página 1.
 - **Filtros:** Transacción, Estado de pago y Fecha solicitud de pago desde–hasta. Las fechas se eligen con el calendario y no se escriben: Enter, Espacio o ↓ lo abren, y Supr o Retroceso borran la fecha. Los filtros aplicados quedan como chips sobre la tabla.
 - **Exportar:** muestra el aviso «Se descargó…» con el nombre del archivo, que depende de la búsqueda. Si falta el RUT o el folio, queda su palabra fija:
@@ -68,6 +70,8 @@ Qué observar:
   | Solo RUT | `DetalleSolicitudPago_12345678-5_#Folio.xlsx` |
   | Solo folio | `DetalleSolicitudPago_#RUT_3848015.xlsx` |
   | RUT y folio | `DetalleSolicitudPago_12345678-5_3848015.xlsx` |
+
+  El archivo lleva todas las filas y páginas, con sus filtros y su orden, y el RUT y el nombre en columnas separadas. El aviso aparece arriba a la derecha y se cierra a los 5 segundos.
 
 - **Estados vacíos:**
   - Antes de buscar: «Ingresa un RUT o un folio».
