@@ -42,6 +42,8 @@ const S = inicial();
 // Error que muestra cada HTML (window.CASO): falla el primer intento y el reintento funciona
 let SIM = { 'error-buscar':'buscar', 'error-exportar':'exportar' }[window.CASO] || '';
 const falla = tipo => { if (SIM !== tipo) return false; SIM = ''; return true; };
+// RUT de demostración: la búsqueda con este RUT siempre da error, para mostrar el modal sin cambiar de página
+const RUT_ERROR = '999999999';
 const rut = $('#rut'), folio = $('#folio'), btnBuscar = $('#buscar');
 
 /* ═══════════ Búsqueda ═══════════ */
@@ -84,7 +86,7 @@ function buscar() {
   tBuscar = setTimeout(() => {
     S.cargando = false;
     btnBuscar.removeAttribute('aria-busy'); btnBuscar.style.pointerEvents = ''; btnBuscar.textContent = 'Buscar';
-    if (falla('buscar')) { Object.assign(S, antes); pintar(); modalErrorSistema(); return; }
+    if (falla('buscar') || S.buscado.rut === RUT_ERROR) { Object.assign(S, antes); pintar(); modalErrorSistema(); return; }
     pintar();
     const n = resultados().length;
     $('#vivo').textContent = n ? `${n} ${n === 1 ? 'solicitud' : 'solicitudes'} de pago` : 'No encontramos solicitudes de pago';

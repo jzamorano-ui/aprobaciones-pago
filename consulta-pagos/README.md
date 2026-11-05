@@ -1,6 +1,6 @@
 # Consulta de Pagos · prototipos HTML
 
-Versión: v1.3 · Fecha: 30/10/2026
+Versión: v1.4 · Fecha: 05/11/2026
 
 Estos tres prototipos muestran funcionando la **Consulta de Pagos** de CCP (HU ESENCIALS-3661). En esta pantalla, el back office busca por RUT o por folio en qué estado está el pago de un cliente y exporta el resultado.
 
@@ -35,6 +35,7 @@ Los ejemplos de los campos sirven para buscar: el RUT 12.345.678-5 y el folio 38
 | RUT 12.345.678-5 y folio 54123987 | Ninguna: ese folio es de otro RUT |
 | Cualquier otro RUT válido, por ejemplo 11.111.111-1 | Ninguna |
 | RUT 12.345.678-9 | No se puede buscar: el dígito verificador está errado |
+| RUT 99.999.999-9 | Ninguna: la búsqueda da error y abre el modal «Tuvimos un problema», en cada intento. Sirve para mostrar el error al buscar sin cambiar de prototipo |
 
 ## Cómo recorrer cada uno
 
@@ -89,6 +90,7 @@ Qué observar:
 - El primer intento abre el modal «Tuvimos un problema», con el texto «El sistema no responde. Vuelve a intentarlo en unos minutos.» y un solo botón: «Entendido».
 - Al cerrarlo, la tabla queda como estaba.
 - El reintento muestra los resultados.
+- En el principal, el RUT 99.999.999-9 da este mismo error en cada intento.
 
 ### Error al exportar
 
