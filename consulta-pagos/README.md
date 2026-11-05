@@ -1,6 +1,6 @@
 # Consulta de Pagos · prototipos HTML
 
-Versión: v1.4 · Fecha: 05/11/2026
+Versión: v1.5 · Fecha: 05/11/2026
 
 Estos tres prototipos muestran funcionando la **Consulta de Pagos** de CCP (HU ESENCIALS-3661). En esta pantalla, el back office busca por RUT o por folio en qué estado está el pago de un cliente y exporta el resultado.
 
@@ -16,8 +16,8 @@ Es un proyecto independiente de los prototipos de Aprobaciones de Pago que está
 
 | Prototipo | Objetivo | Link |
 |---|---|---|
-| Principal | Recorrer la consulta cuando todo sale bien: buscar, filtrar, ordenar, cambiar de página y exportar. También la validación del RUT y las búsquedas sin resultados | [index.html](https://jzamorano-ui.github.io/aprobaciones-pago/consulta-pagos/) |
-| Error al buscar | Revisar qué pasa cuando el sistema no responde al buscar | [error-buscar.html](https://jzamorano-ui.github.io/aprobaciones-pago/consulta-pagos/error-buscar.html) |
+| Principal | Recorrer la consulta cuando todo sale bien: buscar, filtrar, ordenar, cambiar de página y exportar. También la validación del RUT, las búsquedas sin resultados y los errores al buscar y al exportar | [index.html](https://jzamorano-ui.github.io/aprobaciones-pago/consulta-pagos/) |
+| Error al buscar | Revisar qué pasa cuando falla la búsqueda | [error-buscar.html](https://jzamorano-ui.github.io/aprobaciones-pago/consulta-pagos/error-buscar.html) |
 | Error al exportar | Revisar qué pasa cuando falla la descarga del archivo | [error-exportar.html](https://jzamorano-ui.github.io/aprobaciones-pago/consulta-pagos/error-exportar.html) |
 
 Todos abren en la Consulta de Pagos, con la sesión de «Paula Henríquez Soto», Ejecutiva backoffice Tesorería.
@@ -29,7 +29,7 @@ Los ejemplos de los campos sirven para buscar: el RUT 12.345.678-5 y el folio 38
 | Búsqueda | Qué trae |
 |---|---|
 | RUT 12.345.678-5 | 13 solicitudes de Andrea Muñoz Pérez, de Reembolso y de Licencia médica, en los cuatro estados de pago. Son dos páginas |
-| RUT 15.678.234-3 | 2 solicitudes de Rodrigo Saavedra Ortiz |
+| RUT 15.678.234-3 | 2 solicitudes de Rodrigo Saavedra Ortiz. Exportar da error en cada intento. Sirve para mostrar el error al exportar sin cambiar de prototipo |
 | RUT 76.543.210-3 | 3 solicitudes de Comercial Los Aromos SpA, un RUT de empresa |
 | Folio 3848015 | 1 solicitud de Andrea Muñoz Pérez, pagada con vale vista |
 | RUT 12.345.678-5 y folio 54123987 | Ninguna: ese folio es de otro RUT |
@@ -87,7 +87,7 @@ Qué observar:
 
 Qué observar:
 
-- El primer intento abre el modal «Tuvimos un problema», con el texto «El sistema no responde. Vuelve a intentarlo en unos minutos.» y un solo botón: «Entendido».
+- El primer intento abre el modal «Tuvimos un problema», con el texto «No fue posible realizar la búsqueda. Vuelve a intentarlo en unos minutos.» y un solo botón: «Entendido».
 - Al cerrarlo, la tabla queda como estaba.
 - El reintento muestra los resultados.
 - En el principal, el RUT 99.999.999-9 da este mismo error en cada intento.
@@ -101,6 +101,7 @@ Qué observar:
 
 - El botón queda en carga y después aparece el aviso de error «No pudimos descargar el archivo. Vuelve a intentarlo.» La tabla y los filtros no cambian.
 - El reintento muestra el aviso de éxito con el nombre del archivo.
+- En el principal, después de buscar el RUT 15.678.234-3, Exportar da este mismo error en cada intento.
 
 ## Sobre los datos
 

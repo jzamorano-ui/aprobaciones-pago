@@ -44,6 +44,8 @@ let SIM = { 'error-buscar':'buscar', 'error-exportar':'exportar' }[window.CASO] 
 const falla = tipo => { if (SIM !== tipo) return false; SIM = ''; return true; };
 // RUT de demostración: la búsqueda con este RUT siempre da error, para mostrar el modal sin cambiar de página
 const RUT_ERROR = '999999999';
+// RUT de demostración: con este RUT, Exportar siempre da error, para mostrar el aviso sin cambiar de página
+const RUT_ERROR_EXPORTAR = '156782343';
 const rut = $('#rut'), folio = $('#folio'), btnBuscar = $('#buscar');
 
 /* ═══════════ Búsqueda ═══════════ */
@@ -74,7 +76,7 @@ folio.addEventListener('input', () => { folio.value = folio.value.replace(/\D/g,
 let tBuscar, tOrden;
 function buscar() {
   if (!puedeBuscar()) { salirRut(); return; }
-  // Si el sistema no responde, la tabla vuelve a como estaba
+  // Si la búsqueda falla, la tabla vuelve a como estaba
   const antes = { buscado:S.buscado, filtros:S.filtros, orden:S.orden, pag:S.pag };
   S.buscado = { rut: limpia(rut.value), folio: folio.value.trim() };
   Object.assign(S, { filtros:{ ...SIN_FILTROS }, orden:{ col:null, dir:null }, pag:0, cargando:true, ordenando:false });
@@ -255,7 +257,7 @@ function aplicarFiltros(nf) {
 }
 function modalErrorSistema() {
   abrirModal(`<div class="modal modal-err" role="alertdialog" aria-modal="true" aria-labelledby="m-tit" aria-describedby="m-sub">
-    <div class="modal-cab"><span class="err-ic" aria-hidden="true">!</span><h2 id="m-tit">Tuvimos un problema</h2><p id="m-sub">El sistema no responde. Vuelve a intentarlo en unos minutos.</p></div>
+    <div class="modal-cab"><span class="err-ic" aria-hidden="true">!</span><h2 id="m-tit">Tuvimos un problema</h2><p id="m-sub">No fue posible realizar la búsqueda. Vuelve a intentarlo en unos minutos.</p></div>
     <div class="modal-pie"><button class="btn btn-pri" type="button" id="m-entendido" data-a="cerrar-modal">Entendido</button></div>
   </div>`, () => { focoPrevio = btnBuscar; $('#m-entendido').focus(); });
 }
@@ -294,7 +296,7 @@ function exportar(btn) {
       b.removeAttribute('aria-busy'); b.removeAttribute('aria-disabled');
     }
     // Si la descarga falla, la tabla y los filtros no cambian
-    if (falla('exportar')) { toast('No pudimos descargar el archivo. Vuelve a intentarlo.', 'error'); return; }
+    if (falla('exportar') || (S.buscado && S.buscado.rut === RUT_ERROR_EXPORTAR)) { toast('No pudimos descargar el archivo. Vuelve a intentarlo.', 'error'); return; }
     toast(`Se descargó ${archivo}`);
   }, espera(1200));
 }
