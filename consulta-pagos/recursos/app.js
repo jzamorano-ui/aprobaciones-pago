@@ -137,7 +137,7 @@ const titulo = ([t, k], i, bloqueado) => {
   const a = S.orden.col === k;
   return `<th scope="col" class="ord${a ? ' activa' : ''}"${a ? ` aria-sort="${S.orden.dir === 'asc' ? 'ascending' : 'descending'}"` : ''}><button type="button" class="orden" id="ord-${k}" data-a="ordenar" data-v="${k}"${bloqueado ? ' disabled' : ''}>${t}${CARET}</button></th>`;
 };
-const tabla = (cuerpo, bloqueado) => `<div class="tabla-scroll" tabindex="0" role="region" aria-label="Historial de solicitudes de pago (desplazable a lo ancho)">
+const tabla = (cuerpo, bloqueado) => `<div class="tabla-scroll" tabindex="0" role="region" aria-label="Historial de solicitudes de pago (desplazable)">
   <table class="tabla t-consulta">
     <thead><tr>${COLS.map((c, i) => titulo(c, i, bloqueado)).join('')}</tr></thead>
     <tbody>${cuerpo}</tbody>
@@ -199,6 +199,17 @@ function pintar() {
       ${chips.map(([k, t]) => `<span class="chip-f">${t}<button type="button" data-a="quitar-filtro" data-v="${k}" aria-label="Quitar filtro ${t}">${ic('x')}</button></span>`).join('')}
       <button type="button" class="link" data-a="limpiar-filtros">Limpiar filtros</button></div>` : ''}
     ${cuerpo}`;
+  altoTabla();
+}
+// Alto máximo: la cabecera y 10 filas, más la barra horizontal si aparece. Con 10 filas o menos, la tabla se ajusta a su contenido.
+// Como la tabla se repinta entera, al cambiar de página, de filas por página, de orden o de filtros el scroll vuelve arriba.
+function altoTabla() {
+  const sc = $('#res .tabla-scroll'); if (!sc) return;
+  const filas = [...sc.querySelectorAll('tbody tr')];
+  if (filas.length <= 10) { sc.style.maxHeight = ''; return; }
+  const h = sc.querySelector('thead').offsetHeight + filas.slice(0, 10).reduce((s, f) => s + f.offsetHeight, 0);
+  sc.style.maxHeight = h + 'px';
+  sc.style.maxHeight = h + sc.offsetHeight - sc.clientHeight + 'px';
 }
 
 /* ═══════════ Modal de filtros (estándar de la 3659) ═══════════ */
@@ -382,7 +393,7 @@ $('#btn-lat').addEventListener('click', () => {
   const col = $('#shell').classList.toggle('colapsado');
   $('#btn-lat').setAttribute('aria-label', col ? 'Expandir menú' : 'Contraer menú');
 });
-addEventListener('resize', () => { $('#lateral').inert = movil() && !$('#lateral').classList.contains('abierto'); });
+addEventListener('resize', () => { $('#lateral').inert = movil() && !$('#lateral').classList.contains('abierto'); altoTabla(); });
 
 /* ═══════════ Eventos ═══════════ */
 document.addEventListener('click', ev => {

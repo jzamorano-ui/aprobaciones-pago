@@ -1,6 +1,6 @@
 # Consulta de Pagos · prototipos HTML
 
-Versión: v1.5 · Fecha: 05/11/2026
+Versión: v1.6 · Fecha: 05/11/2026
 
 Estos tres prototipos muestran funcionando la **Consulta de Pagos** de CCP (HU ESENCIALS-3661). En esta pantalla, el back office busca por RUT o por folio en qué estado está el pago de un cliente y exporta el resultado.
 
@@ -28,7 +28,7 @@ Los ejemplos de los campos sirven para buscar: el RUT 12.345.678-5 y el folio 38
 
 | Búsqueda | Qué trae |
 |---|---|
-| RUT 12.345.678-5 | 13 solicitudes de Andrea Muñoz Pérez, de Reembolso y de Licencia médica, en los cuatro estados de pago. Son dos páginas |
+| RUT 12.345.678-5 | 13 solicitudes de Andrea Muñoz Pérez, de Reembolso y de Licencia médica, en los cuatro estados de pago. Son dos páginas de 10; con 20 por página, una sola, con scroll interno |
 | RUT 15.678.234-3 | 2 solicitudes de Rodrigo Saavedra Ortiz. Exportar da error en cada intento. Sirve para mostrar el error al exportar sin cambiar de prototipo |
 | RUT 76.543.210-3 | 3 solicitudes de Comercial Los Aromos SpA, un RUT de empresa |
 | Folio 3848015 | 1 solicitud de Andrea Muñoz Pérez, pagada con vale vista |
@@ -62,6 +62,7 @@ Qué observar:
   - «Pagado a cuenta bancaria» cubre transferencia, cuenta RUT y demás depósitos.
   - Una celda sin dato muestra «—», por ejemplo en las solicitudes pagadas con vale vista.
   - El paginador ofrece 10, 20 o 50 filas por página.
+  - Alto máximo de la tabla: la cabecera y 10 filas. Con 20 o 50 filas por página, las filas se recorren con scroll interno y la cabecera queda fija; Filtros, Exportar, la barra de scroll horizontal y el paginador quedan a la vista. Al cambiar de página, de filas por página o de orden, el scroll vuelve arriba. Con menos de 10 filas, la tabla se ajusta a su contenido.
 - **Ordenar:** se ordenan todas las columnas menos Proceso y RUT a pagar. El primer clic ordena de forma ascendente y el segundo, descendente. Cada orden vuelve a la página 1.
 - **Filtros:** Transacción, Estado de pago y Fecha solicitud de pago desde–hasta. Las fechas se eligen con el calendario y no se escriben: Enter, Espacio o ↓ lo abren, y Supr o Retroceso borran la fecha. Los filtros aplicados quedan como chips sobre la tabla.
 - **Exportar:** muestra el aviso «Se descargó…» con el nombre del archivo, que depende de la búsqueda. Si falta el RUT o el folio, queda su palabra fija:

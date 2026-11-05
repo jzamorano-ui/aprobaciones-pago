@@ -154,11 +154,17 @@ main{min-width:0;padding:24px 32px 56px}
 .link{color:var(--verde4);font-weight:700;font-size:14px;text-decoration:underline;text-underline-offset:3px}
 @keyframes entra{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 
-.tabla-scroll{overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--verde) var(--g6)}
+/* Alto máximo de la tabla: la cabecera y 10 filas (lo fija altoTabla()); con 20 o 50 filas por página, scroll interno con la cabecera fija */
+.tabla-scroll{overflow:auto}
 .tabla-scroll:focus-visible{box-shadow:inset var(--foco);border-radius:0}
-.tabla-scroll::-webkit-scrollbar{height:6px}
+/* Barras de 6 px en verde sobre gris; la vertical parte bajo la cabecera. Chrome ignora ::-webkit-scrollbar si hay scrollbar-color, por eso el estándar queda solo para Firefox */
+@supports not selector(::-webkit-scrollbar){.tabla-scroll{scrollbar-width:thin;scrollbar-color:var(--verde) var(--g6)}}
+.tabla-scroll::-webkit-scrollbar{width:6px;height:6px}
 .tabla-scroll::-webkit-scrollbar-track{background:var(--g6)}
+.tabla-scroll::-webkit-scrollbar-track:vertical{margin-top:72px}
 .tabla-scroll::-webkit-scrollbar-thumb{background:var(--verde);border-radius:3px}
+.tabla-scroll::-webkit-scrollbar-corner{background:var(--g6)}
+.t-consulta thead th{position:sticky;top:0;z-index:2}
 table.tabla{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;line-height:24px;font-variant-numeric:tabular-nums}
 .tabla th{background:var(--fondo-tabla);text-align:left;font-size:14px;line-height:20px;font-weight:700;color:var(--t2);padding:14px 12px;vertical-align:middle}
 .tabla td{padding:14px 12px;border-top:1px solid var(--g6);vertical-align:middle;background:#fff;color:var(--t2)}
